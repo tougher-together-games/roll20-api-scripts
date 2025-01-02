@@ -2,7 +2,7 @@
 @import url("Handouts");
 
 :root {
-   --ez-handout-container-offset: -235px -30px -30px -30px;
+   --ez-handout-container-offset: -340px -30px -30px -30px;
 }
 </style>
 
