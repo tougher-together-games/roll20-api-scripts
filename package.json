@@ -1,0 +1,33 @@
+{
+  "name": "roll20-api-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "These are API scripts and modules for use with Roll20.",
+  "main": "./src/easy-utils/easy-utils",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "grunt minify",
+    "docs": "grunt docs",
+    "build-all": "grunt",
+    "start": "grunt"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "better-docs": "^2.7.3",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-sonarjs": "^3.0.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "globals": "^15.13.0",
+    "grunt": "^1.6.1",
+    "grunt-contrib-uglify": "^5.2.2",
+    "grunt-jsdoc": "^2.4.1",
+    "jsdoc": "^4.0.4"
+  }
+}

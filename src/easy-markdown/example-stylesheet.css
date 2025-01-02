@@ -1,0 +1,487 @@
+/*** Normalize and Reset ***/
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+	font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	overflow-wrap: break-word;
+}
+
+p {
+	text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	text-wrap: balance;
+}
+
+#rootContainer {
+	-webkit-font-smoothing: antialiased;
+	line-height: 1.5;
+	/*isolation: isolate;*/
+}
+
+/*** END of Normalize and Reset ***/
+
+/* Global variables (optional) */
+:root {
+	--ez-accent-color: #ff3399;
+	--ez-border-color: #000000;
+	--ez-complement-color: #c9ad6a;
+	--ez-contrast-color: #660000;
+	--ez-handout-blockquote-bottom: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-blockquote-wide-bottom.jpg');
+	--ez-handout-blockquote-middle: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-blockquote-wide-middle.jpg');
+	--ez-handout-blockquote-top: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-blockquote-wide-top.jpg');
+	--ez-handout-font-family: 'Times New Roman', Times, Garamond, serif;
+	--ez-handout-page-bottom: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-bottom.jpg');
+	--ez-handout-page-bullet-list: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-list-bullet.png');
+	--ez-handout-page-horizontal-center: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-horizontal-center.png');
+	--ez-handout-page-horizontal-dart: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-horizontal-dart.png');
+	--ez-handout-page-middle: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-body.jpg');
+	--ez-handout-page-top: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-top.jpg');
+	--ez-handout-table-top: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-table-top.jpg');
+	--ez-handout-table-bottom: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-table-bottom.jpg');
+	--ez-handout-table-middle: url('https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-table-middle.jpg');
+	--ez-overlay-text-color: #ffffff;
+	--ez-primary-background-color: #252B2C;
+	--ez-primary-color: #8655B6;
+	/* blockquote images */
+	--ez-secondary-background-color: #3F3F3F;
+	--ez-secondary-color: #17AEE8;
+	--ez-shadow-color: #4d4d4d;
+	/* page decoration images */
+	--ez-subdued-background-color: #f2f2f2;
+	--ez-tertiary-color: #660000;
+	--ez-text-color: #000000;
+	--ez-handout-container-offset: -15px -30px -30px -30px;
+}
+
+/* <div id="rootContainer"> is wrapped around all templates processed. We can stylize it either here or in :root. */
+/* FIXME If properties contain var() they are not updated unless separated from :root */
+#rootContainer {
+	margin: var(--ez-handout-container-offset);
+	padding: 97px 30px 97px 30px;
+	background:
+		var(--ez-handout-page-top) top center no-repeat,
+		var(--ez-handout-page-bottom) bottom center no-repeat,
+		var(--ez-handout-page-middle) center repeat;
+
+	/* Background sizes */
+	background-size:
+		100% 97px,
+		100% 97px,
+		100% auto;
+}
+
+.hidden {
+	display: none;
+}
+
+/*** Inline Text ***/
+
+/* Headings */
+h1,h2,h3,h4,h5,h6 {
+	margin-bottom: 0.5em;
+	color: var(--ez-tertiary-color);
+	font-family: var(--ez-handout-font-family);
+    font-weight: bold;
+    /*font-variant: small-caps; FIXME */
+    text-transform: uppercase;
+}
+
+h1 {
+	font-size: 42px;
+	text-align: center;
+}
+
+h2 {
+	font-size: 28px;
+}
+
+h3 {
+	padding-bottom: .2em;
+	border-bottom: 5px solid var(--ez-complement-color);
+	font-size: 20px;
+}
+
+h4 {
+	font-size: 16px;
+}
+
+h5 {
+	font-size: 14px;
+}
+
+h6 {
+	font-size: 12px;
+}
+
+/* Horizontal Rules */
+hr.underscore-hr {
+	margin: 1em 0;
+	border: 2px solid var(--ez-tertiary-color);
+}
+
+hr.dash-hr {
+	display: block;
+	width: 100%;
+	height: 15px;
+	border: none;
+	background-color: transparent;
+	background-image: var(--ez-handout-page-horizontal-dart);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+hr.asterisk-hr {
+	display: block;
+	width: 100%;
+	height: 30px;
+	border: none;
+	background-color: transparent;
+	background-image: var(--ez-handout-page-horizontal-center);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+/* Text */
+
+p {
+	margin-bottom: 1em;
+	font-size: 14px;
+	line-height: 1.4;
+	text-indent: 10px;
+}
+
+p::first-letter {
+	display: inline-block;
+	margin-right: .2em;
+	padding: 5px 10px;
+	border: 2px solid #c9ad6a;
+	color: #c9ad6a;
+	font-weight: bold;
+	font-size: 2.5em;
+	font-family: monospace;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+	background-color: rgb(31, 36, 58);
+}
+
+/* Bold & Italic Styling */
+.asterisk-strong {
+	margin: 0px 3px;
+	padding: 2px 2px;
+	font-weight: bold;
+}
+
+.underscore-strong {
+	margin: 0px 3px;
+	padding: 2px 3px;
+	border-radius: 3px;
+	font-weight: bold;
+	background-color: var(--ez-subdued-background-color);
+}
+
+.asterisk-em {
+	padding: 2px 3px;
+	font-style: italic;
+
+}
+
+.underscore-em {
+	padding: 2px 4px;
+	color: var(--ez-complement-color);
+	font-style: italic;
+}
+
+/* Strikethrough */
+del {
+	color: var(--ez-shadow-color);
+	text-decoration: line-through;
+}
+
+/* Mark */
+mark {
+	margin: 0px 3px;
+	padding: 2px 4px;
+	border-radius: 3px;
+	color: #000;
+	background-color: #ffff99;
+}
+
+/* Superscript & Subscript */
+sup {
+	padding: 2px 4px;
+	color: var(--ez-accent-color);
+	font-size: 0.85em;
+	vertical-align: super;
+}
+
+sub {
+	padding: 2px 4px;
+	color: var(--ez-secondary-color);
+	font-size: 0.85em;
+	vertical-align: sub;
+}
+
+/* Inline Code */
+code.inline-code {
+	margin: 0px 3px;
+	padding: 2px 4px;
+	border-radius: 3px;
+	color: var(--ez-contrast-color);
+	font-family: 'Consolas', 'Courier New', Courier, monospace;
+	background-color: var(--ez-subdued-background-color);
+}
+
+/* Images and Links */
+a {
+	margin: 0px 3px;
+	color: #FF0000;
+	text-decoration: underline;
+}
+
+a[title="button"] {
+	display: inline-block;
+	padding: 5px 10px -5px -10px;
+	border: 3px double var(--ez-subdued-background-color);
+	border-radius: 5px;
+	color: var(--ez-overlay-text-color);
+	font-weight: bold;
+	font-size: 16px;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	background-color: var(--ez-primary-color);
+}
+
+/* Lists (UL / OL) */
+#rootContainer>ul>li.dash-bullet {
+	list-style: none outside var(--ez-handout-page-bullet-list);
+	margin-top: -7px; /* Adjust as needed for spacing */
+}
+
+ul>ul {
+	list-style: square inside;
+}
+
+ul>ul>ul {
+	list-style: circle inside;
+}
+
+.dash-bullet {
+	color: var(--ez-text-color);
+}
+
+.asterisk-bullet {
+	color: var(--ez-primary-color);
+}
+
+.plus-bullet {
+	color: var(--ez-tertiary-color);
+}
+
+
+/*** Generic Positional Classes ***/
+/* two column example */
+.two-columns {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+	/* Ensures fixed column widths */
+}
+
+.column-left,
+.column-right {
+	display: table-cell;
+	width: 50%;
+	padding: 1rem;
+	vertical-align: top;
+	/* Align content at the top of each cell */
+}
+
+.float-left {
+	float: left;
+	clear: both;
+}
+
+.float-right {
+	float: right;
+	clear: both;
+}
+
+.half-wide {
+	width: 50%;
+}
+
+/*** Handout Specific **/
+#sizing-guide {
+	display: block;
+	height: 5px;
+	width: 930px;
+	background-color: red;
+	/* For absolute elements reverse the offset of the rootContainer padding. 	padding: 97px 30px 97px 30px; */
+	position: absolute;
+	top: 0px;
+	left: -30px;
+}
+
+img[title="page-bookmark"] {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -15px;
+	width: 100px;
+	height: 300px;
+}
+
+div.avatar-banner {
+	display: block;
+	position: relative;
+	width: 630px;
+	height: 260px;
+	margin: 0px auto;
+	margin-bottom: 10px;
+	overflow: hidden;
+	text-align: center;
+}
+
+img[title="avatar-image"] {
+	display: block;
+	width: 630px;
+	height: 260px;
+	margin: 0 auto;
+}
+
+img[title="avatar-border"] {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 630px;
+	height: 260px;
+	pointer-events: none;
+}
+
+.half-wide>blockquote {
+	border: none;
+	color: var(--ez-overlay-text-color);
+	padding: 48px 35px;
+	font-size: 90%;
+	background:
+	var(--ez-handout-blockquote-top) top center no-repeat,
+	var(--ez-handout-blockquote-bottom) bottom center no-repeat,
+	var(--ez-handout-blockquote-middle) center repeat;
+	
+	/* Background sizes */
+	background-size:
+		100% 48px,
+		100% 48px,
+		100% auto;
+}
+
+#rootContainer>blockquote {
+	border: none;
+	color: var(--ez-overlay-text-color);
+	padding: 48px 35px;
+	font-size: 90%;
+	background:
+	var(--ez-handout-blockquote-top) top center no-repeat,
+	var(--ez-handout-blockquote-bottom) bottom center no-repeat,
+	var(--ez-handout-blockquote-middle) center repeat;
+	
+	/* Background sizes */
+	background-size:
+		100% 48px,
+		100% 48px,
+		100% auto;
+}
+
+blockquote>h4 {
+	color: var(--ez-complement-color);
+}
+
+blockquote>blockquote {
+	border-left: 3px solid var(--ez-tertiary-color);
+	margin: 0.5em 1em;
+	background-color: rgba(102, 0, 0, 0.2);
+}
+
+.half-width>blockquote {
+	padding: 48px 22px;
+}
+
+.accent-detail {
+	padding: 35px 20px;
+	background:
+		var(--ez-handout-table-top) top center no-repeat,
+		var(--ez-handout-table-bottom) bottom center no-repeat,
+		var(--ez-handout-table-middle) center repeat;
+
+	/* Background sizes */
+	background-size:
+		100% 30px,
+		100% 30px,
+		100% auto;
+}
+
+table {
+	width: 100%;
+	border: 1px solid var(--ez-shadow-color);
+	border-collapse: collapse;
+	font-size: 16px;
+}
+
+th,
+td {
+	padding: 5px 10px;
+	border: 1px solid var(--ez-shadow-color);
+	text-align: left;
+}
+
+th {
+	color: var(--ez-complement-color);
+	font-weight: bold;
+	background-color: var(--ez-primary-background-color);
+}
+
+tfoot {
+	color: var(--ez-overlay-text-color);
+	font-weight: bold;
+	background-color: var(--ez-primary-background-color);
+}
+
+tr:nth-child(even) {
+	background-color: rgba(102, 0, 0, 0.2);
+}
