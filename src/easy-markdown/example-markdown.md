@@ -11,14 +11,14 @@
 <p>empty</p>
 </div>
 
-![monster tab](https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-bookmark-monster.png "page-bookmark")
+![monster tab](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-bookmark-monster.png "page-bookmark")
 
 # h1 Heading
 
 ::: avatar-banner
 
 ![Handout Avatar.]({{ AvatarUrl }} "avatar-image")
-![Stylized border of leather straps holding banner picture in place.](https://raw.githubusercontent.com/Tougher-Together-Gaming/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-avatar-border.png "avatar-border")
+![Stylized border of leather straps holding banner picture in place.](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-avatar-border.png "avatar-border")
 
 :::
 
@@ -40,8 +40,8 @@ To use Easy-Markdown in Roll20, you'll need a Pro account, as custom [API script
 >
 > 1. Open the API Mod Page in Roll20.  
 > 2. Upload these two scripts:  
->   1. [Easy-Utils](https://raw.githubusercontent.com/Tougher-Together-Gaming/roll20-api-scripts/refs/heads/main/src/easy-utils/easy-utils.js)  
->   2. [Easy-Markdown](https://raw.githubusercontent.com/Tougher-Together-Gaming/roll20-api-scripts/refs/heads/main/src/easy-markdown/easy-markdown.js)  
+>   1. [Easy-Utils](https://raw.githubusercontent.com/tougher-together-games/roll20-api-scripts/refs/heads/main/src/easy-utils/easy-utils.js)  
+>   2. [Easy-Markdown](https://raw.githubusercontent.com/tougher-together-games/roll20-api-scripts/refs/heads/main/src/easy-markdown/easy-markdown.js)  
 > 3. Launch your Roll20 game.  
 > 4. Create two types of handouts:  
 >   1. **Markdown Handout:** Add your Markdown content to the **GM Notes** section.  
