@@ -42,10 +42,10 @@ module.exports = function (grunt) {
 		// JSDoc configuration for generating documentation
 		jsdoc: {
 			dist: {
-				src: ['src/**/*.js'], // Source files
+				src: ['src/easy-docs/**/*.js'], // Source files
 				options: {
 					destination: 'docs', // Output directory
-					template: 'node_modules/better-docs', // Use better-docs template
+					template: 'node_modules/tidy-jsdoc', // Use better-docs template
 					configure: 'jsdoc.json', // JSDoc configuration file
 				},
 			},

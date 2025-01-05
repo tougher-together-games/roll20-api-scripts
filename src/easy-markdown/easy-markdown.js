@@ -5,18 +5,27 @@
 @version: 1.0.0
 @author: Mhykiel
 @license: MIT
-@repository: {@link https://github.com/Tougher-Together-Gaming/roll20-api-scripts/blob/main/src/easy-utils/easy-utils-menu.js|GitHub Repository}
+@repository: {@link https://github.com/tougher-together-games/roll20-api-scripts/blob/main/src/easy-markdown/easy-markdown.js|GitHub Repository}
 */
 
+/* SECTION Object: EASY_MARKDOWN **************************************************************************************/
+/**
+ * @namespace EASY_MARKDOWN
+ * @summary Example use of EASY_UTILS.
+ * 
+ * - **Purpose**:
+ *   - {{ purpose }}
+ * 
+ * - **Execution**:
+ *   - {{ execution }}
+ * 
+ * - **Design**:
+ *   - {{ design }}
+ * 
+ * @see https://example.com
+ */
 // eslint-disable-next-line no-unused-vars
 const EASY_MARKDOWN = (() => {
-
-	/*******************************************************************************************************************
-	 * SECTION: MODULE CONFIGURATION
-	 *
-	 * Here we define configuration and state related to EASY_MARKDOWN itself. The `moduleSettings` object is passed 
-	 * to utility functions so they can behave according to the EASY_MARKDOWN module's preferences (e.g., verbose logging).
-	 ******************************************************************************************************************/
 
 	// TODO Fill out module meta data
 	const moduleSettings = {
@@ -25,8 +34,33 @@ const EASY_MARKDOWN = (() => {
 		globalName: "EASY_MARKDOWN",
 		version: "1.0.0",
 		author: "Mhykiel",
-		verbose: true,
+		verbose: false,
 		sendWelcomeMsg: true,
+		debug: {
+			"applyCssToHtmlJson": false,
+			"convertCssToJson": false,
+			"convertHtmlToJson": false,
+			"convertMarkdownToHtml": false,
+			"convertJsonToHtml": true,
+			"convertToSingleLine": false,
+			"createPhraseFactory": false,
+			"createTemplateFactory": false,
+			"createThemeFactory": false,
+			"decodeCodeBlock": false,
+			"encodeCodeBlock": false,
+			"decodeNoteContent": false,
+			"encodeNoteContent": false,
+			"getGlobalSettings": false,
+			"getSharedForge": false,
+			"getSharedVault": false,
+			"logSyslogMessage": false,
+			"parseChatCommands": false,
+			"parseChatSubcommands": false,
+			"replacePlaceholders": false,
+			"renderTemplateAsync": false,
+			"whisperAlertMessageAsync": false,
+			"whisperPlayerMessage": false
+		}
 	};
 
 	let Utils = {};
@@ -39,27 +73,9 @@ const EASY_MARKDOWN = (() => {
 	// This ensures a cohesive and consistent color scheme across all components, such as chat menus and modals. 
 	// Define your styles here in the `paletteColors` object and pass it into all theme-related requests.
 
-	const paletteColors = {
-		"--ez-primary-color": "#8655B6", // Primary theme color
-		"--ez-secondary-color": "#17AEE8", // Secondary theme color
-		"--ez-tertiary-color": "#34627B", // Tertiary theme color for accents
-		"--ez-accent-color": "#CC6699", // Accent color for highlights
-		"--ez-complement-color": "#FCEC52", // Complementary color for contrast
-		"--ez-contrast-color": "#C3B9C8", // Color for subtle contrasts
-		"--ez-primary-background-color": "#252B2C", // Primary background color
-		"--ez-secondary-background-color": "#3F3F3F", // Secondary background color
-		"--ez-subdued-background-color": "#f2f2f2", // Subdued or neutral background color
-		"--ez-text-color": "#000000", // Default text color
-		"--ez-overlay-text-color": "#ffffff", // Overlay text color (e.g., on dark backgrounds)
-		"--ez-border-color": "#000000", // Default border color
-		"--ez-shadow-color": "#4d4d4d", // Default shadow color
-	};
+	const paletteColors = {};
 
-	// !SECTION END of MODULE CONFIGURATION
-
-	/*******************************************************************************************************************
-	 * SECTION: MODULE FUNCTIONS
-	 * ****************************************************************************************************************/
+	/* SECTION Private Methods: Module Functions **********************************************************************/
 
 	// ANCHOR processMenuAsync
 	const processMenuAsync = async (msgDetails) => {
@@ -218,7 +234,7 @@ const EASY_MARKDOWN = (() => {
 			// Find the first colon to separate the property name and value
 			const colonIndex = trimmedDeclaration.indexOf(":");
 			if (colonIndex === -1) {
-				log(`Invalid CSS declaration in :root for "${handoutName}": "${trimmedDeclaration}"`);
+				//log(`Invalid CSS declaration in :root for "${handoutName}": "${trimmedDeclaration}"`);
 
 				return;
 			}
@@ -326,9 +342,9 @@ const EASY_MARKDOWN = (() => {
 							// Extract CSS variables from the :root block using the helper function
 							const rootMatch = styleContent.match(/:root\s*{([\s\S]*?)}/i);
 							if (!rootMatch) {
-								log(`No :root block found in <style> for handout: "${handoutName}"`);
+								//log(`No :root block found in <style> for handout: "${handoutName}"`);
 							} else {
-								log(`:root content for "${handoutName}":\n${rootMatch[1]}`);
+								//log(`:root content for "${handoutName}":\n${rootMatch[1]}`);
 							}
 	
 							const cssVars = rootMatch
@@ -423,10 +439,7 @@ const EASY_MARKDOWN = (() => {
 	};
 
 	// !SECTION END of Module Functions
-
-	/*******************************************************************************************************************
-	 * SECTION: EVENT HANDLERS
-	 * ****************************************************************************************************************/
+	// SECTION Event Handlers *****************************************************************************************/
 
 	// ANCHOR actionMap
 	const actionMap = {
@@ -436,6 +449,7 @@ const EASY_MARKDOWN = (() => {
 		"--handouts": (msgDetails) => { return processHandoutsAsync(msgDetails); },
 	};
 
+	/* BOILER PLATE */
 	const handleChatMessages = (apiCall) => {
 
 		/* NOTE: If the message originates from a player, `thisPlayerId` will store the corresponding player object. 
@@ -525,9 +539,7 @@ const EASY_MARKDOWN = (() => {
 	};
 	// !SECTION END of Event Handlers
 
-	/*******************************************************************************************************************
-	 * SECTION: INITIALIZATION
-	 ******************************************************************************************************************/
+	/* SECTION INITIALIZATION *****************************************************************************************/
 
 	// ANCHOR Function: registerEventHandlers
 	const registerEventHandlers = () => {
@@ -545,15 +557,14 @@ const EASY_MARKDOWN = (() => {
 
 		if (typeof EASY_UTILS !== "undefined") {
 
-
 			// TODO Limit the functions fetched down to the ones this module uses for memory efficiency.
 			const requiredFunctions = [
 				"applyCssToHtmlJson",
 				"convertCssToJson",
 				"convertHtmlToJson",
+				"convertMarkdownToHtml",
 				"convertJsonToHtml",
 				"convertToSingleLine",
-				"convertMarkdownToHtml",
 				"createPhraseFactory",
 				"createTemplateFactory",
 				"createThemeFactory",
@@ -567,8 +578,8 @@ const EASY_MARKDOWN = (() => {
 				"logSyslogMessage",
 				"parseChatCommands",
 				"parseChatSubcommands",
-				"renderTemplateAsync",
 				"replacePlaceholders",
+				"renderTemplateAsync",
 				"whisperAlertMessageAsync",
 				"whisperPlayerMessage"
 			];
@@ -585,14 +596,16 @@ const EASY_MARKDOWN = (() => {
 			TemplateFactory = easySharedForge.getFactory({ name: "TemplateFactory" });
 			ThemeFactory = easySharedForge.getFactory({ name: "ThemeFactory" });
 
-			// Log the module is initializing.
-			const msgId = "10000";
-			Utils.logSyslogMessage({
-				severity: 6,
-				tag: "checkInstall",
-				transUnitId: msgId,
-				message: PhraseFactory.get({ transUnitId: msgId })
-			});
+			if (moduleSettings.verbose) {
+				// "10000": ".=> Initializing <=.",
+				const msgId = "10000";
+				Utils.logSyslogMessage({
+					severity: "INFO",
+					tag: moduleSettings.readableName,
+					transUnitId: msgId,
+					message: PhraseFactory.get({ transUnitId: msgId })
+				});
+			}
 
 			// Continue with other Set Up Tasks.
 
@@ -622,112 +635,6 @@ const EASY_MARKDOWN = (() => {
 				}
 			});
 
-			// TODO Add Templates
-			const menuHtml = `
-<div class="menu-box">
-	<h3>{{ title }}</h3>
-	<ul>
-		<!-- <li><a href="!api --menu">Option 1</a></li> -->
-		{{ menuItems }}
-	</ul>
-	<p class="menu-footer">{{ footer }}</p>
-</div>
-			`;
-
-			TemplateFactory.add({
-				newTemplates: {
-					"ezMarkdownMenu": `${menuHtml}`
-				}
-			});
-
-			// TODO Add Themes
-			const menuCss = `
-:root {
-  /* Palette Colors */
-  --ez-primary-color: #8655B6; 
-  --ez-secondary-color: #17AEE8; 
-  --ez-primary-background-color: #252B2C; 
-  --ez-subdued-background-color: #F2F2F2; 
-  --ez-overlay-text-color: #ffffff; 
-  --ez-border-color: #000000; 
-}
-
-/* Chat Menu CSS Rules */
-.menu-box {
-  font-size: 1em;
-  background-color: var(--ez-primary-background-color);
-  border: 2px solid var(--ez-border-color);
-  border-radius: 8px;
-  padding: 10px;
-  max-width: 100%;
-  font-family: Arial, sans-serif;
-  color: var(--ez-overlay-text-color);
-  margin: 5px;
-}
-
-h3 {
-  margin: 0;
-  font-size: 1.2em;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 10px;
-  color: var(--ez-overlay-text-color);
-  background-color: var(--ez-primary-color);
-  border: 2px solid var(--ez-border-color);
-  border-radius: 5px;
-  padding: 5px;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-li {
-  margin: 5px 0;
-  width: 90%;
-  background-color: var(--ez-secondary-color);
-  border: 2px solid var(--ez-border-color);
-  color: var(--ez-overlay-text-color);
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-li[role='deletion'] {
-  background-color: red;
-}
-
-#token {
-  background-color: green;
-}
-
-/* Strip styles from Anchor tags (<a>) */
-li>a {
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    font-size: inherit;
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.menu-footer {
-  color: var(--ez-subdued-background-color);
-}
-
-.inline-rolls {
-color: black;
-}
-`;
-			ThemeFactory.add({
-				newThemes: {
-					"ezMarkdownMenu": `${menuCss}`
-				}
-			});
-
 			return 0;
 		} else {
 
@@ -741,44 +648,43 @@ color: black;
 		}
 	};
 
-	// !SECTION END of INITIALIZATION
-
-	/*******************************************************************************************************************
-	 * SECTION: ROLL20 STARTUP HOOK
-	 ******************************************************************************************************************/
-
 	on("ready", () => {
+
 		const continueMod = checkInstall();
 		if (continueMod === 0) {
+
 			registerEventHandlers();
 
-			// Log the Module is now ready for use.
+			// "20000": ".=> Ready <=.",
 			const msgId = "20000";
 			Utils.logSyslogMessage({
-				severity: 6,
-				tag: "registerEventHandlers",
+				severity: "INFO",
+				tag: moduleSettings.readableName,
 				transUnitId: msgId,
 				message: PhraseFactory.get({ transUnitId: msgId })
 			});
 
 			if (moduleSettings.sendWelcomeMsg) {
+
 				const whisperArguments = {
 					from: moduleSettings.readableName,
 					to: "gm",
 					message: PhraseFactory.get({ transUnitId: "20000" })
 				};
 				Utils.whisperPlayerMessage(whisperArguments);
+
 			}
 		}
 	});
 
-	// !SECTION END of ROLL20 STARTUP HOOK
+	/* !SECTION END of INITIALIZATION *********************************************************************************/
 
-	/*******************************************************************************************************************
-	 * SECTION: PUBLIC INTERFACE
-	 ******************************************************************************************************************/
+	/* SECTION: PUBLIC INTERFACE **************************************************************************************/
 
 	return {};
-	// !SECTION END of PUBLIC INTERFACE
+
+	/* !SECTION End of PUBLIC INTERFACE *******************************************************************************/
 
 })();
+
+/* !SECTION End of EASY_MARKDOWN **************************************************************************************/

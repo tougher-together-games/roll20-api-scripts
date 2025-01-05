@@ -47,51 +47,94 @@ h5,
 h6 {
 	text-wrap: balance;
 }
-
-#rootContainer {
-	-webkit-font-smoothing: antialiased;
-	line-height: 1.5;
-	/*isolation: isolate;*/
-}
-
 /*** END of Normalize and Reset ***/
 
 /* Global variables (optional) */
 :root {
-	--ez-accent-color: #ff3399;
-	--ez-border-color: #000000;
-	--ez-complement-color: #c9ad6a;
-	--ez-contrast-color: #660000;
+	/* Primary Palette */
+	--ez-color-primary: #8655b6;
+	--ez-color-secondary: #34627b;
+	--ez-color-tertiary: #17aee8;
+	--ez-color-accent: #cc6699;
+	--ez-color-complement: #fcec52;
+	--ez-color-contrast: #c3b9c8;
+
+	/* Backgrounds and Borders */
+	--ez-color-background-primary: #252b2c;
+	--ez-color-background-secondary: #2d3e43;
+	--ez-color-background-tertiary: #8c888e;
+	--ez-color-background-accent: #fbe2c4;
+	--ez-color-background-complement: #3f3f3f;
+	--ez-color-background-contrast: #f2f2f2;
+
+	--ez-color-border-primary: #000000;
+	--ez-color-border-shadow: #3f3f3f;
+	--ez-color-border-contrast: #f2f2f2;
+
+	/* Text */
+	--ez-color-text-primary: #000000;
+	--ez-color-text-secondary: #2d3e43;
+	--ez-color-text-tertiary: #660000;
+	--ez-color-text-accent: #cc6699;
+	--ez-color-text-complement: #c9ad6a;
+	--ez-color-text-contrast: #ffffff;
+
+	/* Rainbow Colors */
+	--ez-rainbow-red: #ff0000;
+	--ez-rainbow-orange: #ffa500;
+	--ez-rainbow-yellow: #ffff00;
+	--ez-rainbow-olive: #808000;
+	--ez-rainbow-green: #008000;
+	--ez-rainbow-teal: #008080;
+	--ez-rainbow-blue: #0000ff;
+	--ez-rainbow-violet: #ee82ee;
+	--ez-rainbow-purple: #800080;
+	--ez-rainbow-pink: #ffc0cb;
+	--ez-rainbow-brown: #a52a2a;
+	--ez-rainbow-grey: #808080;
+	--ez-rainbow-black: #000000;
+
+	/* Typography Constants */
+	--ez-line-height: 1.6;
+	--ez-font-weight: 400;
+	--ez-font-size: 62.5%;
+
+	/* NOTE as of now only use single quotes in css values as they will eventually be inserted into double quoted html tags. */
+	--ez-font-family-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+	--ez-font-family-serif: 'Times New Roman', Times, Garamond, serif, var(--ez-font-family-emoji);
+	--ez-font-family-sans-serif: Ubuntu, Cantarell, Helvetica, Arial, 'Helvetica Neue', sans-serif, var(--ez-font-family-emoji);
+	--ez-font-family-monospace: Consolas, monospace;
+
+	/* Layout */
+	--ez-block-padding: 5px 10px;
+	--ez-block-margin: .5em 0em;
+	--ez-block-radius: 5px;
+
+	-webkit-font-smoothing: antialiased;
+	line-height: var(--ez-line-height);
+	isolation: isolate;
+
+	/* Handout background images*/
+	--ez-handout-page-top: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-top.jpg');
+	--ez-handout-page-bottom: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-bottom.jpg');
+	--ez-handout-page-middle: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-body.jpg');
+	/* Block quote background images*/
+	--ez-handout-blockquote-top: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-blockquote-wide-top.jpg');
 	--ez-handout-blockquote-bottom: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-blockquote-wide-bottom.jpg');
 	--ez-handout-blockquote-middle: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-blockquote-wide-middle.jpg');
-	--ez-handout-blockquote-top: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-blockquote-wide-top.jpg');
-	--ez-handout-font-family: 'Times New Roman', Times, Garamond, serif;
-	--ez-handout-page-bottom: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-bottom.jpg');
-	--ez-handout-page-bullet-list: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-list-bullet.png');
-	--ez-handout-page-horizontal-center: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-horizontal-center.png');
-	--ez-handout-page-horizontal-dart: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-horizontal-dart.png');
-	--ez-handout-page-middle: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-body.jpg');
-	--ez-handout-page-top: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-top.jpg');
+	/* Table or ornament background images*/
 	--ez-handout-table-top: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-table-top.jpg');
 	--ez-handout-table-bottom: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-table-bottom.jpg');
 	--ez-handout-table-middle: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-table-middle.jpg');
-	--ez-overlay-text-color: #ffffff;
-	--ez-primary-background-color: #252B2C;
-	--ez-primary-color: #8655B6;
-	/* blockquote images */
-	--ez-secondary-background-color: #3F3F3F;
-	--ez-secondary-color: #17AEE8;
-	--ez-shadow-color: #4d4d4d;
-	/* page decoration images */
-	--ez-subdued-background-color: #f2f2f2;
-	--ez-tertiary-color: #660000;
-	--ez-text-color: #000000;
-	--ez-handout-container-offset: -15px -30px -30px -30px;
-}
+	/* Horizontal rulers images*/
+	--ez-handout-page-horizontal-center: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-horizontal-center.png');
+	--ez-handout-page-horizontal-dart: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-horizontal-dart.png');
+	/* List Bullets */
+	--ez-handout-page-bullet-list: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-list-bullet.png');
 
-/* <div id="rootContainer"> is wrapped around all templates processed. We can stylize it either here or in :root. */
-/* FIXME If properties contain var() they are not updated unless separated from :root */
-#rootContainer {
+	/* handout container offset */
+	--ez-handout-container-offset: -15px -30px -30px -30px;
+
 	margin: var(--ez-handout-container-offset);
 	padding: 97px 30px 97px 30px;
 	background:
@@ -115,8 +158,8 @@ h6 {
 /* Headings */
 h1,h2,h3,h4,h5,h6 {
 	margin-bottom: 0.5em;
-	color: var(--ez-tertiary-color);
-	font-family: var(--ez-handout-font-family);
+	color: var(--ez-color-text-tertiary);
+	font-family: var(--ez-font-family-serif);
     font-weight: bold;
     /*font-variant: small-caps; FIXME */
     text-transform: uppercase;
@@ -133,7 +176,7 @@ h2 {
 
 h3 {
 	padding-bottom: .2em;
-	border-bottom: 5px solid var(--ez-complement-color);
+	border-bottom: 5px solid var(--ez-color-text-complement);
 	font-size: 20px;
 }
 
@@ -152,7 +195,7 @@ h6 {
 /* Horizontal Rules */
 hr.underscore-hr {
 	margin: 1em 0;
-	border: 2px solid var(--ez-tertiary-color);
+	border: 2px solid var(--ez-color-text-tertiary);
 }
 
 hr.dash-hr {
@@ -190,8 +233,8 @@ p::first-letter {
 	display: inline-block;
 	margin-right: .2em;
 	padding: 5px 10px;
-	border: 2px solid #c9ad6a;
-	color: #c9ad6a;
+	border: 2px solid var(--ez-color-border-contrast);
+	color: var(--ez-color-text-complement);
 	font-weight: bold;
 	font-size: 2.5em;
 	font-family: monospace;
@@ -211,7 +254,7 @@ p::first-letter {
 	padding: 2px 3px;
 	border-radius: 3px;
 	font-weight: bold;
-	background-color: var(--ez-subdued-background-color);
+	background-color: var(--ez-color-background-accent);
 }
 
 .asterisk-em {
@@ -222,13 +265,13 @@ p::first-letter {
 
 .underscore-em {
 	padding: 2px 4px;
-	color: var(--ez-complement-color);
+	color: var(--ez-color-text-complement);
 	font-style: italic;
 }
 
 /* Strikethrough */
 del {
-	color: var(--ez-shadow-color);
+	color: var(--ez-color-border-shadow);
 	text-decoration: line-through;
 }
 
@@ -244,14 +287,14 @@ mark {
 /* Superscript & Subscript */
 sup {
 	padding: 2px 4px;
-	color: var(--ez-accent-color);
+	color: var(--ez-color-text-accent);
 	font-size: 0.85em;
 	vertical-align: super;
 }
 
 sub {
 	padding: 2px 4px;
-	color: var(--ez-secondary-color);
+	color: var(--ez-color-text-secondary);
 	font-size: 0.85em;
 	vertical-align: sub;
 }
@@ -261,9 +304,9 @@ code.inline-code {
 	margin: 0px 3px;
 	padding: 2px 4px;
 	border-radius: 3px;
-	color: var(--ez-contrast-color);
-	font-family: 'Consolas', 'Courier New', Courier, monospace;
-	background-color: var(--ez-subdued-background-color);
+	color: var(--ez-color-text-tertiary);
+	font-family: var(--ez-font-family-monospace);
+	background-color: var(--ez-color-background-contrast);
 }
 
 /* Images and Links */
@@ -276,15 +319,15 @@ a {
 a[title="button"] {
 	display: inline-block;
 	padding: 5px 10px -5px -10px;
-	border: 3px double var(--ez-subdued-background-color);
+	border: 3px double var(--ez-color-border-contrast);
 	border-radius: 5px;
-	color: var(--ez-overlay-text-color);
+	color: var(--ez-color-text-contrast);
 	font-weight: bold;
 	font-size: 16px;
 	text-align: center;
 	text-decoration: none;
 	cursor: pointer;
-	background-color: var(--ez-primary-color);
+	background-color: var(--ez-color-accent);
 }
 
 /* Lists (UL / OL) */
@@ -297,20 +340,20 @@ ul>ul {
 	list-style: square inside;
 }
 
-ul>ul>ul {
+ul ul {
 	list-style: circle inside;
 }
 
 .dash-bullet {
-	color: var(--ez-text-color);
+	color: var(--ez-color-text-primary);
 }
 
 .asterisk-bullet {
-	color: var(--ez-primary-color);
+	color: var(--ez-color-text-tertiary);
 }
 
 .plus-bullet {
-	color: var(--ez-tertiary-color);
+	color: var(--ez-color-text-accent);
 }
 
 
@@ -351,7 +394,7 @@ ul>ul>ul {
 	display: block;
 	height: 5px;
 	width: 930px;
-	background-color: red;
+	background-color: var(--ez-rainbow-red);
 	/* For absolute elements reverse the offset of the rootContainer padding. 	padding: 97px 30px 97px 30px; */
 	position: absolute;
 	top: 0px;
@@ -396,7 +439,7 @@ img[title="avatar-border"] {
 
 .half-wide>blockquote {
 	border: none;
-	color: var(--ez-overlay-text-color);
+	color: var(--ez-color-border-contrast);
 	padding: 48px 35px;
 	font-size: 90%;
 	background:
@@ -413,7 +456,7 @@ img[title="avatar-border"] {
 
 #rootContainer>blockquote {
 	border: none;
-	color: var(--ez-overlay-text-color);
+	color: var(--ez-color-border-contrast);
 	padding: 48px 35px;
 	font-size: 90%;
 	background:
@@ -429,11 +472,11 @@ img[title="avatar-border"] {
 }
 
 blockquote>h4 {
-	color: var(--ez-complement-color);
+	color: var(--ez-color-text-complement);
 }
 
 blockquote>blockquote {
-	border-left: 3px solid var(--ez-tertiary-color);
+	border-left: 3px solid var(--ez-color-text-tertiary);
 	margin: 0.5em 1em;
 	background-color: rgba(102, 0, 0, 0.2);
 }
@@ -458,7 +501,7 @@ blockquote>blockquote {
 
 table {
 	width: 100%;
-	border: 1px solid var(--ez-shadow-color);
+	border: 1px solid var(--ez-color-border-shadow);
 	border-collapse: collapse;
 	font-size: 16px;
 }
@@ -466,20 +509,20 @@ table {
 th,
 td {
 	padding: 5px 10px;
-	border: 1px solid var(--ez-shadow-color);
+	border: 1px solid var(--ez-color-border-shadow);
 	text-align: left;
 }
 
 th {
-	color: var(--ez-complement-color);
+	color: var(--ez-color-text-complement);
 	font-weight: bold;
-	background-color: var(--ez-primary-background-color);
+	background-color: var(--ez-color-background-secondary);
 }
 
 tfoot {
 	color: var(--ez-overlay-text-color);
 	font-weight: bold;
-	background-color: var(--ez-primary-background-color);
+	background-color: var(--ez-color-background-secondary);
 }
 
 tr:nth-child(even) {

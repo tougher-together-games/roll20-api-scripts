@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "description": "These are API scripts and modules for use with Roll20.",
-  "main": "./src/easy-utils/easy-utils",
+  "main": "./src",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "grunt minify",
-    "docs": "grunt docs",
+    "docs": "npx jsdoc -c jsdoc.json",
+    "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose",
     "build-all": "grunt",
     "start": "grunt"
   },
@@ -16,7 +17,6 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.16.0",
-    "better-docs": "^2.7.3",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.31.0",

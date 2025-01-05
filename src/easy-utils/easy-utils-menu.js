@@ -7,20 +7,30 @@
 @version: 1.0.0
 @author: Mhykiel
 @license: MIT
-@repository: {@link https://github.com/Tougher-Together-Gaming/roll20-api-scripts/blob/main/src/easy-utils/easy-utils-menu.js|GitHub Repository}
+@repository: {@link https://github.com/tougher-together-games/roll20-api-scripts/blob/main/src/easy-utils/easy-utils-menu.js|GitHub Repository}
 */
 
+/* SECTION Object: EASY_MENU *****************************************************************************************/
+/**
+ * @namespace EASY_MENU
+ * @summary Example use of EASY_UTILS.
+ * 
+ * - **Purpose**:
+ *   - {{ purpose }}
+ * 
+ * - **Execution**:
+ *   - {{ execution }}
+ * 
+ * - **Design**:
+ *   - {{ design }}
+ * 
+ * @see https://example.com
+ */
 // eslint-disable-next-line no-unused-vars
 const EASY_MENU = (() => {
 
-	/*******************************************************************************************************************
-	 * SECTION: MODULE CONFIGURATION
-	 *
-	 * Here we define configuration and state related to EASY_MENU itself. The `moduleSettings` object is passed 
-	 * to utility functions so they can behave according to the EASY_MENU module's preferences (e.g., verbose logging).
-	 ******************************************************************************************************************/
-
 	// TODO Fill out module meta data
+	// ANCHOR Member: moduleSettings
 	const moduleSettings = {
 		readableName: "Easy-Menu",
 		chatApiName: "ezmenu",
@@ -29,12 +39,38 @@ const EASY_MENU = (() => {
 		author: "Mhykiel",
 		verbose: false,
 		sendWelcomeMsg: true,
+		debug: {
+			"applyCssToHtmlJson": false,
+			"convertCssToJson": false,
+			"convertHtmlToJson": false,
+			"convertMarkdownToHtml": false,
+			"convertJsonToHtml": false,
+			"convertToSingleLine": false,
+			"createPhraseFactory": false,
+			"createTemplateFactory": false,
+			"createThemeFactory": false,
+			"decodeCodeBlock": false,
+			"encodeCodeBlock": false,
+			"decodeNoteContent": false,
+			"encodeNoteContent": false,
+			"getGlobalSettings": false,
+			"getSharedForge": false,
+			"getSharedVault": false,
+			"logSyslogMessage": false,
+			"parseChatCommands": false,
+			"parseChatSubcommands": false,
+			"replacePlaceholders": false,
+			"renderTemplateAsync": false,
+			"whisperAlertMessageAsync": false,
+			"whisperPlayerMessage": false
+		}
 	};
 
+	// ANCHOR Factory References
 	let Utils = {};
 	let PhraseFactory = {};
-	let TemplateFactory = {};
-	let ThemeFactory = {};
+	//let TemplateFactory = {};
+	//let ThemeFactory = {};
 
 	// TODO Add universal style colors
 	// NOTE: It's recommended to use a consistent naming convention for color variables in your CSS.
@@ -42,82 +78,107 @@ const EASY_MENU = (() => {
 	// Define your styles here in the `paletteColors` object and pass it into all theme-related requests.
 
 	const paletteColors = {
-		"--ez-primary-color": "#8655B6", // Primary theme color
-		"--ez-secondary-color": "#17AEE8", // Secondary theme color
-		"--ez-tertiary-color": "#34627B", // Tertiary theme color for accents
-		"--ez-accent-color": "#CC6699", // Accent color for highlights
-		"--ez-complement-color": "#FCEC52", // Complementary color for contrast
-		"--ez-contrast-color": "#C3B9C8", // Color for subtle contrasts
-		"--ez-primary-background-color": "#252B2C", // Primary background color
-		"--ez-secondary-background-color": "#3F3F3F", // Secondary background color
-		"--ez-subdued-background-color": "#f2f2f2", // Subdued or neutral background color
-		"--ez-text-color": "#000000", // Default text color
-		"--ez-overlay-text-color": "#ffffff", // Overlay text color (e.g., on dark backgrounds)
-		"--ez-border-color": "#000000", // Default border color
-		"--ez-shadow-color": "#4d4d4d", // Default shadow color
+		"--ez-color-primary": " #8655b6",
+		"--ez-color-secondary": " #34627b",
+		"--ez-color-tertiary": " #17aee8",
+		"--ez-color-accent": " #cc6699",
+		"--ez-color-complement": " #fcec52",
+		"--ez-color-contrast": " #c3b9c8",
+	
+		/* Backgrounds and Borders */
+		"--ez-color-background-primary": " #252b2c",
+		"--ez-color-background-secondary": " #2d3e43",
+		"--ez-color-background-tertiary": " #8c888e",
+		"--ez-color-background-accent": " #fbe2c4",
+		"--ez-color-background-complement": " #3f3f3f",
+		"--ez-color-background-contrast": " #f2f2f2",
+	
+		"--ez-color-border-primary": " #000000",
+		"--ez-color-border-shadow": " #3f3f3f",
+		"--ez-color-border-contrast": " #f2f2f2",
+	
+		/* Text */
+		"--ez-color-text-primary": " #000000",
+		"--ez-color-text-secondary": " #2d3e43",
+		"--ez-color-text-tertiary": " #660000",
+		"--ez-color-text-accent": " #cc6699",
+		"--ez-color-text-complement": " #c9ad6a",
+		"--ez-color-text-contrast": " #ffffff",
+	
+		/* Rainbow Colors */
+		"--ez-rainbow-red": " #ff0000",
+		"--ez-rainbow-orange": " #ffa500",
+		"--ez-rainbow-yellow": " #ffff00",
+		"--ez-rainbow-olive": " #808000",
+		"--ez-rainbow-green": " #008000",
+		"--ez-rainbow-teal": " #008080",
+		"--ez-rainbow-blue": " #0000ff",
+		"--ez-rainbow-violet": " #ee82ee",
+		"--ez-rainbow-purple": " #800080",
+		"--ez-rainbow-pink": " #ffc0cb",
+		"--ez-rainbow-brown": " #a52a2a",
+		"--ez-rainbow-grey": " #808080",
+		"--ez-rainbow-black": " #000000",
+	
+		/* Typography Constants */
+		"--ez-line-height": " 1.6",
+		"--ez-font-weight": " 400",
+		"--ez-font-size": " 62.5%",
+	
+		"--ez-font-family-emoji": " 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
+		"--ez-font-family-serif": " 'Times New Roman', Times, Garamond, serif, var(--ez-font-family-emoji)",
+		"--ez-font-family-sans-serif": " Ubuntu, Cantarell, Helvetica, Arial, 'Helvetica Neue', sans-serif, var(--ez-font-family-emoji)",
+		"--ez-font-family-monospace": " Consolas, monospace",
+	
+		/* Layout */
+		"--ez-block-padding": " 5px 10px",
+		"--ez-block-margin": " .5em 0em",
+		"--ez-block-radius": " 5px"
 	};
 
-	// !SECTION END of MODULE CONFIGURATION
-
-	/*******************************************************************************************************************
-	 * SECTION: MODULE FUNCTIONS
-	 * ****************************************************************************************************************/
-
+	/* SECTION Private Methods: Module Functions **********************************************************************/
 	// ANCHOR processMenuAsync
 	const processMenuAsync = async (msgDetails) => {
-
-		/*
-		<div class="menu-box">
-			<h3>{{ title }}</h3>
-			<ul>
-				<!-- <li><a href="!api --menu">Option 1</a></li> -->
-				{{ menuItems }}
-			</ul>
-			<p class="menu-footer">{{ footer }}</p>
-		</div>
-		*/
 
 		const moduleState = Utils.getGlobalSettings();
 		const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x03BDB2A5" });
 
 		// NOTE use the '\' to escape, make literal, the special characters like the backtick (`) and exclamation (!)
 		const menuItemsArray = [
-			`<li><a href="\`!${moduleSettings.chatApiName} --set-lang">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x08161075" })}</a></li>`,
-			`<li><a href="\`!${moduleSettings.chatApiName} --alerts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D842F34" })}</a></li>`,
-			`<li id="token"><a href="\`!${moduleSettings.chatApiName} --flip">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0382B96E" })}</a></li>`
+			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --set-lang">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x08161075" })}</a></li>`,
+			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --alerts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D842F34" })}</a></li>`,
+			`<li><a role="button"href="\`!${moduleSettings.chatApiName} --flip">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0382B96E" })}</a></li>`
 		];
 
 		const gmMenuItemsArray = [
-			"<h3>GM Only Options</h3>",
-			"<ul>",
-			`<li role="deletion"><a href="\`!${moduleSettings.chatApiName} --purge-state all">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0DD74385" })}</a></li>`,
-			`<li role="deletion"><a href="\`!${moduleSettings.chatApiName} --purge-state ${moduleState.sharedVaultName}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0009ADA5" })}</a></li>`,
 			"</ul>",
+			"<h4>GM Only Options</h4>",
+			"<ul>",
+			`<li data-category="caution"><a role="button" href="\`!${moduleSettings.chatApiName} --purge-state all">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0DD74385" })}</a></li>`,
+			`<li data-category="caution"><a role="button" href="\`!${moduleSettings.chatApiName} --purge-state ${moduleState.sharedVaultName}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0009ADA5" })}</a></li>`,
 		];
 
-		// Join them with a newline
-		const menuItemsHTML = menuItemsArray.join("\n");
+		// Conditionally combine arrays if isGm is true
+		const combinedMenuItemsArray = msgDetails.isGm
+			? [...menuItemsArray, ...gmMenuItemsArray]
+			: menuItemsArray;
 
-		let footer = "";
-		if (msgDetails.isGm) {
-			footer = gmMenuItemsArray.join("\n");
-		}
+		// Join them with a newline
+		const menuItemsHTML = combinedMenuItemsArray.join("\n");
 
 		const menuContent = {
 			title,
 			menuItems: menuItemsHTML,
-			footer,
+			footer: "",
 		};
 
 		try {
 			const styledMessage = await Utils.renderTemplateAsync({
-				template: "utilsMenu",
+				template: "chatMenu",
 				expressions: menuContent,
-				theme: "utilsMenu",
+				theme: "chatMenu",
 				cssVars: paletteColors,
 			});
-
-			log("styledMessage: " + styledMessage);
 
 			const whisperArguments = {
 				from: moduleSettings.readableName,
@@ -145,7 +206,7 @@ const EASY_MENU = (() => {
 			const availableLanguagesArray = PhraseFactory.getLanguages();
 
 			const menuItemsArray = availableLanguagesArray.map(aLang => {
-				return `<li><a href="\`!${moduleSettings.chatApiName} --set-lang ${aLang}">${aLang}</a></li>`;
+				return `<li><a role="button" href="\`!${moduleSettings.chatApiName} --set-lang ${aLang}">${aLang}</a></li>`;
 			});
 
 			// Join them with a newline
@@ -162,9 +223,9 @@ const EASY_MENU = (() => {
 
 			try {
 				const styledMessage = await Utils.renderTemplateAsync({
-					template: "utilsMenu",
+					template: "chatMenu",
 					expressions: menuContent,
-					theme: "utilsMenu",
+					theme: "chatMenu",
 					cssVars: paletteColors,
 				});
 
@@ -248,7 +309,7 @@ const EASY_MENU = (() => {
 			from: moduleSettings.readableName,
 			to: msgDetails.callerName,
 			toId: msgDetails.callerId,
-			severity: 3, // ERROR
+			severity: "ERROR", // ERROR
 			apiCallContent: msgDetails.raw.content,
 			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x07845DCE" })}`
 		};
@@ -260,7 +321,7 @@ const EASY_MENU = (() => {
 			from: moduleSettings.readableName,
 			to: msgDetails.callerName,
 			toId: msgDetails.callerId,
-			severity: 4, // WARNING
+			severity: "WARN", // WARNING
 			apiCallContent: msgDetails.raw.content,
 			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x06F2AA1E" })}`
 		};
@@ -272,7 +333,7 @@ const EASY_MENU = (() => {
 			from: moduleSettings.readableName,
 			to: msgDetails.callerName,
 			toId: msgDetails.callerId,
-			severity: 6, // INFORMATION
+			severity: "INFO", // INFORMATION
 			apiCallContent: msgDetails.raw.content,
 			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0512C293" })}`
 		};
@@ -284,7 +345,7 @@ const EASY_MENU = (() => {
 			from: moduleSettings.readableName,
 			to: msgDetails.callerName,
 			toId: msgDetails.callerId,
-			severity: 7, // TIP
+			severity: "DEBUG", // TIP
 			apiCallContent: msgDetails.raw.content,
 			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x061115DE" })}`
 		};
@@ -304,7 +365,7 @@ const EASY_MENU = (() => {
 				from: moduleSettings.readableName,
 				to: msgDetails.callerName,
 				toId: msgDetails.callerId,
-				severity: 3, // ERROR
+				severity: "ERROR", // ERROR
 				apiCallContent: msgDetails.raw.content,
 				remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D9A441E" })}`
 			};
@@ -364,9 +425,7 @@ const EASY_MENU = (() => {
 
 	// !SECTION END of Module Functions
 
-	/*******************************************************************************************************************
-	 * SECTION: EVENT HANDLERS
-	 * ****************************************************************************************************************/
+	// SECTION Event Handlers *****************************************************************************************/
 
 	// ANCHOR actionMap
 	const actionMap = {
@@ -466,11 +525,9 @@ const EASY_MENU = (() => {
 			}
 		}
 	};
-	// !SECTION END of Event Handlers
+	// !SECTION END of Event Handlers *********************************************************************************/
 
-	/*******************************************************************************************************************
-	 * SECTION: INITIALIZATION
-	 ******************************************************************************************************************/
+	/* SECTION INITIALIZATION *****************************************************************************************/
 
 	// ANCHOR Function: registerEventHandlers
 	const registerEventHandlers = () => {
@@ -488,39 +545,19 @@ const EASY_MENU = (() => {
 
 		if (typeof EASY_UTILS !== "undefined") {
 
-			/*
-			"applyCssToHtmlJson",
-			"convertCssToJson",
-			"convertHtmlToJson",
-			"convertJsonToHtml",
-			"convertToSingleLine",
-			"createPhraseFactory",
-			"createTemplateFactory",
-			"createThemeFactory",
-			"decodeNoteContent",
-			"encodeNoteContent",
-			"getGlobalSettings",
-			"getSharedForge",
-			"getSharedVault",
-			"logSyslogMessage",
-			"parseChatCommands",
-			"parseChatSubcommands",
-			"renderTemplateAsync",
-			"replacePlaceholders",
-			"whisperAlertMessageAsync",
-			"whisperPlayerMessage"
-			*/
-
 			// TODO Limit the functions fetched down to the ones this module uses for memory efficiency.
 			const requiredFunctions = [
 				"applyCssToHtmlJson",
 				"convertCssToJson",
 				"convertHtmlToJson",
+				"convertMarkdownToHtml",
 				"convertJsonToHtml",
 				"convertToSingleLine",
 				"createPhraseFactory",
 				"createTemplateFactory",
 				"createThemeFactory",
+				"decodeCodeBlock",
+				"encodeCodeBlock",
 				"decodeNoteContent",
 				"encodeNoteContent",
 				"getGlobalSettings",
@@ -529,8 +566,8 @@ const EASY_MENU = (() => {
 				"logSyslogMessage",
 				"parseChatCommands",
 				"parseChatSubcommands",
-				"renderTemplateAsync",
 				"replacePlaceholders",
+				"renderTemplateAsync",
 				"whisperAlertMessageAsync",
 				"whisperPlayerMessage",
 				// This function is not in EASY_UTILS; when trying to retrieve it a warning will be logged.
@@ -549,14 +586,16 @@ const EASY_MENU = (() => {
 			TemplateFactory = easySharedForge.getFactory({ name: "TemplateFactory" });
 			ThemeFactory = easySharedForge.getFactory({ name: "ThemeFactory" });
 
-			// Log the module is initializing.
-			const msgId = "10000";
-			Utils.logSyslogMessage({
-				severity: 6,
-				tag: "checkInstall",
-				transUnitId: msgId,
-				message: PhraseFactory.get({ transUnitId: msgId })
-			});
+			if (moduleSettings.verbose) {
+				// "10000": ".=> Initializing <=.",
+				const msgId = "10000";
+				Utils.logSyslogMessage({
+					severity: "INFO",
+					tag: moduleSettings.readableName,
+					transUnitId: msgId,
+					message: PhraseFactory.get({ transUnitId: msgId })
+				});
+			}
 
 			// Continue with other Set Up Tasks.
 
@@ -564,6 +603,7 @@ const EASY_MENU = (() => {
 			PhraseFactory.add({
 				newMap: {
 					enUS: {
+						"0x08433FB0": `${moduleSettings.readableName} .=> Active <=.`,
 						"0x03BDB2A5": "Custom Menu",
 						"0x08161075": "Set Preferred Language",
 						"0x062D88F0": "Whispers to you from 'EASY-MODULES' will be in {{ remark }} (if available). ",
@@ -580,6 +620,7 @@ const EASY_MENU = (() => {
 						"0x03B6FF6E": "Invalid Arguments: There is one or more commands unrecognized. Check the commands spelling and usage."
 					},
 					frFR: {
+						"0x08433FB0": `${moduleSettings.readableName} .=> Prêt <=.`,
 						"0x03BDB2A5": "Menu personnalisé",
 						"0x08161075": "Définir la langue préférée",
 						"0x062D88F0": "Les chuchotements de 'EASY-MODULES' vous parviendront en {{ remark }} (si disponible).",
@@ -598,120 +639,6 @@ const EASY_MENU = (() => {
 				}
 			});
 
-			// TODO Add Templates
-			const menuHtml = `
-<div class="menu-box">
-	<h3>{{ title }}</h3>
-	<ul>
-		<!-- <li><a href="!api --menu">Option 1</a></li> -->
-		{{ menuItems }}
-	</ul>
-	<p class="menu-footer">{{ footer }}</p>
-</div>
-			`;
-
-			TemplateFactory.add({
-				newTemplates: {
-					"utilsMenu": `${menuHtml}`
-				}
-			});
-
-			// TODO Add Themes
-			const menuCss = `
-:root {
-  /* Palette Colors */
-  --ez-primary-color: #8655B6; 
-  --ez-secondary-color: #17AEE8; 
-  --ez-primary-background-color: #252B2C; 
-  --ez-subdued-background-color: #F2F2F2; 
-  --ez-overlay-text-color: #ffffff; 
-  --ez-border-color: #000000; 
-}
-
-/* Chat Menu CSS Rules */
-.menu-box {
-  font-size: 1.2em;
-  background-color: var(--ez-primary-background-color);
-  border: 2px solid var(--ez-border-color);
-  border-radius: 8px;
-  padding: 10px;
-  max-width: 100%;
-  font-family: Arial, sans-serif;
-  color: var(--ez-overlay-text-color);
-  margin: 5px;
-}
-
-h3 {
-  margin: 0;
-  font-size: 1.2em;
-  text-transform: uppercase;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 10px;
-  color: var(--ez-overlay-text-color);
-  background-color: var(--ez-primary-color);
-  border: 2px solid var(--ez-border-color);
-  border-radius: 5px;
-  padding: 5px;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-li {
-  margin: 5px 0;
-  width: 90%;
-  background-color: var(--ez-secondary-color);
-  border: 2px solid var(--ez-border-color);
-  color: var(--ez-overlay-text-color);
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-
-li:nth-child(even) {
-  background-color: var(--ez-primary-color);
-}
-
-li[role="deletion"] {
-  background-color: red;
-}
-
-
-#token {
-  background-color: green;
-}
-
-/* Strip styles from Anchor tags (<a>) */
-li > a {
-    text-decoration: none;
-    color: var(--ez-overlay-text-color);
-    font-weight: bold;
-    font-size: inherit;
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.menu-footer {
-  color: var(--ez-subdued-background-color);
-}
-
-.inline-rolls {
-color: black;
-}
-`;
-
-			ThemeFactory.add({
-				newThemes: {
-					"utilsMenu": `${menuCss}`
-				}
-			});
-
 			return 0;
 		} else {
 
@@ -725,44 +652,43 @@ color: black;
 		}
 	};
 
-	// !SECTION END of INITIALIZATION
-
-	/*******************************************************************************************************************
-	 * SECTION: ROLL20 STARTUP HOOK
-	 ******************************************************************************************************************/
-
 	on("ready", () => {
+
 		const continueMod = checkInstall();
 		if (continueMod === 0) {
+
 			registerEventHandlers();
-		}
 
-		// Log the Module is now ready for use.
-		const msgId = "20000";
-		Utils.logSyslogMessage({
-			severity: 6,
-			tag: "registerEventHandlers",
-			transUnitId: msgId,
-			message: PhraseFactory.get({ transUnitId: msgId })
-		});
+			// "20000": ".=> Ready <=.",
+			const msgId = "20000";
+			Utils.logSyslogMessage({
+				severity: "INFO",
+				tag: moduleSettings.readableName,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId })
+			});
 
-		if (moduleSettings.sendWelcomeMsg) {
-			const whisperArguments = {
-				from: moduleSettings.readableName,
-				to: "gm",
-				message: PhraseFactory.get({ transUnitId: "20000" })
-			};
-			Utils.whisperPlayerMessage(whisperArguments);
+			if (moduleSettings.sendWelcomeMsg) {
+
+				const whisperArguments = {
+					from: moduleSettings.readableName,
+					to: "gm",
+					message: PhraseFactory.get({ transUnitId: "20000" })
+				};
+				Utils.whisperPlayerMessage(whisperArguments);
+
+			}
 		}
 	});
 
-	// !SECTION END of ROLL20 STARTUP HOOK
+	/* !SECTION END of INITIALIZATION *********************************************************************************/
 
-	/*******************************************************************************************************************
-	 * SECTION: PUBLIC INTERFACE
-	 ******************************************************************************************************************/
+	/* SECTION: PUBLIC INTERFACE **************************************************************************************/
 
 	return {};
-	// !SECTION END of PUBLIC INTERFACE
+
+	/* !SECTION End of PUBLIC INTERFACE *******************************************************************************/
 
 })();
+
+/* !SECTION End of EASY_MENU *****************************************************************************************/
