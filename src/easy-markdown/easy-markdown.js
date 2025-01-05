@@ -190,9 +190,6 @@ const EASY_MARKDOWN = (() => {
 							},
 						});
 
-						log(`ezmarkdown:: added to ThemeFactory ${handoutId} which is named ${handoutName}`);
-
-
 						handoutsLoaded.push(handoutName);
 						resolve();
 					});
@@ -214,12 +211,12 @@ const EASY_MARKDOWN = (() => {
 	};
 
 	/**
- * Parses CSS variables from a :root block and returns an object mapping variable names to their values.
- *
- * @param {string} rootContent - The content inside the :root { } block.
- * @param {string} handoutName - The name of the handout (used for logging purposes).
- * @returns {Object} An object containing CSS variables as key-value pairs.
- */
+	 * Parses CSS variables from a :root block and returns an object mapping variable names to their values.
+	 *
+	 * @param {string} rootContent - The content inside the :root { } block.
+	 * @param {string} handoutName - The name of the handout (used for logging purposes).
+	 * @returns {Object} An object containing CSS variables as key-value pairs.
+	 */
 	const parseCssVariables = (rootContent, handoutName) => {
 		const cssVars = {};
 

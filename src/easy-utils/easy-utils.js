@@ -1528,9 +1528,9 @@ const EASY_UTILS = (() => {
 					const tagStack = [];
 
 					/**
- * Adds a processed HTML line to the htmlArray.
- * @param {string} html - The HTML string to add.
- */
+					 * Adds a processed HTML line to the htmlArray.
+					 * @param {string} html - The HTML string to add.
+					 */
 					function addToHtmlArray(html, raw = false) {
 						if (raw) {
 							htmlArray.push(html);
@@ -3519,6 +3519,9 @@ const EASY_UTILS = (() => {
 				// Cache Dependencies
 				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
 
+				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+				// │                                      Main Closure                                                 │
+				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return () => {
 					const vaultName = globalSettings.sharedVaultName;
 					if (!state[vaultName]) {
