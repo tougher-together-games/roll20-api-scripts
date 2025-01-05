@@ -348,9 +348,6 @@ const EASY_MARKDOWN = (() => {
 					? parseCssVariables(rootMatch[1], handoutName)
 					: {};
 
-
-				log(`ezmarkdown:: Converting ${handoutId} which is named ${handoutName} content: ${cleanedNotes}`);
-
 				// Convert markdown to HTML
 				const htmlConversion = Utils.convertMarkdownToHtml({ content: cleanedNotes });
 
@@ -373,8 +370,6 @@ const EASY_MARKDOWN = (() => {
 					TemplateFactory.remove({
 						template: handoutId
 					});
-
-					log(`ezmarkdown:: removed TemplateFactory ${handoutId} which is named ${handoutName}`);
 
 					// Update the handout’s notes
 					handout.set("notes", styledContent);

@@ -2050,20 +2050,11 @@ const EASY_UTILS = (() => {
 					// Create a copy of the content array to avoid mutating the original
 					const markdownArray = [...(content.split("\n"))];
 
-					// Start with the root div
-					//htmlArray.push("<div id=\"rootContainer\">");
-
 					// Start processing lines
 					parseBlock(markdownArray);
 
 					// Close all remaining open tags
 					closeAllTags();
-
-					// Close the root div
-					//htmlArray.push("</div>");
-
-					// Join the array into a single string separated by newline characters
-					log("This instance of convertMarkdownToHtml has issued:" + htmlArray.join("\n"));
 
 					return htmlArray.join("\n");
 				};
