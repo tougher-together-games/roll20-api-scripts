@@ -1581,10 +1581,6 @@ const EASY_UTILS = (() => {
 						// Escaped Characters
 						// asterisk -> &#42;
 						.replace(/\\\*/g, "&#42;")
-						// Images
-						.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<img src=\"$2\" alt=\"$1\" title=\"$3\" />")
-						// Links
-						.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<a href=\"$2\" title=\"$3\">$1</a>")
 						// Inline Code
 						.replace(/`([^`]+)`(?!`)/g, (match, code) => {
 
@@ -1593,6 +1589,10 @@ const EASY_UTILS = (() => {
 
 							return `<code class="inline-code">${escapedCode}</code>`;
 						})
+						// Images
+						.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<img src=\"$2\" alt=\"$1\" title=\"$3\" />")
+						// Links
+						.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<a href=\"$2\" title=\"$3\">$1</a>")
 						// Superscript
 						.replace(/\^\^([^=]+)\^\^/g, "<sup>$1</sup>")
 						// Subscript
