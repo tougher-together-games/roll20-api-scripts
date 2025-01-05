@@ -41,7 +41,7 @@ const EASY_MARKDOWN = (() => {
 			"convertCssToJson": false,
 			"convertHtmlToJson": false,
 			"convertMarkdownToHtml": false,
-			"convertJsonToHtml": true,
+			"convertJsonToHtml": false,
 			"convertToSingleLine": false,
 			"createPhraseFactory": false,
 			"createTemplateFactory": false,
@@ -88,8 +88,8 @@ const EASY_MARKDOWN = (() => {
 
 			// NOTE use the '\' to escape, make literal, the special characters like the backtick (`) and exclamation (!)
 			const menuItemsArray = [
-				`<li><a href="\`!${moduleSettings.chatApiName} --styles">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D813F3C" })}</a></li>`,
-				`<li><a href="\`!${moduleSettings.chatApiName} --handouts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x005A0033" })}</a></li>`
+				`<li><a role="button" href="\`!${moduleSettings.chatApiName} --styles">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D813F3C" })}</a></li>`,
+				`<li><a role="button" href="\`!${moduleSettings.chatApiName} --handouts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x005A0033" })}</a></li>`
 			];
 
 			// Join them with a newline
@@ -103,9 +103,9 @@ const EASY_MARKDOWN = (() => {
 
 			try {
 				const styledMessage = await Utils.renderTemplateAsync({
-					template: "ezMarkdownMenu",
+					template: "chatMenu",
 					expressions: menuContent,
-					theme: "ezMarkdownMenu",
+					theme: "chatMenu",
 					cssVars: paletteColors,
 				});
 
@@ -129,7 +129,7 @@ const EASY_MARKDOWN = (() => {
 				from: moduleSettings.readableName,
 				to: msgDetails.callerName,
 				toId: msgDetails.callerId,
-				severity: 3, // ERROR
+				severity: "ERROR", // ERROR
 				apiCallContent: msgDetails.raw.content,
 				remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
 			};
@@ -190,6 +190,9 @@ const EASY_MARKDOWN = (() => {
 							},
 						});
 
+						log(`ezmarkdown:: added to ThemeFactory ${handoutId} which is named ${handoutName}`);
+
+
 						handoutsLoaded.push(handoutName);
 						resolve();
 					});
@@ -219,18 +222,18 @@ const EASY_MARKDOWN = (() => {
  */
 	const parseCssVariables = (rootContent, handoutName) => {
 		const cssVars = {};
-    
+
 		// Split the root content by semicolons to handle each declaration separately
 		const declarations = rootContent.split(";");
-    
+
 		declarations.forEach(declaration => {
 			const trimmedDeclaration = declaration.trim();
-        
+
 			// Skip empty lines or lines that are comments
 			if (!trimmedDeclaration || trimmedDeclaration.startsWith("/*")) {
 				return;
 			}
-        
+
 			// Find the first colon to separate the property name and value
 			const colonIndex = trimmedDeclaration.indexOf(":");
 			if (colonIndex === -1) {
@@ -238,20 +241,20 @@ const EASY_MARKDOWN = (() => {
 
 				return;
 			}
-        
+
 			// Extract key and value
 			let key = trimmedDeclaration.substring(0, colonIndex).trim();
 			const value = trimmedDeclaration.substring(colonIndex + 1).trim();
-        
+
 			// Ensure the key starts with '--'
 			if (!key.startsWith("--")) {
 				key = `--${key}`;
 			}
-        
+
 			// Assign the key-value pair to the cssVars object
 			cssVars[key] = value;
 		});
-    
+
 		return cssVars;
 	};
 
@@ -259,151 +262,142 @@ const EASY_MARKDOWN = (() => {
 		try {
 			const handouts = findObjs({ type: "handout" });
 			const handoutsConverted = [];
-	
+
+			// Iterate over all handouts in a serial (await) fashion
 			for (const handout of handouts) {
-				await new Promise((resolve) => {
-					handout.get("gmnotes", (gmNotes) => {
-						try {
-							const handoutName = handout.get("name").trim();
-							const handoutId = handout.get("_id");
-							
-							if (!handoutName) {
-								resolve();
+				let styledContent = "";
+				const handoutName = handout.get("name")?.trim();
+				const handoutId = handout.get("_id");
 
-								return;
-							}
-	
-							// Skip theme handouts (assuming theme names start with "StyleSheet:")
-							if (handoutName.startsWith("StyleSheet:")) {
-								resolve();
+				// Skip if handout has no valid name
+				if (!handoutName) {
+					continue;
+				}
 
-								return;
-							}
-	
-							const avatarUrlRaw = JSON.stringify(handout.get("avatar"));
-							const decodedNotes = Utils.decodeNoteContent({ text: gmNotes });
-	
-							// Check if the handout contains an @import tag within a <style> block
-							const styleMatch = decodedNotes.match(/<style([\s\S]*?)<\/style>/i);
-							if (!styleMatch) {
-								resolve();
+				// Skip if this is a stylesheet handout
+				if (handoutName.startsWith("StyleSheet:")) {
+					continue;
+				}
 
-								return;
-							}
-	
-							const styleContent = styleMatch[1].trim();
-	
-							// Check for @import tag within the <style> block
-							const importMatch = styleContent.match(/@import\s+url\(["'](.+?)["']\);/i);
-							if (!importMatch || !importMatch[1]) {
-								resolve();
+				// Retrieve the GM notes asynchronously
+				const gmNotes = await new Promise((resolve) => {
+					handout.get("gmnotes", (notes) => {return resolve(notes);});
+				});
 
-								return;
-							}
-	
-							const themeName = importMatch[1].trim();
-	
-							// Transform the avatar URL
-							let avatarUrl = "";
-							if (avatarUrlRaw) {
-								avatarUrl = avatarUrlRaw
-									.replace(/^"|"$/g, "") // Remove surrounding quotes
-									.replace(/\/med\.jpg(\?.*)?$/, "/original.jpg"); // Replace '/med.jpg' and remove query string if present
-							} else {
-							}
-	
-							// Clean the notes by removing the <style> block and replacing the avatar URL placeholder
-							const cleanedNotes = decodedNotes
-								.replace(/<style[\s\S]*?<\/style>/i, "")
-								.replace(/{{\s*AvatarUrl\s*}}/, avatarUrl)
-								.trim();
-	
-							// Find the theme handout by name
-							const themeHandout = findObjs({
-								type: "handout",
-								name: `StyleSheet: ${themeName}`,
-							})[0];
-	
-							if (!themeHandout) {
-								const msgId = "50000";
-								Utils.logSyslogMessage({
-									severity: 6,
-									tag: "processHandoutsAsync",
-									transUnitId: msgId,
-									message: `Not Found: No theme handout: "${themeName}" for "${handoutName}" to use.`,
-								});
-								resolve();
+				// Decode the GM notes
+				const avatarUrlRaw = JSON.stringify(handout.get("avatar"));
+				const decodedNotes = Utils.decodeNoteContent({ text: gmNotes });
 
-								return;
-							}
-	
-							const themeId = themeHandout.get("_id");
-	
-							// Extract CSS variables from the :root block using the helper function
-							const rootMatch = styleContent.match(/:root\s*{([\s\S]*?)}/i);
-							if (!rootMatch) {
-								//log(`No :root block found in <style> for handout: "${handoutName}"`);
-							} else {
-								//log(`:root content for "${handoutName}":\n${rootMatch[1]}`);
-							}
-	
-							const cssVars = rootMatch
-								? parseCssVariables(rootMatch[1], handoutName) // Use the helper function here
-								: {};
-	
-							// Convert Markdown to HTML
-							const htmlConversion = Utils.convertMarkdownToHtml({ content: cleanedNotes });
-	
-							// Add the converted template
-							TemplateFactory.add({
-								newTemplates: {
-									[handoutName]: htmlConversion,
-								},
-							});
-	
-							// Render the template with the extracted CSS variables
-							Utils.renderTemplateAsync({
-								template: handoutName,
-								expressions: {},
-								theme: themeId,
-								cssVars,
-							})
-								.then((styledContent) => {
-									//log(`Styled content for "${handoutName}":\n${styledContent}`);
-	
-									// Update the handout's notes with the styled content
-									handout.set("notes", styledContent);
-									handoutsConverted.push(handoutName);
-									resolve();
-								})
-								.catch((err) => {
-									const msgId = "50000";
-									Utils.logSyslogMessage({
-										severity: 6,
-										tag: "processHandoutsAsync",
-										transUnitId: msgId,
-										message: PhraseFactory.get({
-											transUnitId: msgId,
-											expressions: { remark: err },
-										}),
-									});
-									resolve();
-								});
-						} catch (err) {
-							const msgId = "50000";
-							Utils.logSyslogMessage({
-								severity: 6,
-								tag: "processHandoutsAsync",
-								transUnitId: msgId,
-								message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } }),
-							});
-							resolve();
-						}
+				// Attempt to match the <style> block
+				const styleMatch = decodedNotes.match(/<style([\s\S]*?)<\/style>/i);
+				if (!styleMatch) {
+					// No <style> block => no @import => skip
+					continue;
+				}
+
+				const styleContent = styleMatch[1].trim();
+
+				// Attempt to match an @import line
+				const importMatch = styleContent.match(/@import\s+url\(["'](.+?)["']\);/i);
+				if (!importMatch || !importMatch[1]) {
+					// No @import => skip
+					continue;
+				}
+
+				// This is the stylesheet name we're looking for, e.g. "DarkTheme" in @import url("DarkTheme");
+				const themeName = importMatch[1].trim();
+
+				// Transform the avatar URL if present
+				let avatarUrl = "";
+				if (avatarUrlRaw) {
+					avatarUrl = avatarUrlRaw
+						.replace(/^"|"$/g, "") // Remove surrounding quotes
+						.replace(/\/med\.jpg(\?.*)?$/, "/original.jpg"); // Turn /med.jpg -> /original.jpg
+				}
+
+				// Clean out the <style> block and replace any {{ AvatarUrl }} placeholders
+				const cleanedNotes = decodedNotes
+					.replace(/<style[\s\S]*?<\/style>/i, "")
+					.replace(/{{\s*AvatarUrl\s*}}/, avatarUrl)
+					.trim();
+
+				// Find the theme handout by name
+				const themeHandout = findObjs({
+					type: "handout",
+					name: `StyleSheet: ${themeName}`,
+				})[0];
+
+				if (!themeHandout) {
+					const msgId = "50000";
+					Utils.logSyslogMessage({
+						severity: 6,
+						tag: "processHandoutsAsync",
+						transUnitId: msgId,
+						message: `Not Found: No theme handout: "${themeName}" for "${handoutName}" to use.`,
+					});
+					// Move on to the next handout
+					continue;
+				}
+
+				// Grab the theme's roll20 _id
+				const themeId = themeHandout.get("_id");
+
+				// Attempt to extract any CSS variables (e.g. from :root {...})
+				const rootMatch = styleContent.match(/:root\s*{([\s\S]*?)}/i);
+				const cssVars = rootMatch
+					? parseCssVariables(rootMatch[1], handoutName)
+					: {};
+
+
+				log(`ezmarkdown:: Converting ${handoutId} which is named ${handoutName} content: ${cleanedNotes}`);
+
+				// Convert markdown to HTML
+				const htmlConversion = Utils.convertMarkdownToHtml({ content: cleanedNotes });
+
+				// Register this handout's content as a template in the TemplateFactory
+				TemplateFactory.add({
+					newTemplates: {
+						[handoutId]: htmlConversion,
+					},
+				});
+
+				try {
+					// Render this handout with the correct theme
+					styledContent = await Utils.renderTemplateAsync({
+						template: handoutId,
+						expressions: {},
+						theme: themeId,
+						cssVars,
+					});
+
+					TemplateFactory.remove({
+						template: handoutId
+					});
+
+					log(`ezmarkdown:: removed TemplateFactory ${handoutId} which is named ${handoutName}`);
+
+					// Update the handout’s notes
+					handout.set("notes", styledContent);
+
+					styledContent = "";
+
+					// Keep track of which handouts were successfully converted
+					handoutsConverted.push(handoutName);
+				} catch (err) {
+					const msgId = "50000";
+					Utils.logSyslogMessage({
+						severity: 6,
+						tag: "processHandoutsAsync",
+						transUnitId: msgId,
+						message: PhraseFactory.get({
+							transUnitId: msgId,
+							expressions: { remark: err },
+						}),
 					});
 				}
-				);}
-	
-			// Handle final alert message logic...
+			}
+
+			// Post-processing: whisper a summary to whoever initiated this
 			if (handoutsConverted.length === 0) {
 				const whisperArguments = {
 					from: moduleSettings.readableName,
@@ -413,7 +407,6 @@ const EASY_MARKDOWN = (() => {
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0FD080D4" })}`
 				};
-	
 				await Utils.whisperAlertMessageAsync(whisperArguments);
 			} else {
 				const whisperArguments = {
@@ -424,7 +417,6 @@ const EASY_MARKDOWN = (() => {
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0DFBD0E4" })} ${handoutsConverted}`,
 				};
-	
 				await Utils.whisperAlertMessageAsync(whisperArguments);
 			}
 		} catch (err) {
@@ -437,6 +429,7 @@ const EASY_MARKDOWN = (() => {
 			});
 		}
 	};
+
 
 	// !SECTION END of Module Functions
 	// SECTION Event Handlers *****************************************************************************************/

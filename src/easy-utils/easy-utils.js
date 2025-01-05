@@ -340,7 +340,7 @@ const EASY_UTILS = (() => {
 				 *                   - `updatedRules` {Array<Object>}: The remaining CSS rules after removing the `:root` rule.
 				 */
 				function preprocessRootRules(cssRules, htmlTree) {
-					const rootIndex = cssRules.findIndex((r) => {return r.selector === ":root";});
+					const rootIndex = cssRules.findIndex((r) => { return r.selector === ":root"; });
 					if (rootIndex < 0) {
 						return { rootVariables: {}, updatedRules: cssRules };
 					}
@@ -362,7 +362,7 @@ const EASY_UTILS = (() => {
 					// See if #rootContainer exists
 					const allNodes = flattenHtmlTree(htmlTree);
 					const rootContainerNode = allNodes.find(
-						(node) => {return node.attributes?.id === "rootContainer";}
+						(node) => { return node.attributes?.id === "rootContainer"; }
 					);
 					if (rootContainerNode) {
 						rootContainerNode.attributes = rootContainerNode.attributes || {};
@@ -372,7 +372,7 @@ const EASY_UTILS = (() => {
 					}
 
 					// Remove :root rule
-					const updatedRules = cssRules.filter((r) => {return r.selector !== ":root";});
+					const updatedRules = cssRules.filter((r) => { return r.selector !== ":root"; });
 
 					return { rootVariables, updatedRules };
 				}
@@ -419,7 +419,7 @@ const EASY_UTILS = (() => {
 				 */
 				function tokenizeSelector(selector) {
 					// First, split by commas to handle multiple selectors:
-					const groups = selector.split(",").map((s) => {return s.trim();});
+					const groups = selector.split(",").map((s) => { return s.trim(); });
 
 					// For each group, parse out direct child (>) vs descendant (space).
 					// We'll do a simple approach: split on whitespace or '>' to detect combinators.
@@ -1519,394 +1519,380 @@ const EASY_UTILS = (() => {
 				// const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
 				const encodeCodeBlock = EASY_UTILS.getFunction({ functionName: "encodeCodeBlock", moduleSettings });
 
-				const htmlArray = [];
-				const tagStack = [];
+				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+				// │                                      Main Closure                                                 │
+				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+				return ({ content }) => {
 
-				/**
-				 * Adds a processed HTML line to the htmlArray.
-				 * @param {string} html - The HTML string to add.
-				 */
-				function addToHtmlArray(html, raw = false) {
-					if (raw) {
-						htmlArray.push(html);
-					} else {
-						htmlArray.push(processInline(html));
-					}
-				}
+					const htmlArray = [];
+					const tagStack = [];
 
-				/**
-				 * Handles the closing of the most recently opened HTML tag.
-				 */
-				function handleTagClosing() {
-					if (tagStack.length === 0) return; // No tags to close
-					const tag = tagStack.pop();
-					addToHtmlArray(`</${tag}>`, true);
-				}
-
-				/**
-				 * Closes all open tags in the tagStack.
-				 */
-				function closeAllTags() {
-					while (tagStack.length > 0) {
-						handleTagClosing();
-					}
-				}
-
-				/**
-				 * Generates a slugified ID from a heading text.
-				 * @param {string} text - The heading text.
-				 * @returns {string} The slugified ID.
-				 */
-				function slugify(text) {
-					return text.toLowerCase()
-						.replace(/[^a-z0-9\s-]/g, "") // Remove non-alphanumeric characters
-						.trim()
-						.replace(/\s+/g, "-"); // Replace spaces with hyphens
-				}
-
-				/**
-				 * Processes inline Markdown syntax such as code, strong, italics, etc.
-				 * Does not escape HTML; inserts it as-is.
-				 * @param {string} text - The text to process.
-				 * @returns {string} The text with inline HTML tags.
-				 */
-				function processInline(text) {
-					if (typeof text !== "string") {
-						console.error("Invalid input to processInline. Expected a string, got:", text);
-
-						return "";
+					/**
+ * Adds a processed HTML line to the htmlArray.
+ * @param {string} html - The HTML string to add.
+ */
+					function addToHtmlArray(html, raw = false) {
+						if (raw) {
+							htmlArray.push(html);
+						} else {
+							htmlArray.push(processInline(html));
+						}
 					}
 
-					return text
-						// Escaped Characters
-						// asterisk -> &#42;
-						.replace(/\\\*/g, "&#42;")
-						// Inline Code
-						.replace(/`([^`]+)`(?!`)/g, (match, code) => {
+					/**
+					 * Handles the closing of the most recently opened HTML tag.
+					 */
+					function handleTagClosing() {
+						if (tagStack.length === 0) return; // No tags to close
+						const tag = tagStack.pop();
+						addToHtmlArray(`</${tag}>`, true);
+					}
 
-							//const escapedCode = encodeNoteContent({ text: code });
-							const escapedCode = encodeCodeBlock({ text: code });
+					/**
+					 * Closes all open tags in the tagStack.
+					 */
+					function closeAllTags() {
+						while (tagStack.length > 0) {
+							handleTagClosing();
+						}
+					}
 
-							return `<code class="inline-code">${escapedCode}</code>`;
-						})
-						// Images
-						.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<img src=\"$2\" alt=\"$1\" title=\"$3\" />")
-						// Links
-						.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<a href=\"$2\" title=\"$3\">$1</a>")
-						// Superscript
-						.replace(/\^\^([^=]+)\^\^/g, "<sup>$1</sup>")
-						// Subscript
-						.replace(/\^\_([^=]+)\_\^/g, "<sub>$1</sub>")
-						// Horizontal Rules
-						.replace(/^-{3,}$/gm, "<hr class=\"dash-hr\" />") // Dash Horizontal Rule
-						.replace(/^\*{3,}$/gm, "<hr class=\"asterisk-hr\" />") // Asterisk Horizontal Rule
-						.replace(/^_{3,}$/gm, "<hr class=\"underscore-hr\" />") // Underscore Horizontal Rule
-						// Bold and italics
-						.replace(/\*\*\*([^*]+)\*\*\*/g, "<strong class=\"asterisk-strong\"><em class=\"asterisk-em\">$1</em></strong>")
-						.replace(/___([^_]+)___/g, "<strong class=\"underscore-strong\"><em class=\"underscore-em\">$1</em></strong>")
-						// Bold
-						.replace(/\*\*([^*]+)\*\*/g, "<strong class=\"asterisk-strong\">$1</strong>")
-						.replace(/__([^_]+)__/g, "<strong class=\"underscore-strong\">$1</strong>")
-						// Italics
-						.replace(/\*([^*]+)\*/g, "<em class=\"asterisk-em\">$1</em>")
-						.replace(/_((?!<[^>]*>).+?)_/g, "<em class=\"underscore-em\">$1</em>")
-						// Strikethrough
-						.replace(/~~([^~]+)~~/g, "<del>$1</del>")
-						// Mark
-						.replace(/==([^=]+)==/g, "<mark>$1</mark>")
-						// Headers with Slugified IDs
-						.replace(/^#{6} (.+)$/gm, (match, text) => { return `<h6 id="${slugify(text)}">${text}</h6>`; })
-						.replace(/^#{5} (.+)$/gm, (match, text) => { return `<h5 id="${slugify(text)}">${text}</h5>`; })
-						.replace(/^#{4} (.+)$/gm, (match, text) => { return `<h4 id="${slugify(text)}">${text}</h4>`; })
-						.replace(/^#{3} (.+)$/gm, (match, text) => { return `<h3 id="${slugify(text)}">${text}</h3>`; })
-						.replace(/^#{2} (.+)$/gm, (match, text) => { return `<h2 id="${slugify(text)}">${text}</h2>`; })
-						.replace(/^#{1} (.+)$/gm, (match, text) => { return `<h1 id="${slugify(text)}">${text}</h1>`; });
-				}
+					/**
+					 * Generates a slugified ID from a heading text.
+					 * @param {string} text - The heading text.
+					 * @returns {string} The slugified ID.
+					 */
+					function slugify(text) {
+						return text.toLowerCase()
+							.replace(/[^a-z0-9\s-]/g, "") // Remove non-alphanumeric characters
+							.trim()
+							.replace(/\s+/g, "-"); // Replace spaces with hyphens
+					}
 
-				/**
-				 * Recursively processes a block of Markdown lines.
-				 * @param {string[]} lines - The array of Markdown lines to process.
-				 */
-				function parseBlock(lines) {
+					/**
+					 * Processes inline Markdown syntax such as code, strong, italics, etc.
+					 * Does not escape HTML; inserts it as-is.
+					 * @param {string} text - The text to process.
+					 * @returns {string} The text with inline HTML tags.
+					 */
+					function processInline(text) {
+						if (typeof text !== "string") {
+							console.error("Invalid input to processInline. Expected a string, got:", text);
 
-					while (lines.length > 0) {
-						const originalLine = lines.shift();
-
-						// Normalize indentation: Convert tabs to 3 spaces, normalize leading spaces
-						const normalizedLine = originalLine
-							.replace(/\t/g, "   ")
-							.replace(/<style([^>]*)>/g, "<div$1 style=\"display:none\">")
-							.replace(/<template([^>]*)>/g, "<div$1 style=\"display:none\">")
-							.replace(/<\/style>/g, "</div>")
-							.replace(/<\/template>/g, "</div>")
-
-							// Convert tabs to 3 spaces
-							// REVIEW I do not believe the normalization for list items matters; more testing to refactor
-							.replace(/^ \*(.*)/, "*$1")
-							.replace(/^ -/, "-")
-							.replace(/^\+/, "+")
-							.replace(/^(\s*)/, (match) => {
-
-								// Normalize to multiples of 3
-								const spaces = Math.ceil(match.length / 3) * 3;
-
-
-								return " ".repeat(spaces);
-							});
-
-						const meta = {
-							isEmpty: /^\s*$/.test(originalLine),
-							thisLine: normalizedLine.trim(),//.replace(/\\?\s*$/, ""), // Remove trailing backslashes and whitespace
-							indentLevel: normalizedLine.match(/^\s*/)[0].length, // Calculate the indentation level
-						};
-
-						let doContinue = false;
-
-						switch (true) {
-
-						case /^:::/.test(meta.thisLine): {
-							// Match "::: " and grab everything after it
-							const openFenceMatch = meta.thisLine.match(/^:::\s*(.+)$/);
-							const closeFenceMatch = meta.thisLine.trim() === ":::";
-
-							if (openFenceMatch && openFenceMatch[1]) {
-								// Extract and trim everything after ":::"
-								const className = openFenceMatch[1].trim();
-								addToHtmlArray(`<div class="${className}">`, true);
-							} else if (closeFenceMatch) {
-								// Handle closing ":::"
-								addToHtmlArray("</div>", true);
-							}
-
-							// Prevent further processing of this line
-							doContinue = true;
-							break;
+							return "";
 						}
 
-						case /^```/.test(meta.thisLine): {
-							// 1) Determine if this is an open or close Code
-							const openCodeMatch = meta.thisLine.match(/^```(\S.*)$/); // "::: some-class" => open
-							const closeCodeMatch = meta.thisLine.match(/^```$/);       // ":::        " => close (no text)
+						return text
+							// Escaped Characters
+							// asterisk -> &#42;
+							.replace(/\\\*/g, "&#42;")
+							// Inline Code
+							.replace(/`([^`]+)`(?!`)/g, (match, code) => {
 
-							// If it's a close Code, we do not open a new div. Instead, we break out.
-							if (closeCodeMatch) {
-								// This scenario can happen if there's a stray ":::" or if a nested close is found.
-								// Usually you'd decrement a nesting counter if you track that at a higher level.
-								// But let's assume parseBlock is handling this scenario. We'll just skip or handle.
-								// For demonstration, let's just skip further processing so it doesn't become a paragraph.
-								doContinue = true;
-								break;
-							}
+								//const escapedCode = encodeNoteContent({ text: code });
+								const escapedCode = encodeCodeBlock({ text: code });
 
-							// 2) It's an open Code if there's text after ":::"
-							if (openCodeMatch) {
-								const codeBlockType = openCodeMatch[1].trim() || "text";  // e.g. "two-columns", "left hidden", etc.
+								return `<code class="inline-code">${escapedCode}</code>`;
+							})
+							// Images
+							.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<img src=\"$2\" alt=\"$1\" title=\"$3\" />")
+							// Links
+							.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, "<a href=\"$2\" title=\"$3\">$1</a>")
+							// Superscript
+							.replace(/\^\^([^=]+)\^\^/g, "<sup>$1</sup>")
+							// Subscript
+							.replace(/\^\_([^=]+)\_\^/g, "<sub>$1</sub>")
+							// Horizontal Rules
+							.replace(/^-{3,}$/gm, "<hr class=\"dash-hr\" />") // Dash Horizontal Rule
+							.replace(/^\*{3,}$/gm, "<hr class=\"asterisk-hr\" />") // Asterisk Horizontal Rule
+							.replace(/^_{3,}$/gm, "<hr class=\"underscore-hr\" />") // Underscore Horizontal Rule
+							// Bold and italics
+							.replace(/\*\*\*([^*]+)\*\*\*/g, "<strong class=\"asterisk-strong\"><em class=\"asterisk-em\">$1</em></strong>")
+							.replace(/___([^_]+)___/g, "<strong class=\"underscore-strong\"><em class=\"underscore-em\">$1</em></strong>")
+							// Bold
+							.replace(/\*\*([^*]+)\*\*/g, "<strong class=\"asterisk-strong\">$1</strong>")
+							.replace(/__([^_]+)__/g, "<strong class=\"underscore-strong\">$1</strong>")
+							// Italics
+							.replace(/\*([^*]+)\*/g, "<em class=\"asterisk-em\">$1</em>")
+							.replace(/_((?!<[^>]*>).+?)_/g, "<em class=\"underscore-em\">$1</em>")
+							// Strikethrough
+							.replace(/~~([^~]+)~~/g, "<del>$1</del>")
+							// Mark
+							.replace(/==([^=]+)==/g, "<mark>$1</mark>")
+							// Headers with Slugified IDs
+							.replace(/^#{6} (.+)$/gm, (match, text) => { return `<h6 id="${slugify(text)}">${text}</h6>`; })
+							.replace(/^#{5} (.+)$/gm, (match, text) => { return `<h5 id="${slugify(text)}">${text}</h5>`; })
+							.replace(/^#{4} (.+)$/gm, (match, text) => { return `<h4 id="${slugify(text)}">${text}</h4>`; })
+							.replace(/^#{3} (.+)$/gm, (match, text) => { return `<h3 id="${slugify(text)}">${text}</h3>`; })
+							.replace(/^#{2} (.+)$/gm, (match, text) => { return `<h2 id="${slugify(text)}">${text}</h2>`; })
+							.replace(/^#{1} (.+)$/gm, (match, text) => { return `<h1 id="${slugify(text)}">${text}</h1>`; });
+					}
 
-								// Open the custom block
-								addToHtmlArray(`<pre data-role="code-block" data-info="${codeBlockType}" class="${codeBlockType}"><code>`, true);
+					/**
+					 * Recursively processes a block of Markdown lines.
+					 * @param {string[]} lines - The array of Markdown lines to process.
+					 */
+					function parseBlock(lines) {
 
-								// Consume lines inside this block
-								let nextLine = lines.shift();
-								while (nextLine !== undefined) {
-									const nextCloseCodeMatch = nextLine.match(/^```$/);
+						while (lines.length > 0) {
+							const originalLine = lines.shift();
 
-									if (!nextCloseCodeMatch) {
-										// Process normal code line
-										const escapedLine = encodeCodeBlock({ text: nextLine });
-										addToHtmlArray(`${escapedLine}<br />`, true);
-										nextLine = lines.shift();
-									} else {
-										// Found the closing fence => break out
-										break;
-									}
+							// Normalize indentation: Convert tabs to 3 spaces, normalize leading spaces
+							const normalizedLine = originalLine
+								.replace(/\t/g, "   ")
+								.replace(/<style([^>]*)>/g, "<div$1 style=\"display:none\">")
+								.replace(/<template([^>]*)>/g, "<div$1 style=\"display:none\">")
+								.replace(/<\/style>/g, "</div>")
+								.replace(/<\/template>/g, "</div>")
+
+								// Convert tabs to 3 spaces
+								// REVIEW I do not believe the normalization for list items matters; more testing to refactor
+								.replace(/^ \*(.*)/, "*$1")
+								.replace(/^ -/, "-")
+								.replace(/^\+/, "+")
+								.replace(/^(\s*)/, (match) => {
+
+									// Normalize to multiples of 3
+									const spaces = Math.ceil(match.length / 3) * 3;
+
+
+									return " ".repeat(spaces);
+								});
+
+							const meta = {
+								isEmpty: /^\s*$/.test(originalLine),
+								thisLine: normalizedLine.trim(),//.replace(/\\?\s*$/, ""), // Remove trailing backslashes and whitespace
+								indentLevel: normalizedLine.match(/^\s*/)[0].length, // Calculate the indentation level
+							};
+
+							let doContinue = false;
+
+							switch (true) {
+
+							case /^:::/.test(meta.thisLine): {
+								// Match "::: " and grab everything after it
+								const openFenceMatch = meta.thisLine.match(/^:::\s*(.+)$/);
+								const closeFenceMatch = meta.thisLine.trim() === ":::";
+
+								if (openFenceMatch && openFenceMatch[1]) {
+									// Extract and trim everything after ":::"
+									const className = openFenceMatch[1].trim();
+									addToHtmlArray(`<div class="${className}">`, true);
+								} else if (closeFenceMatch) {
+									// Handle closing ":::"
+									addToHtmlArray("</div>", true);
 								}
-
-								addToHtmlArray("</code></pre>", true);
 
 								// Prevent further processing of this line
 								doContinue = true;
 								break;
 							}
 
-							// If the line started with ":::", but didn't match open or close, 
-							// it might be malformed or empty. Let's just skip it.
-							doContinue = true;
-							break;
-						}
+							case /^```/.test(meta.thisLine): {
+								// 1) Determine if this is an open or close Code
+								const openCodeMatch = meta.thisLine.match(/^```(\S.*)$/); // "::: some-class" => open
+								const closeCodeMatch = meta.thisLine.match(/^```$/);       // ":::        " => close (no text)
 
-						// Block quotes
-						case /^>/.test(meta.thisLine): {
-							addToHtmlArray("<blockquote>", true);
-							const blockquotePocketDimension = [];
-
-							// Remove the first ">" and normalize the current line
-							blockquotePocketDimension.push(meta.thisLine.replace(/^>\s*/, ""));
-
-							let nextLine = lines.shift();
-
-							// Process lines recursively within the blockquote
-							while (nextLine) {
-								if (/^>/.test(nextLine)) {
-									// If the line starts with ">", remove one level of ">" and add it
-									const updatedLine = nextLine.replace(/^>\s?/, "");
-									blockquotePocketDimension.push(updatedLine);
-
-								} else {
-									// If a non-blockquote line is encountered, stop processing
-									lines.unshift(nextLine); // Return the line to the stack for later processing
+								// If it's a close Code, we do not open a new div. Instead, we break out.
+								if (closeCodeMatch) {
+									// This scenario can happen if there's a stray ":::" or if a nested close is found.
+									// Usually you'd decrement a nesting counter if you track that at a higher level.
+									// But let's assume parseBlock is handling this scenario. We'll just skip or handle.
+									// For demonstration, let's just skip further processing so it doesn't become a paragraph.
+									doContinue = true;
 									break;
 								}
-								nextLine = lines.shift();
-							}
 
-							// Recursively parse the contents of the blockquote
-							parseBlock(blockquotePocketDimension);
+								// 2) It's an open Code if there's text after ":::"
+								if (openCodeMatch) {
+									const codeBlockType = openCodeMatch[1].trim() || "text";  // e.g. "two-columns", "left hidden", etc.
 
-							// Close the blockquote
-							addToHtmlArray("</blockquote>", true);
+									// Open the custom block
+									addToHtmlArray(`<pre data-role="code-block" data-info="${codeBlockType}" class="${codeBlockType}"><code>`, true);
 
-							// Skip further processing for this blockquote
-							doContinue = true;
-							break;
-						}
+									// Consume lines inside this block
+									let nextLine = lines.shift();
+									while (nextLine !== undefined) {
+										const nextCloseCodeMatch = nextLine.match(/^```$/);
 
-						// Unordered Lists
-						case /^[-+*]\s+/.test(meta.thisLine): {
-							// Capture the bullet type and the content
-							const listMatch = meta.thisLine.match(/^([-+*])\s+(.*)/);
-							const bulletType = listMatch ? listMatch[1] : "-"; // Default to `-` if match fails
-							const listItemContent = listMatch ? listMatch[2].trim() : "";
+										if (!nextCloseCodeMatch) {
+											// Process normal code line
+											const escapedLine = encodeCodeBlock({ text: nextLine });
+											addToHtmlArray(`${escapedLine}<br />`, true);
+											nextLine = lines.shift();
+										} else {
+											// Found the closing fence => break out
+											break;
+										}
+									}
 
-							const indentLevel = (Math.floor(meta.indentLevel / 3)) + 1; // Each 3 spaces represent a nesting level
+									addToHtmlArray("</code></pre>", true);
 
-							// Determine the current ordered list nesting level
-							const currentListLevel = tagStack.filter(tag => { return tag === "ul"; }).length;
-
-							// Map bullet types to class names
-							const bulletClassMap = {
-								"-": "dash-bullet",
-								"+": "plus-bullet",
-								"*": "asterisk-bullet"
-							};
-							const bulletClass = bulletClassMap[bulletType] || "dash-bullet"; // Fallback to `dash-bullet`
-
-							if (indentLevel > currentListLevel) {
-								addToHtmlArray("<ul>");
-								tagStack.push("ul");
-							} else if (indentLevel < currentListLevel) {
-
-								// Close <ul> tags for decreased indentation
-								for (let i = currentListLevel; i > indentLevel; i--) {
-									addToHtmlArray("</ul>", true);
-									tagStack.pop();
+									// Prevent further processing of this line
+									doContinue = true;
+									break;
 								}
+
+								// If the line started with ":::", but didn't match open or close, 
+								// it might be malformed or empty. Let's just skip it.
+								doContinue = true;
+								break;
 							}
 
-							// Add <li> for the current list item with the specific class for the bullet type
-							const processedContent = processInline(listItemContent);
-							addToHtmlArray(`<li class="${bulletClass}">${processedContent}</li>`);
+							// Block quotes
+							case /^>/.test(meta.thisLine): {
+								addToHtmlArray("<blockquote>", true);
+								const blockquotePocketDimension = [];
 
-							break;
-						}
+								// Remove the first ">" and normalize the current line
+								blockquotePocketDimension.push(meta.thisLine.replace(/^>\s*/, ""));
 
+								let nextLine = lines.shift();
 
-						// Ordered Lists
-						case /^\d+\.\s+/.test(meta.thisLine): {
-							// Capture the list number and the content
-							const listMatch = meta.thisLine.match(/^(\d+)\.\s+(.*)/);
-							const listNumber = listMatch ? parseInt(listMatch[1], 10) : 1; // Default to `1` if match fails
-							const listItemContent = listMatch ? listMatch[2].trim() : "";
-							const indentLevel = (Math.floor(meta.indentLevel / 3)) + 1; // Each 3 spaces represent a nesting level
+								// Process lines recursively within the blockquote
+								while (nextLine) {
+									if (/^>/.test(nextLine)) {
+										// If the line starts with ">", remove one level of ">" and add it
+										const updatedLine = nextLine.replace(/^>\s?/, "");
+										blockquotePocketDimension.push(updatedLine);
 
-							// Determine the current ordered list nesting level
-							const currentListLevel = tagStack.filter(tag => { return tag === "ol"; }).length;
-
-							if (indentLevel > currentListLevel) {
-								// Open new <ol> tags for increased indentation
-								for (let i = currentListLevel; i < indentLevel; i++) {
-									if (listNumber > 1) {
-										addToHtmlArray(`<ol start="${listNumber}">`);
 									} else {
-										addToHtmlArray("<ol>");
+										// If a non-blockquote line is encountered, stop processing
+										lines.unshift(nextLine); // Return the line to the stack for later processing
+										break;
 									}
-									tagStack.push("ol");
+									nextLine = lines.shift();
 								}
-							} else if (indentLevel < currentListLevel) {
-								// Close <ol> tags for decreased indentation
-								for (let i = currentListLevel; i > indentLevel; i--) {
-									addToHtmlArray("</ol>", true);
-									tagStack.pop();
-								}
+
+								// Recursively parse the contents of the blockquote
+								parseBlock(blockquotePocketDimension);
+
+								// Close the blockquote
+								addToHtmlArray("</blockquote>", true);
+
+								// Skip further processing for this blockquote
+								doContinue = true;
+								break;
 							}
 
-							// Add the current list item
-							const processedContent = processInline(listItemContent);
-							addToHtmlArray(`<li>${processedContent}</li>`);
+							// Unordered Lists
+							case /^[-+*]\s+/.test(meta.thisLine): {
+								// Capture the bullet type and the content
+								const listMatch = meta.thisLine.match(/^([-+*])\s+(.*)/);
+								const bulletType = listMatch ? listMatch[1] : "-"; // Default to `-` if match fails
+								const listItemContent = listMatch ? listMatch[2].trim() : "";
 
-							break;
-						}
+								const indentLevel = (Math.floor(meta.indentLevel / 3)) + 1; // Each 3 spaces represent a nesting level
 
-						case /^\|/.test(meta.thisLine): {
-							// 1. Collect all lines starting with '|'
-							const tableLines = [meta.thisLine];
-							let nextLine = lines.shift();
-							while (nextLine && /^\|/.test(nextLine)) {
-								tableLines.push(nextLine);
-								nextLine = lines.shift();
-							}
+								// Determine the current ordered list nesting level
+								const currentListLevel = tagStack.filter(tag => { return tag === "ul"; }).length;
 
-							// 2. Check if the next line (the "stopper" line) is a valid footer:
-							//    - must be non-empty
-							//    - must NOT start with '|'
-							//    If it doesn't match those criteria, we push it back and let the normal parser handle it
-							let footerLine = null;
-							if (nextLine && nextLine.trim() !== "" && !/^\|/.test(nextLine)) {
-								footerLine = nextLine; // We'll treat this as our footer text
-							} else if (nextLine) {
-								lines.unshift(nextLine); // Not a footer, so restore it for normal parsing
-							}
+								// Map bullet types to class names
+								const bulletClassMap = {
+									"-": "dash-bullet",
+									"+": "plus-bullet",
+									"*": "asterisk-bullet"
+								};
+								const bulletClass = bulletClassMap[bulletType] || "dash-bullet"; // Fallback to `dash-bullet`
 
-							// 3. Check if the second line is a valid header separator
-							const separator = tableLines[1];
-							if (
-								separator &&
-									/^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|$/.test(separator)
-							) {
-								// => We have a valid table with a header row
+								if (indentLevel > currentListLevel) {
+									addToHtmlArray("<ul>");
+									tagStack.push("ul");
+								} else if (indentLevel < currentListLevel) {
 
-								// Parse headers and alignments
-								const headers = tableLines[0]
-									.slice(1, -1)
-									.split("|")
-									.map((h) => { return h.trim(); });
-								const alignments = separator
-									.slice(1, -1)
-									.split("|")
-									.map((s) => { return s.trim(); });
-
-								addToHtmlArray("<table>");
-								// THEAD
-								addToHtmlArray("<thead><tr>");
-								headers.forEach((header, index) => {
-									let style = "";
-									if (/^:-+:?$/.test(alignments[index])) {
-										style = " style=\"text-align:center\"";
-									} else if (/^:-+$/.test(alignments[index])) {
-										style = " style=\"text-align:left\"";
-									} else if (/^-+:$/.test(alignments[index])) {
-										style = " style=\"text-align:right\"";
+									// Close <ul> tags for decreased indentation
+									for (let i = currentListLevel; i > indentLevel; i--) {
+										addToHtmlArray("</ul>", true);
+										tagStack.pop();
 									}
-									addToHtmlArray(`<th${style}>${processInline(header)}</th>`);
-								});
-								addToHtmlArray("</tr></thead>");
+								}
 
-								// TBODY
-								addToHtmlArray("<tbody>");
-								for (let i = 2; i < tableLines.length; i++) {
-									const row = tableLines[i];
-									const cells = row.slice(1, -1).split("|").map((c) => { return c.trim(); });
-									addToHtmlArray("<tr>");
-									cells.forEach((cell, index) => {
+								// Add <li> for the current list item with the specific class for the bullet type
+								const processedContent = processInline(listItemContent);
+								addToHtmlArray(`<li class="${bulletClass}">${processedContent}</li>`);
+
+								break;
+							}
+
+
+							// Ordered Lists
+							case /^\d+\.\s+/.test(meta.thisLine): {
+								// Capture the list number and the content
+								const listMatch = meta.thisLine.match(/^(\d+)\.\s+(.*)/);
+								const listNumber = listMatch ? parseInt(listMatch[1], 10) : 1; // Default to `1` if match fails
+								const listItemContent = listMatch ? listMatch[2].trim() : "";
+								const indentLevel = (Math.floor(meta.indentLevel / 3)) + 1; // Each 3 spaces represent a nesting level
+
+								// Determine the current ordered list nesting level
+								const currentListLevel = tagStack.filter(tag => { return tag === "ol"; }).length;
+
+								if (indentLevel > currentListLevel) {
+									// Open new <ol> tags for increased indentation
+									for (let i = currentListLevel; i < indentLevel; i++) {
+										if (listNumber > 1) {
+											addToHtmlArray(`<ol start="${listNumber}">`);
+										} else {
+											addToHtmlArray("<ol>");
+										}
+										tagStack.push("ol");
+									}
+								} else if (indentLevel < currentListLevel) {
+									// Close <ol> tags for decreased indentation
+									for (let i = currentListLevel; i > indentLevel; i--) {
+										addToHtmlArray("</ol>", true);
+										tagStack.pop();
+									}
+								}
+
+								// Add the current list item
+								const processedContent = processInline(listItemContent);
+								addToHtmlArray(`<li>${processedContent}</li>`);
+
+								break;
+							}
+
+							case /^\|/.test(meta.thisLine): {
+								// 1. Collect all lines starting with '|'
+								const tableLines = [meta.thisLine];
+								let nextLine = lines.shift();
+								while (nextLine && /^\|/.test(nextLine)) {
+									tableLines.push(nextLine);
+									nextLine = lines.shift();
+								}
+
+								// 2. Check if the next line (the "stopper" line) is a valid footer:
+								//    - must be non-empty
+								//    - must NOT start with '|'
+								//    If it doesn't match those criteria, we push it back and let the normal parser handle it
+								let footerLine = null;
+								if (nextLine && nextLine.trim() !== "" && !/^\|/.test(nextLine)) {
+									footerLine = nextLine; // We'll treat this as our footer text
+								} else if (nextLine) {
+									lines.unshift(nextLine); // Not a footer, so restore it for normal parsing
+								}
+
+								// 3. Check if the second line is a valid header separator
+								const separator = tableLines[1];
+								if (
+									separator &&
+										/^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|$/.test(separator)
+								) {
+									// => We have a valid table with a header row
+
+									// Parse headers and alignments
+									const headers = tableLines[0]
+										.slice(1, -1)
+										.split("|")
+										.map((h) => { return h.trim(); });
+									const alignments = separator
+										.slice(1, -1)
+										.split("|")
+										.map((s) => { return s.trim(); });
+
+									addToHtmlArray("<table>");
+									// THEAD
+									addToHtmlArray("<thead><tr>");
+									headers.forEach((header, index) => {
 										let style = "";
 										if (/^:-+:?$/.test(alignments[index])) {
 											style = " style=\"text-align:center\"";
@@ -1915,137 +1901,151 @@ const EASY_UTILS = (() => {
 										} else if (/^-+:$/.test(alignments[index])) {
 											style = " style=\"text-align:right\"";
 										}
-										addToHtmlArray(`<td${style}>${processInline(cell)}</td>`);
+										addToHtmlArray(`<th${style}>${processInline(header)}</th>`);
 									});
-									addToHtmlArray("</tr>");
-								}
-								addToHtmlArray("</tbody>");
+									addToHtmlArray("</tr></thead>");
 
-								// 4. If we captured a non-empty line that doesn't start with '|', treat it as a table footer
-								if (footerLine) {
-									addToHtmlArray("<tfoot><tr>");
-									addToHtmlArray(
-										`<td colspan="${headers.length}">${processInline(footerLine)}</td>`
-									);
-									addToHtmlArray("</tr></tfoot>");
-								}
+									// TBODY
+									addToHtmlArray("<tbody>");
+									for (let i = 2; i < tableLines.length; i++) {
+										const row = tableLines[i];
+										const cells = row.slice(1, -1).split("|").map((c) => { return c.trim(); });
+										addToHtmlArray("<tr>");
+										cells.forEach((cell, index) => {
+											let style = "";
+											if (/^:-+:?$/.test(alignments[index])) {
+												style = " style=\"text-align:center\"";
+											} else if (/^:-+$/.test(alignments[index])) {
+												style = " style=\"text-align:left\"";
+											} else if (/^-+:$/.test(alignments[index])) {
+												style = " style=\"text-align:right\"";
+											}
+											addToHtmlArray(`<td${style}>${processInline(cell)}</td>`);
+										});
+										addToHtmlArray("</tr>");
+									}
+									addToHtmlArray("</tbody>");
 
-								addToHtmlArray("</table>");
-
-							} else {
-								// => Invalid or non-header table, treat each line as plain text
-								tableLines.forEach((line) => {
-									addToHtmlArray(`<p>${processInline(line)}</p>`);
-								});
-
-								// If we popped nextLine off earlier but haven't used it as a footer,
-								// we may consider unshifting it back here—depending on your desired logic
-								if (footerLine) {
-									lines.unshift(footerLine);
-								}
-							}
-
-							break;
-						}
-
-
-						// Raw HTML Blocks
-						case /^<([a-zA-Z]+)([^>]*)>/.test(meta.thisLine): {
-							const htmlTagMatch = meta.thisLine.match(/^<([a-zA-Z]+)([^>]*)>/);
-							const openingTag = htmlTagMatch ? htmlTagMatch[1] : null;
-
-							if (openingTag) {
-								const singleLineClosingTagMatch = meta.thisLine.match(new RegExp(`^<${openingTag}[^>]*>.*</${openingTag}>$`));
-
-								if (singleLineClosingTagMatch) {
-									// Single line contains both opening and closing tags
-									addToHtmlArray(meta.thisLine, true);
-								} else {
-									// Process multi-line raw HTML block
-									const rawHtmlStack = [meta.thisLine]; // Add the opening line to the stack
-									let nextLine = lines.shift();
-
-									while (nextLine) {
-										const closingTagMatch = nextLine.match(new RegExp(`^</${openingTag}>`));
-
-										if (closingTagMatch) {
-											rawHtmlStack.push(nextLine); // Add the closing tag
-											break;
-										}
-
-										const nestedOpeningTagMatch = nextLine.match(/^<([a-zA-Z]+)([^>]*)>/);
-										const nestedClosingTagMatch = nextLine.match(/^<\/([a-zA-Z]+)>/);
-
-										// Add nested opening tags to the stack
-										if (nestedOpeningTagMatch && nestedOpeningTagMatch[1]) {
-											rawHtmlStack.push(nextLine);
-										}
-										// Remove matching closing tags from the stack
-										else if (
-											nestedClosingTagMatch &&
-												nestedClosingTagMatch[1] &&
-												rawHtmlStack[rawHtmlStack.length - 1] === `<${nestedClosingTagMatch[1]}>`
-										) {
-											rawHtmlStack.pop();
-										} else {
-											rawHtmlStack.push(nextLine); // Add content or unmatched tags
-										}
-
-										nextLine = lines.shift();
+									// 4. If we captured a non-empty line that doesn't start with '|', treat it as a table footer
+									if (footerLine) {
+										addToHtmlArray("<tfoot><tr>");
+										addToHtmlArray(
+											`<td colspan="${headers.length}">${processInline(footerLine)}</td>`
+										);
+										addToHtmlArray("</tr></tfoot>");
 									}
 
-									// Push the raw HTML block to the HTML array
-									addToHtmlArray(rawHtmlStack.join("\n"), true);
+									addToHtmlArray("</table>");
+
+								} else {
+									// => Invalid or non-header table, treat each line as plain text
+									tableLines.forEach((line) => {
+										addToHtmlArray(`<p>${processInline(line)}</p>`);
+									});
+
+									// If we popped nextLine off earlier but haven't used it as a footer,
+									// we may consider unshifting it back here—depending on your desired logic
+									if (footerLine) {
+										lines.unshift(footerLine);
+									}
 								}
 
-								// Skip further processing for this block
-								doContinue = true;
+								break;
 							}
-							break;
-						}
 
-						// Catch and skip things that do not need a paragraph tag.
-						case (meta.isEmpty):
-						{
-							doContinue = true;
-							closeAllTags();
-							break;
-						}
 
-						// Headings
-						case /\s*#{1,6}\s+/.test(meta.thisLine):
-						{
-							addToHtmlArray(`${processInline(meta.thisLine)}`);
-							doContinue = true;
-							break;
-						}
+							// Raw HTML Blocks
+							case /^<([a-zA-Z]+)([^>]*)>/.test(meta.thisLine): {
+								const htmlTagMatch = meta.thisLine.match(/^<([a-zA-Z]+)([^>]*)>/);
+								const openingTag = htmlTagMatch ? htmlTagMatch[1] : null;
 
-						// Horizontal Rules
-						case /^\s*(\*\s*){3,}$/.test(meta.thisLine) || /^\s*(-\s*){3,}$/.test(meta.thisLine) || /^\s*(?:_ ?){3,}$/.test(meta.thisLine):
-						{
-							addToHtmlArray(`${processInline(meta.thisLine)}`);
-							doContinue = true;
-							break;
-						}
+								if (openingTag) {
+									const singleLineClosingTagMatch = meta.thisLine.match(new RegExp(`^<${openingTag}[^>]*>.*</${openingTag}>$`));
 
-						// Paragraphs
-						default:
-						{
-							addToHtmlArray(`<p>${processInline(meta.thisLine)}</p>`);
-							break;
-						}
-						}
+									if (singleLineClosingTagMatch) {
+										// Single line contains both opening and closing tags
+										addToHtmlArray(meta.thisLine, true);
+									} else {
+										// Process multi-line raw HTML block
+										const rawHtmlStack = [meta.thisLine]; // Add the opening line to the stack
+										let nextLine = lines.shift();
 
-						if (doContinue) {
-							continue;
+										while (nextLine) {
+											const closingTagMatch = nextLine.match(new RegExp(`^</${openingTag}>`));
+
+											if (closingTagMatch) {
+												rawHtmlStack.push(nextLine); // Add the closing tag
+												break;
+											}
+
+											const nestedOpeningTagMatch = nextLine.match(/^<([a-zA-Z]+)([^>]*)>/);
+											const nestedClosingTagMatch = nextLine.match(/^<\/([a-zA-Z]+)>/);
+
+											// Add nested opening tags to the stack
+											if (nestedOpeningTagMatch && nestedOpeningTagMatch[1]) {
+												rawHtmlStack.push(nextLine);
+											}
+											// Remove matching closing tags from the stack
+											else if (
+												nestedClosingTagMatch &&
+													nestedClosingTagMatch[1] &&
+													rawHtmlStack[rawHtmlStack.length - 1] === `<${nestedClosingTagMatch[1]}>`
+											) {
+												rawHtmlStack.pop();
+											} else {
+												rawHtmlStack.push(nextLine); // Add content or unmatched tags
+											}
+
+											nextLine = lines.shift();
+										}
+
+										// Push the raw HTML block to the HTML array
+										addToHtmlArray(rawHtmlStack.join("\n"), true);
+									}
+
+									// Skip further processing for this block
+									doContinue = true;
+								}
+								break;
+							}
+
+							// Catch and skip things that do not need a paragraph tag.
+							case (meta.isEmpty):
+							{
+								doContinue = true;
+								closeAllTags();
+								break;
+							}
+
+							// Headings
+							case /\s*#{1,6}\s+/.test(meta.thisLine):
+							{
+								addToHtmlArray(`${processInline(meta.thisLine)}`);
+								doContinue = true;
+								break;
+							}
+
+							// Horizontal Rules
+							case /^\s*(\*\s*){3,}$/.test(meta.thisLine) || /^\s*(-\s*){3,}$/.test(meta.thisLine) || /^\s*(?:_ ?){3,}$/.test(meta.thisLine):
+							{
+								addToHtmlArray(`${processInline(meta.thisLine)}`);
+								doContinue = true;
+								break;
+							}
+
+							// Paragraphs
+							default:
+							{
+								addToHtmlArray(`<p>${processInline(meta.thisLine)}</p>`);
+								break;
+							}
+							}
+
+							if (doContinue) {
+								continue;
+							}
 						}
 					}
-				}
-
-				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
-				// │                                      Main Closure                                                 │
-				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
-				return ({ content }) => {
 
 					// Create a copy of the content array to avoid mutating the original
 					const markdownArray = [...(content.split("\n"))];
@@ -2063,6 +2063,8 @@ const EASY_UTILS = (() => {
 					//htmlArray.push("</div>");
 
 					// Join the array into a single string separated by newline characters
+					log("This instance of convertMarkdownToHtml has issued:" + htmlArray.join("\n"));
+
 					return htmlArray.join("\n");
 				};
 			};

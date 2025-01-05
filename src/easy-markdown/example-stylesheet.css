@@ -419,6 +419,7 @@ div.avatar-banner {
 	margin-bottom: 10px;
 	overflow: hidden;
 	text-align: center;
+	transform: rotate(30deg);
 }
 
 img[title="avatar-image"] {
