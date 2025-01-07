@@ -14,22 +14,22 @@ const EASY_FORGE = (() => {
 	// SECTION Object: EASY_FORGE
 
 	/**
- * @namespace EASY_FORGE
- * @summary A global registry for managing factories shared across all Easy Modules.
- * 
- * - **Purpose**:
- *   - Acts as a shared registry for storing and retrieving factories across Easy Modules.
- *   - Simplifies access to modular resources like HTML templates, CSS themes, and localization strings.
- * 
- * - **Execution**:
- *   - Uses an Immediately Invoked Function Expression (IIFE) to create a singleton instance.
- *   - The following EASY_UTILS will initialize the "Forge" with factories.
- * 
- * - **Design**:
- *   - Maintains a central registry of factories keyed by name.
- *   - Factories follow a standardized interface, including methods like `add`, `remove`, `set`, `get`, and `init`.
- *   - Designed for sharing complex, reusable objects between modules without duplication.
- */
+	 * @namespace EASY_FORGE
+	 * @summary A global registry for managing factories shared across all Easy Modules.
+	 * 
+	 * - **Purpose**:
+	 *   - Acts as a shared registry for storing and retrieving factories across Easy Modules.
+	 *   - Simplifies access to modular resources like HTML templates, CSS themes, and localization strings.
+	 * 
+	 * - **Execution**:
+	 *   - Uses an Immediately Invoked Function Expression (IIFE) to create a singleton instance.
+	 *   - The following EASY_UTILS will initialize the "Forge" with factories.
+	 * 
+	 * - **Design**:
+	 *   - Maintains a central registry of factories keyed by name.
+	 *   - Factories follow a standardized interface, including methods like `add`, `remove`, `set`, `get`, and `init`.
+	 *   - Designed for sharing complex, reusable objects between modules without duplication.
+	 */
 
 	const factories = {};
 
@@ -470,7 +470,8 @@ const EASY_UTILS = (() => {
 				 */
 				function parseAttributes(rawAttributes) {
 					const attributes = {
-						inlineStyles: {},
+						style: {},
+						inlineStyle: {},
 						classList: [],
 						id: null
 					};
@@ -487,7 +488,7 @@ const EASY_UTILS = (() => {
 						case "style":
 							value.split(";").forEach((styleDeclaration) => {
 								const [property, styleValue] = styleDeclaration.split(":").map(s => { return s.trim(); });
-								if (property && styleValue) attributes.inlineStyles[property] = styleValue;
+								if (property && styleValue) attributes.inlineStyle[property] = styleValue;
 							});
 							break;
 						case "class":
@@ -525,7 +526,7 @@ const EASY_UTILS = (() => {
 							id: "rootContainer",
 							style: {},
 							classList: [],
-							inlineStyles: {}
+							inlineStyle: {}
 						},
 						children: [],
 						childIndex: 1
@@ -633,7 +634,7 @@ const EASY_UTILS = (() => {
 								"attributes": {
 									"id": "rootContainer",
 									"classList": [],
-									"inlineStyles": {}
+									"inlineStyle": {}
 								},
 								"children": [
 									{
@@ -641,7 +642,7 @@ const EASY_UTILS = (() => {
 										"attributes": {
 											"classList": [],
 											"id": null,
-											"inlineStyles": {}
+											"inlineStyle": {}
 										},
 										"children": [
 											{
@@ -1310,33 +1311,59 @@ const EASY_UTILS = (() => {
 				 */
 				function generateHtmlFromNode(node) {
 					if (!node.element) return "";
-
+				
+					// If it's a text node, just return its text
 					if (node.element === "text") {
 						return node.children?.[0]?.innerText || "";
 					}
-
-					const combinedStyle = { ...node.attributes?.style, ...node.attributes?.inlineStyle };
-					const styleString = Object.keys(combinedStyle).length
-						? convertCamelCaseToKebabCase(combinedStyle)
+				
+					// 1) Merge style & inlineStyle from node.attributes
+					const mergedStyle = {
+						...(node.attributes?.style || {}),
+						...(node.attributes?.inlineStyle || {}),
+					};
+				
+					// 2) Convert the merged style object into a valid CSS string
+					const styleString = Object.keys(mergedStyle).length
+						? convertCamelCaseToKebabCase(mergedStyle)
 						: "";
-
+				
+					// 3) Remove inlineStyle so it doesn't appear as an HTML attribute
+					if (node.attributes?.inlineStyle) {
+						delete node.attributes.inlineStyle;
+					}
+				
+					// Collect valid HTML attributes
 					const attributes = [];
-					if (styleString) attributes.push(`style="${styleString}"`);
-
+				
+					// (a) If we have a final style string, add it
+					if (styleString) {
+						attributes.push(`style="${styleString}"`);
+					}
+				
+					// (b) Handle classList, if present
 					if (Array.isArray(node.attributes?.classList) && node.attributes.classList.length > 0) {
 						attributes.push(`class="${node.attributes.classList.join(" ")}"`);
 					}
-
-					if (node.attributes?.id) attributes.push(`id="${node.attributes.id}"`);
-
+				
+					// (c) Handle id
+					if (node.attributes?.id) {
+						attributes.push(`id="${node.attributes.id}"`);
+					}
+				
+					// (d) Any other attributes (besides style, inlineStyle, classList, id) get added as well
 					Object.entries(node.attributes || {})
-						.filter(([key]) => { return !["style", "inlineStyle", "classList", "id"].includes(key); })
+						.filter(([key]) => {return !["style", "inlineStyle", "classList", "id"].includes(key);})
 						.forEach(([key, value]) => {
 							attributes.push(`${key}="${value}"`);
 						});
-
-					const childrenHtml = (node.children || []).map(generateHtmlFromNode).join("");
-
+				
+					// Process children recursively
+					const childrenHtml = (node.children || [])
+						.map(generateHtmlFromNode)
+						.join("");
+				
+					// Build the final HTML tag
 					const attributesString = attributes.length ? ` ${attributes.join(" ")}` : "";
 
 					return `<${node.element}${attributesString}>${childrenHtml}</${node.element}>`;

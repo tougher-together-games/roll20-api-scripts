@@ -256,14 +256,13 @@ const EASY_MARKDOWN = (() => {
 		const thisFuncDebugName = "processHandoutsAsync";
 
 		if (!msgDetails.isGm) {
-
 			if (moduleSettings.verbose) {
 				// Only for GM Use
 				Utils.whisperAlertMessageAsync({
 					from: moduleSettings.readableName,
 					to: msgDetails.callerName,
 					toId: msgDetails.callerId,
-					severity: "ERROR", // ERROR
+					severity: "ERROR",
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
 				});
@@ -272,140 +271,140 @@ const EASY_MARKDOWN = (() => {
 			return 0;
 		}
 
+		//------------------------------------------------------------------
 		// Subroutine: parseCssOverrides
+		//    Splits CSS declarations in :root {...}, storing key:value in an object.
+		//------------------------------------------------------------------
 		const parseCssOverrides = (rootContent) => {
 			const cssVars = {};
-
-			// Split the root content by semicolons to handle each declaration separately
 			const declarations = rootContent.split(";");
 
 			declarations.forEach(declaration => {
 				const trimmedDeclaration = declaration.trim();
-
-				// Skip empty lines or lines that are comments
 				if (!trimmedDeclaration || trimmedDeclaration.startsWith("/*")) {
 					return;
 				}
-
-				// Find the first colon to separate the property name and value
 				const colonIndex = trimmedDeclaration.indexOf(":");
 				if (colonIndex === -1) {
-					//log(`Invalid CSS declaration in :root for "${handoutName}": "${trimmedDeclaration}"`);
-
 					return;
 				}
-
-				// Extract key and value
 				let key = trimmedDeclaration.substring(0, colonIndex).trim();
 				const value = trimmedDeclaration.substring(colonIndex + 1).trim();
-
-				// Ensure the key starts with '--'
 				if (!key.startsWith("--")) {
 					key = `--${key}`;
 				}
-
-				// Assign the key-value pair to the cssVars object
 				cssVars[key] = value;
 			});
 
 			return cssVars;
 		};
 
+		//------------------------------------------------------------------
 		// Subroutine: extractRollTableBlocks
+		//    Finds ::: ... ::: blocks with a class like 'rolltable-something',
+		//    capturing the 'something' (tableId) and the block content.
+		//------------------------------------------------------------------
 		const extractRollTableBlocks = (markdown) => {
-			// Regex Explanation:
+			// e.g. ::: another-class rolltable-tableID ... :::
 			// /:::[^\n]*?(rolltable-(\S+))([\s\S]*?):::/gm
-			// - Matches `:::` followed by optional text,
-			// - then a group capturing "rolltable-xxx" plus an inner group for the ID,
-			// - then lazily captures everything until the closing triple colons.
 			const blockRegex = /:::[^\n]*?(rolltable-(\S+))([\s\S]*?):::/gm;
 			const blocks = [];
 
 			let match;
 			while ((match = blockRegex.exec(markdown)) !== null) {
-				const entireMatch = match[0];    // The whole ::: ... ::: text
-				const fullClass = match[1];      // e.g. "rolltable-tableID"
-				const tableId = match[2];        // e.g. "tableID"
-				const blockContent = match[3];   // The text between ::: lines
-
-				blocks.push({ tableId, blockContent: blockContent.trim(), entireMatch });
+				const entireMatch = match[0];
+				const fullClass = match[1];    // e.g. "rolltable-tableID"
+				const tableId = match[2];      // e.g. "tableID"
+				const blockContent = match[3]; // text between ::: ... :::
+				blocks.push({
+					tableId,
+					blockContent: blockContent.trim(),
+					entireMatch
+				});
 			}
 
 			return blocks;
 		};
 
-		// Subroutine: parseSecondColumnOfTable
-		const parseSecondColumnOfTable = (blockContent) => {
-			// Regex Explanation:
-			// ^\|\s*(\d+)\s*\|\s*([^|]+)\|.*$
-			// - ^\| at start of line, matches a leading pipe (|)
-			// - \s*(\d+)\s* captures one or more digits in the first column
-			// - \|\s* then a pipe and optional spaces
-			// - ([^|]+) captures everything in the second column up to the next pipe
-			// - \|.*$ matches the remaining pipe and any text that might follow in other columns
-			const rowRegex = /^\|\s*(\d+)\s*\|\s*([^|]+)\|.*$/gm;
+		/**
+		 * parseDiceTable
+		 * 1) The first row’s first column is the dice expression (e.g. "1d8+1d10").
+		 * 2) We skip the alignment row (the row of dashes/colons).
+		 * 3) For each subsequent row, we assume:
+		 *    - Column 1 => numeric or range (e.g. "2-3")
+		 *    - Column 2 => result text (Base64-encoded).
+		 *
+		 * @param {string} blockContent - the markdown inside ::: ... :::
+		 * @returns {Object} { diceExpression, csv }
+		 *          diceExpression: string (e.g. "1d8+1d10")
+		 *          csv: comma-separated pairs: "2-3=AAAA,4-8=BBBB,9=CCCC" etc.
+		 */
+		function parseDiceTable(blockContent) {
+			// Typical row pattern: "| col1 | col2 | ..."
+			// We capture only the first two columns:
+			//   ^\|\s*([^|]+)\|\s*([^|]+)\|.*$
+			const rowRegex = /^\|\s*([^|]+)\|\s*([^|]+)\|.*$/gm;
 
-			const results = [];
+			let diceExpression = "";
+			const entries = [];
+
+			let rowIndex = 0;
 			let match;
 
 			while ((match = rowRegex.exec(blockContent)) !== null) {
-				// match[1] = the number in the first column (roll)
-				// match[2] = the descriptive result in the second column
+				const col1 = match[1].trim();
+				const col2 = match[2].trim();
 
-				// Github:   https://github.com/shdwjk/Roll20API/blob/master/Base64/Base64.js
-				// By:       The Aaron, Arcane Scriptomancer
-				// Contact:  https://app.roll20.net/users/104025/the-aaron
-				// modified from:  http://www.webtoolkit.info/
+				// 1) Check if this row is the alignment row:
+				//    e.g., ":---", "---", ":----:", or any combination of dashes/colons/spaces
+				const alignmentRegex = /^[\-\:\s]+$/;
+				const isAlignmentRow = alignmentRegex.test(col1) && alignmentRegex.test(col2);
+				if (isAlignmentRow) {
+					// Skip this row altogether
+					continue;
+				}
 
+				// 2) If rowIndex===0 => the first *non-alignment* row is the dice expression row
+				if (rowIndex === 0) {
+					diceExpression = col1;  // e.g., "1d8+1d10"
+				} else {
+					// All subsequent rows => col1 is range, col2 is the table result
+					const rangePart = col1;
+					const encodedResult = Utils.encodeBase64({ text: col2 });
+					entries.push(`${rangePart}=${encodedResult}`);
+				}
 
-
-				// Example usage:
-				//const originalString = "This is a test string.";
-				//const base64Encoded = encodeBase64(originalString);
-				//log(`Encoded: ${base64Encoded}`);
-
-				const col2 = Utils.encodeBase64({ text: match[2].trim() });
-				//.replace(/ /g, "%%%SPACE%%%")  // Replace spaces
-				//.replace(/#/g, "%%%HASHTAG%%%")  // Replace #
-				//.replace(/\|/g, "%%%PIPE%%%");  // Replace |
-
-				log(`Found matching row ${col2}`);
-				results.push(col2);
+				rowIndex++;
 			}
 
-			log("results: " + results);
-			
-			return results;
+			// Build a comma-separated string => "range=encodedResult,range=encodedResult,..."
+			const csv = entries.join(",");
+
+			return { diceExpression, csv };
 		};
 
+		//------------------------------------------------------------------
 		// Subroutine: replaceRollTablesInMarkdown
+		//    For each ::: rolltable-xxx ::: block:
+		//     1) Parse the dice expression from first row, subsequent ranges/entries.
+		//     2) Replace link placeholders like: href="{{ %rolltable-xxx% }}"
+		//     3) Insert the final command with dynamic dice expression & CSV data.
+		//------------------------------------------------------------------
 		const replaceRollTablesInMarkdown = (markdown) => {
 			// 1) Extract all rolltable blocks
 			const blocks = extractRollTableBlocks(markdown);
-
-			// 2) Parse each block’s second column, and build a comma-separated string
-			const tableResultsMap = {};  // { [tableId]: "Value1, Value2, Value3..." }
-			for (const { tableId, blockContent } of blocks) {
-				const col2Array = parseSecondColumnOfTable(blockContent);
-				// Build a single comma-separated string from col2
-				const csvResults = col2Array.join(" ");
-				tableResultsMap[tableId] = csvResults;
-			}
-
-			// 3) For each recognized tableId, replace the matching placeholder
-			//    href="{{ %roll-table-<tableId>% }}" with
-			//    href="&#96;!ezmarkdown --rolltable ..."
 			let updatedMarkdown = markdown;
 
-			for (const tableId of Object.keys(tableResultsMap)) {
-				// The placeholder to look for: {{ %roll-table-tableId% }}
-				// We'll build a regex that matches href="{{ %roll-table-tableId% }}"
+			for (const { tableId, blockContent } of blocks) {
+				// 2) Parse out the dice expression + row data
+				const { diceExpression, csv } = parseDiceTable(blockContent);
+
+				// 3) Build the final href
+				// Example: `href="`!ezmarkdown --rolltable result#[[1d8+1d10]] table#2-3=AAAA,4-8=BBBB"`
+				const replacement = `href="&#96;!ezmarkdown --rolltable &#91;&#91;${diceExpression}&#93;&#93; ${csv}"`;
+
+				// 4) Replace the link placeholder: {{ %rolltable-<tableId>% }}
 				const placeholderRegex = new RegExp(`href="\\{\\{\\s*%rolltable-${tableId}%\\s*\\}\\}"`, "g");
-
-				// Build the replacement
-				const csv = tableResultsMap[tableId];
-				const replacement = `href="&#96;!ezmarkdown --rolltable ${csv}"`;
-
 				updatedMarkdown = updatedMarkdown.replace(placeholderRegex, replacement);
 			}
 
@@ -413,6 +412,7 @@ const EASY_MARKDOWN = (() => {
 		};
 
 		try {
+			// Grab all handouts
 			const handouts = findObjs({ type: "handout" });
 			const handoutsConverted = [];
 
@@ -423,9 +423,7 @@ const EASY_MARKDOWN = (() => {
 				const handoutId = handout.get("_id");
 
 				// Skip if handout has no valid name
-				if (!handoutName) {
-					continue;
-				}
+				if (!handoutName) continue;
 
 				// Skip if this is a stylesheet handout
 				if (handoutName.startsWith("StyleSheet:")) {
@@ -456,24 +454,24 @@ const EASY_MARKDOWN = (() => {
 					continue;
 				}
 
-				// This is the stylesheet name we're looking for, e.g. "DarkTheme" in @import url("DarkTheme");
+				// The stylesheet name we're looking for, e.g. "DarkTheme" in @import url("DarkTheme");
 				const themeName = importMatch[1].trim();
 
 				// Transform the avatar URL if present
 				let avatarUrl = "";
 				if (avatarUrlRaw) {
 					avatarUrl = avatarUrlRaw
-						.replace(/^"|"$/g, "") // Remove surrounding quotes
-						.replace(/\/med\.jpg(\?.*)?$/, "/original.jpg"); // Turn /med.jpg -> /original.jpg
+						.replace(/^"|"$/g, "") // remove surrounding quotes
+						.replace(/\/med\.jpg(\?.*)?$/, "/original.jpg"); // /med.jpg -> /original.jpg
 				}
 
-				// Clean out the <style> block and replace any {{ AvatarUrl }} placeholders
+				// Clean out the <style> block and replace {{ AvatarUrl }} placeholders
 				const cleanedNotes = decodedNotes
 					.replace(/<style[\s\S]*?<\/style>/i, "")
 					.replace(/{{\s*AvatarUrl\s*}}/, avatarUrl)
 					.trim();
 
-				// --- NEW STEP: Replace any roll-table placeholders ---
+				// --- NEW STEP: Replace any rolltable placeholders ---
 				const replacedNotes = replaceRollTablesInMarkdown(cleanedNotes);
 
 				// Find the theme handout by name
@@ -488,31 +486,23 @@ const EASY_MARKDOWN = (() => {
 						severity: 6,
 						tag: "processHandoutsAsync",
 						transUnitId: msgId,
-						message: `Not Found: No theme handout: "${themeName}" for "${handoutName}" to use.`,
+						message: `Not Found: No theme handout: "${themeName}" for "${handoutName}".`
 					});
-					// Move on to the next handout
 					continue;
 				}
 
-				// Grab the theme's roll20 _id
-				const themeId = themeHandout.get("_id");
-
 				// Attempt to extract any CSS variables (e.g. from :root {...})
 				const rootMatch = styleContent.match(/:root\s*{([\s\S]*?)}/i);
-				const cssVars = rootMatch
-					? parseCssOverrides(rootMatch[1], handoutName)
-					: {};
+				const cssVars = rootMatch ? parseCssOverrides(rootMatch[1], handoutName) : {};
 
-				// Convert the final (replaced) Markdown to HTML
-				const htmlConversion = Utils.convertMarkdownToHtml({
-					content: replacedNotes
-				});
+				// Convert final (replaced) Markdown to HTML
+				const htmlConversion = Utils.convertMarkdownToHtml({ content: replacedNotes });
 
 				// Register this handout's content as a template in the TemplateFactory
 				TemplateFactory.add({
 					newTemplates: {
-						[handoutId]: htmlConversion,
-					},
+						[handoutId]: htmlConversion
+					}
 				});
 
 				try {
@@ -520,23 +510,20 @@ const EASY_MARKDOWN = (() => {
 					styledContent = await Utils.renderTemplateAsync({
 						template: handoutId,
 						expressions: {},
-						theme: themeId,
-						cssVars,
+						theme: themeHandout.get("_id"),
+						cssVars
 					});
 
-					// Remove it from the TemplateFactory after rendering
-					TemplateFactory.remove({
-						template: handoutId
-					});
+					// Remove from TemplateFactory after rendering
+					TemplateFactory.remove({ template: handoutId });
 
 					// Update the handout’s notes
 					handout.set("notes", styledContent);
 
-
+					log("styledContent: " + styledContent);
 					styledContent = "";
-
-					// Keep track of which handouts were successfully converted
 					handoutsConverted.push(handoutName);
+
 				} catch (err) {
 					const msgId = "50000";
 					Utils.logSyslogMessage({
@@ -545,7 +532,7 @@ const EASY_MARKDOWN = (() => {
 						transUnitId: msgId,
 						message: PhraseFactory.get({
 							transUnitId: msgId,
-							expressions: { remark: err },
+							expressions: { remark: err }
 						}),
 					});
 				}
@@ -561,7 +548,7 @@ const EASY_MARKDOWN = (() => {
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({
 						playerId: msgDetails.callerId,
-						transUnitId: "0x0FD080D4",
+						transUnitId: "0x0FD080D4"
 					})}`
 				};
 				await Utils.whisperAlertMessageAsync(whisperArguments);
@@ -574,16 +561,15 @@ const EASY_MARKDOWN = (() => {
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({
 						playerId: msgDetails.callerId,
-						transUnitId: "0x0DFBD0E4",
+						transUnitId: "0x0DFBD0E4"
 					})} ${handoutsConverted}`,
 				};
 				await Utils.whisperAlertMessageAsync(whisperArguments);
 			}
 
 			return 0;
-		} catch (err) {
 
-			// "50000": "Error: {{ remark }}"
+		} catch (err) {
 			const msgId = "50000";
 			Utils.logSyslogMessage({
 				severity: "ERROR",
@@ -596,9 +582,13 @@ const EASY_MARKDOWN = (() => {
 		}
 	};
 
-	// Subroutine: processRollTable
+	// ANCHOR Subroutine: processRollTable
+	//   (Unchanged, or adapted if you want to handle the "table#2-3=AAAA" approach.)
 	const processRollTable = async (msgDetails, parsedArgs) => {
 		try {
+			
+			sendChat("System", `/w "${msgDetails.callerName}" args: ${JSON.stringify(parsedArgs)}`);
+
 			// Check if parsedArgs is not empty
 			const keys = Object.keys(parsedArgs);
 			if (keys.length === 0) {
@@ -606,24 +596,25 @@ const EASY_MARKDOWN = (() => {
 
 				return;
 			}
-	
+
 			// Randomly select one of the keys
 			const randomKey = keys[Math.floor(Math.random() * keys.length)];
-	
+
 			// Decode the Base64 key
 			const decodedValue = Utils.decodeBase64({ text: randomKey });
-	
+
 			// Prepare the output message
 			const output = `&{template:default} {{name=Roll Table Result}} {{Result=${decodedValue}}}`;
-	
+
 			// Send the formatted roll table output to Roll20 chat
 			sendChat(msgDetails.callerName, output);
+
 		} catch (err) {
-			// Handle errors by logging and sending a whisper to the caller
 			log(`Error in processRollTable: ${err.message}`);
 			sendChat("System", `/w "${msgDetails.callerName}" Error processing roll table: ${err.message}`);
 		}
-	};	
+	};
+
 
 	// !SECTION End of Inner Methods
 	// SECTION Event Hooks: Roll20 API
