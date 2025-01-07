@@ -86,15 +86,17 @@ const EASY_MARKDOWN = (() => {
 
 		if (!msgDetails.isGm) {
 
-			// Only for GM Use
-			Utils.whisperAlertMessageAsync({
-				from: moduleSettings.readableName,
-				to: msgDetails.callerName,
-				toId: msgDetails.callerId,
-				severity: "ERROR", // ERROR
-				apiCallContent: msgDetails.raw.content,
-				remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
-			});
+			if (moduleSettings.verbose) {
+				// Only for GM Use
+				Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR", // ERROR
+					apiCallContent: msgDetails.raw.content,
+					remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
+				});
+			}
 
 			return 0;
 		}
@@ -255,21 +257,23 @@ const EASY_MARKDOWN = (() => {
 
 		if (!msgDetails.isGm) {
 
-			// Only for GM Use
-			Utils.whisperAlertMessageAsync({
-				from: moduleSettings.readableName,
-				to: msgDetails.callerName,
-				toId: msgDetails.callerId,
-				severity: "ERROR", // ERROR
-				apiCallContent: msgDetails.raw.content,
-				remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
-			});
+			if (moduleSettings.verbose) {
+				// Only for GM Use
+				Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR", // ERROR
+					apiCallContent: msgDetails.raw.content,
+					remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
+				});
+			}
 
 			return 0;
 		}
 
 		// Subroutine: parseCssOverrides
-		const parseCssOverrides = (rootContent, handoutName) => {
+		const parseCssOverrides = (rootContent) => {
 			const cssVars = {};
 
 			// Split the root content by semicolons to handle each declaration separately
@@ -360,7 +364,7 @@ const EASY_MARKDOWN = (() => {
 				//const base64Encoded = encodeBase64(originalString);
 				//log(`Encoded: ${base64Encoded}`);
 
-				const col2 = Base64.encode(match[2].trim());
+				const col2 = Utils.encodeBase64({ text: match[2].trim() });
 				//.replace(/ /g, "%%%SPACE%%%")  // Replace spaces
 				//.replace(/#/g, "%%%HASHTAG%%%")  // Replace #
 				//.replace(/\|/g, "%%%PIPE%%%");  // Replace |
@@ -369,6 +373,8 @@ const EASY_MARKDOWN = (() => {
 				results.push(col2);
 			}
 
+			log("results: " + results);
+			
 			return results;
 		};
 
@@ -526,7 +532,7 @@ const EASY_MARKDOWN = (() => {
 					// Update the handout’s notes
 					handout.set("notes", styledContent);
 
-					log("styledContent: " + styledContent);
+
 					styledContent = "";
 
 					// Keep track of which handouts were successfully converted
@@ -590,6 +596,35 @@ const EASY_MARKDOWN = (() => {
 		}
 	};
 
+	// Subroutine: processRollTable
+	const processRollTable = async (msgDetails, parsedArgs) => {
+		try {
+			// Check if parsedArgs is not empty
+			const keys = Object.keys(parsedArgs);
+			if (keys.length === 0) {
+				sendChat("System", `/w "${msgDetails.callerName}" No valid roll table entries found.`);
+
+				return;
+			}
+	
+			// Randomly select one of the keys
+			const randomKey = keys[Math.floor(Math.random() * keys.length)];
+	
+			// Decode the Base64 key
+			const decodedValue = Utils.decodeBase64({ text: randomKey });
+	
+			// Prepare the output message
+			const output = `&{template:default} {{name=Roll Table Result}} {{Result=${decodedValue}}}`;
+	
+			// Send the formatted roll table output to Roll20 chat
+			sendChat(msgDetails.callerName, output);
+		} catch (err) {
+			// Handle errors by logging and sending a whisper to the caller
+			log(`Error in processRollTable: ${err.message}`);
+			sendChat("System", `/w "${msgDetails.callerName}" Error processing roll table: ${err.message}`);
+		}
+	};	
+
 	// !SECTION End of Inner Methods
 	// SECTION Event Hooks: Roll20 API
 
@@ -648,6 +683,8 @@ const EASY_MARKDOWN = (() => {
 				"whisperPlayerMessage"
 				*/
 				"convertMarkdownToHtml",
+				"decodeBase64",
+				"encodeBase64",
 				"decodeNoteContent",
 				"getGlobalSettings",
 				"getSharedForge",

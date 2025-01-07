@@ -11,7 +11,7 @@
 
 // eslint-disable-next-line no-unused-vars
 const EASY_FORGE = (() => {
-// SECTION Object: EASY_FORGE
+	// SECTION Object: EASY_FORGE
 
 	/**
  * @namespace EASY_FORGE
@@ -2304,121 +2304,87 @@ const EASY_UTILS = (() => {
 		// Contact:  https://app.roll20.net/users/104025/the-aaron
 		// modified from:  http://www.webtoolkit.info/
 		decodeBase64: function () {
+			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
-				const thisFuncDebugName = "decodeBase64";
+				// const thisFuncDebugName = "decodeBase64";
 
 				// Cache Dependencies
-
-				// Base64 decoding logic
-				const base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-				const decodeUtf8 = (utf8Text) => {
-					let decodedString = "";
-					let index = 0;
-
-					while (index < utf8Text.length) {
-						const byte1 = utf8Text.charCodeAt(index);
-
-						if (byte1 < 128) {
-							decodedString += String.fromCharCode(byte1);
-							index++;
-						} else if (byte1 > 191 && byte1 < 224) {
-							const byte2 = utf8Text.charCodeAt(index + 1);
-							decodedString += String.fromCharCode(((byte1 & 31) << 6) | (byte2 & 63));
-							index += 2;
-						} else {
-							const byte2 = utf8Text.charCodeAt(index + 1);
-							const byte3 = utf8Text.charCodeAt(index + 2);
-							decodedString += String.fromCharCode(((byte1 & 15) << 12) | ((byte2 & 63) << 6) | (byte3 & 63));
-							index += 3;
-						}
-					}
-
-					return decodedString;
-				};
 
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ text }) => {
-
-					// Debug logging if desired
-					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
-
-						Utils.logSyslogMessage({
-							severity: "DEBUG",
-							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-							transUnitId: "70000",
-							message: `Before: ${text}`,
-						});
+					// Quick type check
+					if (typeof text !== "string") {
+						return text;
 					}
 
-					if (typeof text !== "string") {
+					const base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-						Utils.logSyslogMessage({
-							severity: "ERROR",
-							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-							transUnitId: "40000",
-							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
-						});
+					// Helper to decode from UTF-8
+					function decodeUtf8(utf8Text) {
+						let decodedString = "";
+						let i = 0;
 
-						return text;
+						while (i < utf8Text.length) {
+							const byte1 = utf8Text.charCodeAt(i);
+
+							if (byte1 < 128) {
+								decodedString += String.fromCharCode(byte1);
+								i++;
+							} else if (byte1 > 191 && byte1 < 224) {
+								const byte2 = utf8Text.charCodeAt(i + 1);
+								decodedString += String.fromCharCode(((byte1 & 31) << 6) | (byte2 & 63));
+								i += 2;
+							} else {
+								const byte2 = utf8Text.charCodeAt(i + 1);
+								const byte3 = utf8Text.charCodeAt(i + 2);
+								decodedString += String.fromCharCode(
+									((byte1 & 15) << 12) |
+									((byte2 & 63) << 6) |
+									(byte3 & 63)
+								);
+								i += 3;
+							}
+						}
+
+						return decodedString;
 					}
 
 					try {
 						let decodedOutput = "";
-						let index = 0;
+						let i = 0;
 
+						// Remove invalid Base64 characters
 						const sanitizedInput = text.replace(/[^A-Za-z0-9+/=]/g, "");
 
-						while (index < sanitizedInput.length) {
-							const encodedChar1 = base64Characters.indexOf(sanitizedInput.charAt(index++));
-							const encodedChar2 = base64Characters.indexOf(sanitizedInput.charAt(index++));
-							const encodedChar3 = base64Characters.indexOf(sanitizedInput.charAt(index++));
-							const encodedChar4 = base64Characters.indexOf(sanitizedInput.charAt(index++));
+						while (i < sanitizedInput.length) {
+							const enc1 = base64Characters.indexOf(sanitizedInput.charAt(i++));
+							const enc2 = base64Characters.indexOf(sanitizedInput.charAt(i++));
+							const enc3 = base64Characters.indexOf(sanitizedInput.charAt(i++));
+							const enc4 = base64Characters.indexOf(sanitizedInput.charAt(i++));
 
-							const decodedByte1 = (encodedChar1 << 2) | (encodedChar2 >> 4);
-							const decodedByte2 = ((encodedChar2 & 15) << 4) | (encodedChar3 >> 2);
-							const decodedByte3 = ((encodedChar3 & 3) << 6) | encodedChar4;
+							const dec1 = (enc1 << 2) | (enc2 >> 4);
+							const dec2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+							const dec3 = ((enc3 & 3) << 6) | enc4;
 
-							decodedOutput += String.fromCharCode(decodedByte1);
+							decodedOutput += String.fromCharCode(dec1);
 
-							if (encodedChar3 !== 64) {
-								decodedOutput += String.fromCharCode(decodedByte2);
+							if (enc3 !== 64) {
+								decodedOutput += String.fromCharCode(dec2);
 							}
-							if (encodedChar4 !== 64) {
-								decodedOutput += String.fromCharCode(decodedByte3);
+							if (enc4 !== 64) {
+								decodedOutput += String.fromCharCode(dec3);
 							}
 						}
 
-						const output = decodeUtf8(decodedOutput);
-
-						// Debug logging if desired
-						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
-
-							Utils.logSyslogMessage({
-								severity: "DEBUG",
-								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-								transUnitId: "70000",
-								message: `After: ${output}`,
-							});
-						}
-
-						return output;
+						// Convert from UTF-8 to a normal JS string
+						return decodeUtf8(decodedOutput);
 
 					} catch (err) {
-
-						// "50000": "Error: {{ remark }}"
-						const msgId = "50000";
-						Utils.logSyslogMessage({
-							severity: "ERROR",
-							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-							transUnitId: msgId,
-							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
-						});
-
-						return 1;
+						// In a production script, you might log/handle errors differently
+						return "";
 					}
 				};
 			};
@@ -2430,119 +2396,82 @@ const EASY_UTILS = (() => {
 		// Contact:  https://app.roll20.net/users/104025/the-aaron
 		// modified from:  http://www.webtoolkit.info/
 		encodeBase64: function () {
+			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
-				const thisFuncDebugName = "encodeBase64";
+				// const thisFuncDebugName = "encodeBase64";
 
 				// Cache Dependencies
-
-				// Base64 encoding logic
-				const base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-				const encodeUtf8 = (plainText) => {
-					let utf8Text = "";
-
-					for (let index = 0; index < plainText.length; index++) {
-						const charCode = plainText.charCodeAt(index);
-
-						if (charCode < 128) {
-							utf8Text += String.fromCharCode(charCode);
-						} else if (charCode > 127 && charCode < 2048) {
-							utf8Text += String.fromCharCode((charCode >> 6) | 192);
-							utf8Text += String.fromCharCode((charCode & 63) | 128);
-						} else {
-							utf8Text += String.fromCharCode((charCode >> 12) | 224);
-							utf8Text += String.fromCharCode(((charCode >> 6) & 63) | 128);
-							utf8Text += String.fromCharCode((charCode & 63) | 128);
-						}
-					}
-
-					return utf8Text;
-				};
 
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ text }) => {
-
-					// Debug logging if desired
-					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
-
-						Utils.logSyslogMessage({
-							severity: "DEBUG",
-							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-							transUnitId: "70000",
-							message: `Before: ${text}`,
-						});
-					}
-
+					// Quick type check
 					if (typeof text !== "string") {
-
-						Utils.logSyslogMessage({
-							severity: "ERROR",
-							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-							transUnitId: "40000",
-							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
-						});
-
 						return text;
 					}
+				
+					const base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+				
+					// Helper to encode to UTF-8
+					function encodeUtf8(str) {
+						let utf8Text = "";
+						for (let i = 0; i < str.length; i++) {
+							const charCode = str.charCodeAt(i);
+							if (charCode < 128) {
+								utf8Text += String.fromCharCode(charCode);
+							} else if (charCode < 2048) {
+								utf8Text += String.fromCharCode((charCode >> 6) | 192);
+								utf8Text += String.fromCharCode((charCode & 63) | 128);
+							} else {
+								utf8Text += String.fromCharCode((charCode >> 12) | 224);
+								utf8Text += String.fromCharCode(((charCode >> 6) & 63) | 128);
+								utf8Text += String.fromCharCode((charCode & 63) | 128);
+							}
+						}
 
+						return utf8Text;
+					}
+				
 					try {
 						let output = "";
-						let index = 0;
-
+						let i = 0;
 						const utf8Text = encodeUtf8(text);
-
-						while (index < utf8Text.length) {
-							const byte1 = utf8Text.charCodeAt(index++);
-							const byte2 = utf8Text.charCodeAt(index++);
-							const byte3 = utf8Text.charCodeAt(index++);
-
-							const encodedChar1 = byte1 >> 2;
-							const encodedChar2 = ((byte1 & 3) << 4) | (byte2 >> 4);
-							const encodedChar3 = ((byte2 & 15) << 2) | (byte3 >> 6);
-							const encodedChar4 = byte3 & 63;
-
+				
+						while (i < utf8Text.length) {
+							const byte1 = utf8Text.charCodeAt(i++);
+							const byte2 = utf8Text.charCodeAt(i++);
+							const byte3 = utf8Text.charCodeAt(i++);
+				
+							const enc1 = byte1 >> 2;
+							let enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
+							let enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
+							let enc4 = byte3 & 63;
+				
 							if (isNaN(byte2)) {
-								encodedChar3 = encodedChar4 = 64;
+								enc2 = ((byte1 & 3) << 4);
+								enc3 = 64;
+								enc4 = 64;
 							} else if (isNaN(byte3)) {
-								encodedChar4 = 64;
+								enc3 = ((byte2 & 15) << 2);
+								enc4 = 64;
 							}
-
-							output += base64Characters.charAt(encodedChar1) +
-								base64Characters.charAt(encodedChar2) +
-								base64Characters.charAt(encodedChar3) +
-								base64Characters.charAt(encodedChar4);
+				
+							output +=
+								base64Characters.charAt(enc1) +
+								base64Characters.charAt(enc2) +
+								base64Characters.charAt(enc3) +
+								base64Characters.charAt(enc4);
 						}
-
-						// Debug logging if desired
-						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
-
-							Utils.logSyslogMessage({
-								severity: "DEBUG",
-								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-								transUnitId: "70000",
-								message: `After: ${output}`,
-							});
-						}
-
+				
 						return output;
-
 					} catch (err) {
-
-						// "50000": "Error: {{ remark }}"
-						const msgId = "50000";
-						Utils.logSyslogMessage({
-							severity: "ERROR",
-							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
-							transUnitId: msgId,
-							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
-						});
-
-						return 1;
+						// In a production script, you might log/handle errors differently
+						return "";
 					}
 				};
+				
 			};
 		},
 
