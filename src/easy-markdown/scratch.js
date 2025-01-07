@@ -10,26 +10,26 @@
 @repository: {@link https://github.com/tougher-together-games/roll20-api-scripts/blob/main/src/easy-utils/easy-utils-menu.js|GitHub Repository}
 */
 
+// SECTION Object: EASY_MARKDOWN
+/**
+ * @namespace EASY_MARKDOWN
+ * @summary Example use of EASY_UTILS.
+ * 
+ * - **Purpose**:
+ *   - // TODO Fill in Purpose
+ * 
+ * - **Execution**:
+ *   - // TODO Fill in Execution
+ * 
+ * - **Design**:
+ *   - // TODO Fill in Design
+ * 
+ * @see https://example.com
+ */
 // eslint-disable-next-line no-unused-vars
 const EASY_MARKDOWN = (() => {
 
-	// SECTION Object: EASY_MARKDOWN
-	/**
-	 * @namespace EASY_MARKDOWN
-	 * @summary Example use of EASY_UTILS.
-	 * 
-	 * - **Purpose**:
-	 *   - // TODO Fill in Purpose
-	 * 
-	 * - **Execution**:
-	 *   - // TODO Fill in Execution
-	 * 
-	 * - **Design**:
-	 *   - // TODO Fill in Design
-	 * 
-	 * @see https://example.com
-	 */
-
+	// TODO Fill out module meta data
 	// ANCHOR Member: moduleSettings
 	const moduleSettings = {
 		readableName: "Easy-Markdown",
@@ -590,6 +590,48 @@ const EASY_MARKDOWN = (() => {
 		}
 	};
 
+	// ANCHOR Function: processRollTable
+	const processRollTable = async (msgDetails, parsedArgs) => {
+
+		const thisFuncDebugName = "processRollTable";
+
+		try {
+			// Check if parsedArgs is not empty
+			const keys = Object.keys(parsedArgs);
+			if (keys.length === 0) {
+				sendChat("System", `/w "${msgDetails.callerName}" No valid roll table entries found.`);
+
+				return;
+			}
+	
+			// Randomly select one of the keys
+			const randomKey = keys[Math.floor(Math.random() * keys.length)];
+	
+			// Decode the Base64 key
+			const decodedValue = Base64.decode(randomKey);
+	
+			// Prepare the output message
+			const output = `&{template:default} {{name=Roll Table Result}} {{Result=${decodedValue}}}`;
+	
+			// Send the formatted roll table output to Roll20 chat
+			sendChat(msgDetails.callerName, output);
+
+			return 0;
+		} catch (err) {
+
+			// "50000": "Error: {{ remark }}"
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+
+			return 1;
+		}
+	};
+
 	// !SECTION End of Inner Methods
 	// SECTION Event Hooks: Roll20 API
 
@@ -647,8 +689,6 @@ const EASY_MARKDOWN = (() => {
 				"whisperAlertMessageAsync",
 				"whisperPlayerMessage"
 				*/
-				"convertMarkdownToHtml",
-				"decodeNoteContent",
 				"getGlobalSettings",
 				"getSharedForge",
 				"handleApiCall",
@@ -751,11 +791,12 @@ const EASY_MARKDOWN = (() => {
 	});
 
 	// !SECTION End of Event Hooks: Roll20 API
-	// SECTION Public Methods: Exposed Interface
+	// SECTION: Public Methods: Exposed Interface
 
 	return {};
 
 	// !SECTION End of Public Methods: Exposed Interface
-	// !SECTION End of Object: EASY_MARKDOWN
+
 })();
 
+// !SECTION End of Object: EASY_MARKDOWN

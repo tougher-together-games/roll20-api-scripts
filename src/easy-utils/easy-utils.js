@@ -9,8 +9,11 @@
  * @repository: {@link https://github.com/tougher-together-games/roll20-api-scripts/blob/main/src/easy-utils/easy-utils.js|GitHub Repository}
  */
 
-/* SECTION Object: EASY_FORGE *****************************************************************************************/
-/**
+// eslint-disable-next-line no-unused-vars
+const EASY_FORGE = (() => {
+// SECTION Object: EASY_FORGE
+
+	/**
  * @namespace EASY_FORGE
  * @summary A global registry for managing factories shared across all Easy Modules.
  * 
@@ -27,8 +30,7 @@
  *   - Factories follow a standardized interface, including methods like `add`, `remove`, `set`, `get`, and `init`.
  *   - Designed for sharing complex, reusable objects between modules without duplication.
  */
-// eslint-disable-next-line no-unused-vars
-const EASY_FORGE = (() => {
+
 	const factories = {};
 
 	return {
@@ -44,9 +46,9 @@ const EASY_FORGE = (() => {
 		 * @returns {Object|null} The factory object if found, or `null` if no factory exists with the specified name.
 		 * 
 		 * @example
-		 * const templateFactory = EASY_FORGE.getFactory({ name: "templateFactory" });
+		 * const templateFactory = EASY_FORGE.getFactory({ name: "TemplateFactory" });
 		 * if (templateFactory) {
-		 *     templateFactory.createTemplate("example");
+		 *     templateFactory.init()
 		 * }
 		 */
 		getFactory: ({ name }) => {
@@ -69,9 +71,9 @@ const EASY_FORGE = (() => {
 		 * 
 		 * @example
 		 * EASY_FORGE.setFactory({
-		 *     name: "templateFactory",
-		 *     factory: { createTemplate: () => "<div></div>" }
-		 * });
+				name: phraseFactoryName,
+				factory: phraseFactoryObject
+			});
 		 */
 		setFactory: ({ name, factory }) => {
 			factories[name] = factory;
@@ -87,7 +89,7 @@ const EASY_FORGE = (() => {
 		 * 
 		 * @example
 		 * const factoryNames = EASY_FORGE.getFactoryNames();
-		 * console.log(factoryNames); // ["templateFactory", "themeFactory"]
+		 * log(factoryNames); // ["TemplateFactory", "ThemeFactory"]
 		 */
 		getFactoryNames: () => {
 			return Object.keys(factories);
@@ -95,9 +97,9 @@ const EASY_FORGE = (() => {
 	};
 })();
 
-/* !SECTION End of EASY_FORGE *****************************************************************************************/
+// !SECTION End of Object: EASY_FORGE
+// SECTION Object: EASY_UTILS
 
-/* SECTION Object: EASY_UTILS *****************************************************************************************/
 /**
  * @namespace EASY_UTILS
  * @summary A utility library for Easy Modules in Roll20, providing reusable functions to simplify module development.
@@ -128,8 +130,9 @@ const EASY_UTILS = (() => {
 
 	// ANCHOR Member: globalSettings
 	const globalSettings = {
-		sharedVaultName: "EASY_VAULT",
-		sharedForgeName: "EASY_FORGE",
+		purgeState: true,
+		sharedVault: sharedVault = (state["EASY_VAULT"] = state["EASY_VAULT"] || {}),
+		sharedForge: EASY_FORGE,
 		defaultLanguage: "enUS",
 		factoryFunctions: [
 			"createPhraseFactory",
@@ -185,7 +188,7 @@ const EASY_UTILS = (() => {
 			--ez-font-weight: 400;
 			--ez-font-size: 62.5%;
 
-			--ez-font-family-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+			--ez-font-family-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 			--ez-font-family-serif: 'Times New Roman', Times, Garamond, serif, var(--ez-font-family-emoji);
 			--ez-font-family-sans-serif: Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--ez-font-family-emoji);
 			--ez-font-family-monospace: Consolas, monospace;
@@ -206,7 +209,7 @@ const EASY_UTILS = (() => {
 		author: "Mhykiel",
 		verbose: false,
 		debug: {
-			"applyCssToHtmlJson": false,
+			"onReady": false,
 			"convertCssToJson": false,
 			"convertHtmlToJson": false,
 			"convertMarkdownToHtml": false,
@@ -215,6 +218,8 @@ const EASY_UTILS = (() => {
 			"createPhraseFactory": false,
 			"createTemplateFactory": false,
 			"createThemeFactory": false,
+			"decodeBase64": false,
+			"encodeBase64": false,
 			"decodeCodeBlock": false,
 			"encodeCodeBlock": false,
 			"decodeNoteContent": false,
@@ -226,20 +231,24 @@ const EASY_UTILS = (() => {
 			"parseChatCommands": false,
 			"parseChatSubcommands": false,
 			"replacePlaceholders": false,
+			"applyCssToHtmlJson": false,
+			"handleChatApi": false,
 			"renderTemplateAsync": false,
 			"whisperAlertMessageAsync": false,
 			"whisperPlayerMessage": false
 		}
 	};
 
-	// ANCHOR Factory References
+	// ANCHOR Member: Factory References
 	// References to factories, reassigned during checkInstall to initialize and provide basic syslog messages to EASY_UTILS.
 	let Utils = {};
 	let PhraseFactory = {};
-	// let TemplateFactory = {};
-	// let ThemeFactory = {};
+	// eslint-disable-next-line no-unused-vars
+	let TemplateFactory = {};
+	// eslint-disable-next-line no-unused-vars
+	let ThemeFactory = {};
 
-	/* SECTION Private Methods: functionLoaders ***********************************************************************/
+	// SECTION Outer Method: functionLoaders
 	/**
 	 * @namespace functionLoaders
 	 * @memberof EASY_UTILS
@@ -255,631 +264,31 @@ const EASY_UTILS = (() => {
 	 * 
 	 * @example
 	 * // Retrieve a customized function instance:
-	 * const customizedFunction = EASY_UTILS.functionLoaders.getFunction({
-	 *     functionName: "functionName", 
-	 *     moduleSettings
-	 * });
+	 * const customizedFuncInstance = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
 	 */
 	const functionLoaders = {
 
-		/* SECTION Utilities: Low Level *******************************************************************************/
-		/**
-		 * @summary Basic, reusable, and stateless functions for small, specific tasks. 
-		 * 
-		 * - Support higher-level functions but can be used independently.
-		 * - Do not require `moduleSettings` but include it for consistency and optional logging.
-		 * - Handle errors gracefully (e.g., return default values or log warnings) without throwing exceptions.
-		 */
+		// SECTION Inner Methods: Low Level Utilities
 
-		// ANCHOR Utilities: applyCssToHtmlJson
-		/**
-		 * @summary Applies CSS rules (provided as JSON) to an HTML-like structure (also provided as JSON).
-		 * 
-		 * - Parses and processes CSS rules, including `:root` variables, selectors, and pseudo-classes.
-		 * - Applies matching CSS styles as inline styles to nodes in the HTML JSON structure.
-		 * - Resolves `var(--css-variable)` values from `:root` variables or default values.
-		 * 
-		 * @function applyCssToHtmlJson
-		 * @memberof EASY_UTILS
-		 * @returns {Function} A higher-order function that takes `moduleSettings` and returns a function for applying CSS.
-		 * 
-		 * @param {Object} params - Parameters for the function.
-		 * @param {Array|Object} params.cssJson - The JSON representation of the CSS rules.
-		 * @param {Array|Object} params.htmlJson - The JSON representation of the HTML structure.
-		 * 
-		 * @returns {string} The resulting HTML JSON with styles applied as inline styles.
-		 * 
-		 * @example
-		 * const cssJson = [
-		 *   { selector: ":root", style: { "--main-color": "blue" } },
-		 *   { selector: "div", style: { color: "var(--main-color)", background: "white" } }
-		 * ];
-		 * const htmlJson = [
-		 *   {
-		 *     element: "div",
-		 *     attributes: { id: "rootContainer" },
-		 *     children: [
-		 *       { element: "span", attributes: { class: ["highlight"] }, children: [{ element: "text", innerText: "Hello" }] }
-		 *     ]
-		 *   }
-		 * ];
-		 * 
-		 * const updatedHtmlJson = applyCssToHtmlJson()(moduleSettings)({ cssJson, htmlJson });
-		 * log(updatedHtmlJson);
-		 * // Output: JSON with styles applied to matching nodes
-		 * // [
-		 * //   {
-		 * //     element: "div",
-		 * //     attributes: {
-		 * //       id: "rootContainer",
-		 * //       style: { color: "blue", background: "white" }
-		 * //     },
-		 * //     children: [...]
-		 * //   }
-		 * // ]
-		 */
-		applyCssToHtmlJson: function () {
-			return (moduleSettings) => {
-
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings, });
-				const replacePlaceholders = EASY_UTILS.getFunction({ functionName: "replacePlaceholders", moduleSettings, });
-
-				// Subroutine: preprocessRootRules
-				/**
-				 * @function preprocessRootRules
-				 * @summary Extracts CSS variables from the `:root` selector and applies non-variable properties 
-				 *          to the `#rootContainer` element in the HTML tree. It also removes the `:root` rule 
-				 *          from the CSS rules array for subsequent processing.
-				 *
-				 * @param {Array<Object>} cssRules - The array of CSS rule objects, where each rule contains a `selector` and `style` object.
-				 * @param {Array|Object} htmlTree - The HTML structure in JSON format, either as a single root node or an array of nodes.
-				 * 
-				 * @returns {Object} An object containing:
-				 *                   - `rootVariables` {Object}: Extracted CSS variables (key-value pairs from `:root`).
-				 *                   - `updatedRules` {Array<Object>}: The remaining CSS rules after removing the `:root` rule.
-				 */
-				function preprocessRootRules(cssRules, htmlTree) {
-					const rootIndex = cssRules.findIndex((r) => { return r.selector === ":root"; });
-					if (rootIndex < 0) {
-						return { rootVariables: {}, updatedRules: cssRules };
-					}
-
-					const rootRule = cssRules[rootIndex];
-					const rootStyle = rootRule.style ?? {};
-
-					// Separate variables from normal css declarations
-					const rootVariables = {};
-					const rootNonVars = {};
-					for (const [propKey, propValue] of Object.entries(rootStyle)) {
-						if (propKey.startsWith("--")) {
-							rootVariables[propKey] = propValue;
-						} else {
-							rootNonVars[propKey] = propValue;
-						}
-					}
-
-					// See if #rootContainer exists
-					const allNodes = flattenHtmlTree(htmlTree);
-					const rootContainerNode = allNodes.find(
-						(node) => { return node.attributes?.id === "rootContainer"; }
-					);
-					if (rootContainerNode) {
-						rootContainerNode.attributes = rootContainerNode.attributes || {};
-						rootContainerNode.attributes.style =
-							rootContainerNode.attributes.style || {};
-						mergeStyles(rootContainerNode.attributes.style, rootNonVars, rootVariables);
-					}
-
-					// Remove :root rule
-					const updatedRules = cssRules.filter((r) => { return r.selector !== ":root"; });
-
-					return { rootVariables, updatedRules };
-				}
-
-				// Subroutine: flattenHtmlTree
-				/**
-				 * @function flattenHtmlTree
-				 * @summary Depth-first traversal to collect all nodes in one flat array.
-				 *          Also adds `.parentNode` to each node.
-				 */
-				function flattenHtmlTree(nodeOrArray, results = [], parent = null) {
-					if (Array.isArray(nodeOrArray)) {
-						for (const child of nodeOrArray) {
-							flattenHtmlTree(child, results, parent);
-						}
-					} else if (nodeOrArray && typeof nodeOrArray === "object") {
-						nodeOrArray.parentNode = parent;
-						results.push(nodeOrArray);
-						if (Array.isArray(nodeOrArray.children)) {
-							for (const c of nodeOrArray.children) {
-								flattenHtmlTree(c, results, nodeOrArray);
-							}
-						}
-					}
-
-					return results;
-				}
-
-				// Subroutine: tokenizeSelector
-				/**
-				 * @function tokenizeSelector
-				 * @summary Splits a CSS selector string by `,` into groups, then parses each
-				 *          group to handle space (descendant) and `>` (direct child).
-				 *
-				 * @example
-				 *   "ul p, .class #id > span"
-				 *   => an array of chains, each chain is an array of
-				 *      { combinator: " " or ">", segment: "..." }
-				 * 
-				 *   For instance: "ul p" => [
-				 *       { combinator: null, segment: "ul" },
-				 *       { combinator: " ", segment: "p" }
-				 *   ]
-				 */
-				function tokenizeSelector(selector) {
-					// First, split by commas to handle multiple selectors:
-					const groups = selector.split(",").map((s) => { return s.trim(); });
-
-					// For each group, parse out direct child (>) vs descendant (space).
-					// We'll do a simple approach: split on whitespace or '>' to detect combinators.
-					const chainsArray = [];
-
-					for (const group of groups) {
-						const tokens = splitSelectorGroup(group);
-						// tokens might look like:
-						//   [
-						//     { combinator: null, segment: "ul" },
-						//     { combinator: " ", segment: "p" }
-						//   ]
-						chainsArray.push(tokens);
-					}
-
-					return chainsArray;
-				}
-
-				// Subroutine: splitSelectorGroup
-				/**
-				 * @function splitSelectorGroup
-				 * @summary Splits a single CSS selector group (no commas) into an array of objects, 
-				 *          each containing a `combinator` and a `segment`. This helps differentiate
-				 *          between direct child (`>`) and descendant (` `) relationships in CSS selectors.
-				 *
-				 * @param {string} group - A single CSS selector group without commas (e.g., "ul > li p").
-				 *
-				 * @returns {Array<Object>} An array of objects, where each object has:
-				 *                          - `combinator` {string|null}: The relationship between the current and next segment:
-				 *                            - `null` for the first segment.
-				 *                            - `" "` for descendant combinators (space-separated).
-				 *                            - `">"` for direct child combinators.
-				 *                          - `segment` {string}: The CSS selector part (e.g., "ul", "li", "p").
-				 *
-				 * @example
-				 * const group = "ul > li p";
-				 * const result = splitSelectorGroup(group);
-				 * console.log(result);
-				 * // Output:
-				 * // [
-				 * //   { combinator: null, segment: "ul" },
-				 * //   { combinator: ">", segment: "li" },
-				 * //   { combinator: " ", segment: "p" }
-				 * // ]
-				 *
-				 * @example
-				 * const group = "div > .class #id";
-				 * const result = splitSelectorGroup(group);
-				 * console.log(result);
-				 * // Output:
-				 * // [
-				 * //   { combinator: null, segment: "div" },
-				 * //   { combinator: ">", segment: ".class" },
-				 * //   { combinator: " ", segment: "#id" }
-				 * // ]
-				 */
-				function splitSelectorGroup(group) {
-					// Easiest is to insert space around '>' to ensure we can split on whitespace:
-					// "ul>li p" => "ul > li p"
-					// Then we split by whitespace to get tokens: ["ul", ">", "li", "p"]
-					// We'll walk them to see if they're ">" or a segment.
-					const spaced = group.replace(/>/g, " > ");
-					const rawTokens = spaced.split(/\s+/).filter(Boolean);
-
-					const results = [];
-					// We'll track the "current combinator" for the next segment.
-					let combinator = null;
-					for (const token of rawTokens) {
-						if (token === ">") {
-							// Next segment is a direct child
-							combinator = ">";
-						} else {
-							// It's a segment
-							results.push({ combinator, segment: token });
-							combinator = " "; // default any future segments to "descendant" if not '>'
-						}
-					}
-
-					// If the first item is a segment with combinator = null => it's the first part
-					// all subsequent ones get either ">" or " "
-					return results;
-				}
-
-				// Subroutine: parseSegment
-				/**
-				 * @function parseSegment
-				 * @summary Parses a single CSS selector segment to extract its components, such as tag name, ID, classes, attributes, and pseudo-classes.
-				 *
-				 * @param {string} segment - A CSS selector segment (e.g., "div#main.container[role='button']:nth-child(2):empty").
-				 *
-				 * @returns {Object} An object containing the parsed information:
-				 *                   - `tag` {string|null}: The tag name (e.g., "div").
-				 *                   - `id` {string|null}: The ID (e.g., "main").
-				 *                   - `classes` {Array<string>}: A list of classes (e.g., ["container"]).
-				 *                   - `attributes` {Object}: A map of attribute key-value pairs (e.g., { role: "button" }).
-				 *                   - `pseudo` {Object}:
-				 *                     - `nthChild` {string|number|null}: Specifies the `:nth-child()` pseudo-class value (e.g., "even", "odd", or a number).
-				 *                     - `firstChild` {boolean}: Whether the segment specifies `:first-child`.
-				 *                     - `lastChild` {boolean}: Whether the segment specifies `:last-child`.
-				 *                     - `empty` {boolean}: Whether the segment specifies `:empty`.
-				 */
-				function parseSegment(segment) {
-					const data = {
-						tag: null,
-						id: null,
-						classes: [],
-						attributes: {},
-						pseudo: {
-							nthChild: null,
-							firstChild: false,
-							lastChild: false,
-							empty: false,
-						},
-					};
-
-					let working = segment.trim();
-
-					// [attr="val"]
-					const attrRegex = /\[([\w-]+)\s*=\s*"([^"]+)"\]/g;
-					let attrMatch;
-					while ((attrMatch = attrRegex.exec(working)) !== null) {
-						const attrKey = attrMatch[1];
-						const attrVal = attrMatch[2];
-						data.attributes[attrKey] = attrVal;
-					}
-					working = working.replace(attrRegex, "");
-
-					// #id
-					const idRegex = /#([\w-]+)/;
-					const idMatch = idRegex.exec(working);
-					if (idMatch) {
-						data.id = idMatch[1];
-						working = working.replace(idRegex, "");
-					}
-
-					// .class
-					const classRegex = /\.([\w-]+)/g;
-					let cMatch;
-					while ((cMatch = classRegex.exec(working)) !== null) {
-						data.classes.push(cMatch[1]);
-					}
-					working = working.replace(classRegex, "");
-
-					// :first-child
-					if (/:first-child/.test(working)) {
-						data.pseudo.firstChild = true;
-						working = working.replace(":first-child", "");
-					}
-					// :last-child
-					if (/:last-child/.test(working)) {
-						data.pseudo.lastChild = true;
-						working = working.replace(":last-child", "");
-					}
-
-					// :nth-child(even|odd|number)
-					const nthRegex = /:nth-child\(\s*(even|odd|\d+)\s*\)/;
-					const nthMatch = nthRegex.exec(working);
-					if (nthMatch) {
-						const val = nthMatch[1];
-						if (val === "even" || val === "odd") {
-							data.pseudo.nthChild = val;
-						} else {
-							data.pseudo.nthChild = parseInt(val, 10);
-						}
-						working = working.replace(nthRegex, "");
-					}
-
-					// :empty
-					if (/:empty/.test(working)) {
-						data.pseudo.empty = true;
-						working = working.replace(":empty", "");
-					}
-
-					// leftover => tag
-					const leftover = working.trim();
-					if (leftover) {
-						data.tag = leftover;
-					}
-
-					return data;
-				}
-
-				// ---------------------------------------------------------------------------
-				// Subroutine doesNodeMatchSegment
-				// ---------------------------------------------------------------------------
-				function doesNodeMatchSegment(node, segmentData) {
-					// 1) tag
-					if (segmentData.tag && segmentData.tag !== node.element) {
-						return false;
-					}
-					// 2) id
-					if (segmentData.id && node.attributes?.id !== segmentData.id) {
-						return false;
-					}
-					// 3) classes
-					if (segmentData.classes.length > 0) {
-						const nodeClasses = node.attributes?.classList || [];
-						for (const neededClass of segmentData.classes) {
-							if (!nodeClasses.includes(neededClass)) {
-								return false;
-							}
-						}
-					}
-					// 4) attributes
-					for (const [k, v] of Object.entries(segmentData.attributes)) {
-						if (node.attributes?.[k] !== v) {
-							return false;
-						}
-					}
-					// 5) pseudo
-					const { firstChild, lastChild, nthChild, empty } = segmentData.pseudo;
-
-					// :empty => must have no children
-					if (empty) {
-						const hasChildren = Array.isArray(node.children) && node.children.length > 0;
-						if (hasChildren) {
-							return false;
-						}
-					}
-
-					// handle :first-child, :last-child, :nth-child
-					if (firstChild || lastChild || nthChild !== null) {
-						const parent = node.parentNode;
-						if (!parent || !Array.isArray(parent.children)) {
-							return false;
-						}
-						const idx = parent.children.indexOf(node); // 0-based
-						if (firstChild && idx !== 0) {
-							return false;
-						}
-						if (lastChild && idx !== parent.children.length - 1) {
-							return false;
-						}
-						if (nthChild !== null) {
-							if (nthChild === "odd") {
-								if (idx % 2 !== 0) return false;
-							} else if (nthChild === "even") {
-								if (idx % 2 !== 1) return false;
-							} else {
-								// numeric => e.g. 3 => idx=2
-								if (idx !== nthChild - 1) return false;
-							}
-						}
-					}
-
-					return true;
-				}
-
-				// ---------------------------------------------------------------------------
-				// Subroutine filterNodesBySegment
-				// ---------------------------------------------------------------------------
-				function filterNodesBySegment(nodes, segmentData) {
-					const results = [];
-					for (const n of nodes) {
-						if (doesNodeMatchSegment(n, segmentData)) {
-							results.push(n);
-						}
-					}
-
-					return results;
-				}
-
-				// ---------------------------------------------------------------------------
-				// Descendant Gather Helpers
-				// ---------------------------------------------------------------------------
-				/**
-				 * Returns *all descendants* of `node` (including children, grandchildren, etc.).
-				 * We'll gather them in a flat list.
-				 */
-				function gatherDescendants(node) {
-					const result = [];
-					if (!node.children) return result;
-					for (const child of node.children) {
-						result.push(child);
-						result.push(...gatherDescendants(child));
-					}
-
-					return result;
-				}
-
-				// Subroutine: filterByChain
-				/**
-				 * @function filterByChain
-				 * @summary Given a single array of steps (with combinator/segment pairs), find all matching nodes.
-				 * @param {Object|Array<Object>} htmlRoot - The root of the HTML JSON tree.
-				 * @param {Array<{combinator: string|null, segment: string}>} chain
-				 */
-				function filterByChain(htmlRoot, chain) {
-					// Flatten tree once
-					const allNodes = flattenHtmlTree(htmlRoot, []);
-					// Parse the first segment
-					const { segment: firstSeg, combinator: firstComb } = chain[0];
-					const firstData = parseSegment(firstSeg);
-
-					// We'll filter from all nodes for the first segment
-					let currentSet = filterNodesBySegment(allNodes, firstData);
-
-					// Process subsequent steps
-					for (let i = 1; i < chain.length; i++) {
-						const { combinator, segment } = chain[i];
-						const segData = parseSegment(segment);
-						const nextSet = [];
-
-						// For each node in currentSet, we look for matches among either its direct children or all descendants
-						for (const matchedNode of currentSet) {
-							// direct child combinator '>'
-							if (combinator === ">") {
-								if (Array.isArray(matchedNode.children)) {
-									for (const childNode of matchedNode.children) {
-										if (doesNodeMatchSegment(childNode, segData)) {
-											nextSet.push(childNode);
-										}
-									}
-								}
-							}
-							// descendant combinator ' '
-							else {
-								// gather *all* descendants
-								const descendants = gatherDescendants(matchedNode);
-								// filter them
-								const matched = filterNodesBySegment(descendants, segData);
-								nextSet.push(...matched);
-							}
-						}
-						currentSet = nextSet;
-					}
-
-					return currentSet;
-				}
-
-				// Subroutine: filterBySelector
-				/**
-				 * @function filterBySelector
-				 * @summary Handles multiple comma-separated groups; each group can have
-				 *          ">" or " " (descendant) combinators.
-				 */
-				function filterBySelector(htmlRoot, selector) {
-					const chainsArray = tokenizeSelector(selector);
-					const resultSet = new Set();
-
-					// For each chain (one group of the selector string), get matching nodes
-					for (const chain of chainsArray) {
-						const matched = filterByChain(htmlRoot, chain);
-						for (const node of matched) {
-							resultSet.add(node);
-						}
-					}
-
-					return [...resultSet];
-				}
-
-				// ---------------------------------------------------------------------------
-				// Subroutine mergeStyles
-				// ---------------------------------------------------------------------------
-				function mergeStyles(nodeStyle, newStyles, rootVars) {
-					for (const [prop, val] of Object.entries(newStyles)) {
-						nodeStyle[prop] = replacePlaceholders({ text: val, cssVars: rootVars });
-					}
-				}
-
-				// ---------------------------------------------------------------------------
-				// Subroutine removeParentRefs
-				// ---------------------------------------------------------------------------
-				function removeParentRefs(objOrArray) {
-					if (Array.isArray(objOrArray)) {
-						for (const item of objOrArray) {
-							removeParentRefs(item);
-						}
-					} else if (objOrArray && typeof objOrArray === "object") {
-						delete objOrArray.parentNode;
-						if (Array.isArray(objOrArray.children)) {
-							for (const child of objOrArray.children) {
-								removeParentRefs(child);
-							}
-						}
-					}
-				}
-
-				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
-				// │                                      Main Closure                                                 │
-				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
-				return ({ cssJson, htmlJson }) => {
-					try {
-						// Convert inputs if needed
-						let cssRules = typeof cssJson === "string" ? JSON.parse(cssJson) : cssJson;
-						let htmlTree = typeof htmlJson === "string" ? JSON.parse(htmlJson) : htmlJson;
-
-						if (!Array.isArray(cssRules)) {
-							cssRules = [];
-						}
-						if (!Array.isArray(htmlTree)) {
-							htmlTree = [htmlTree];
-						}
-
-						// Preprocess :root => rootVariables + #rootContainer
-						const { rootVariables, updatedRules } = preprocessRootRules(cssRules, htmlTree);
-						cssRules = updatedRules;
-
-						// For each rule => find matched => merge style
-						for (const rule of cssRules) {
-							const { selector, style } = rule;
-							// filter nodes
-							const matchedNodes = filterBySelector(htmlTree, selector);
-							// merge style
-							for (const node of matchedNodes) {
-								node.attributes = node.attributes || {};
-								node.attributes.style = node.attributes.style || {};
-								mergeStyles(node.attributes.style, style, rootVariables);
-							}
-						}
-
-						// remove .parentNode
-						removeParentRefs(htmlTree);
-						const output = JSON.stringify(htmlTree, null, 2);
-
-						// Debug logging if desired
-						if (moduleSettings?.debug?.applyCssToHtmlJson ?? false) {
-							logSyslogMessage({
-								severity: 7, // DEBUG
-								tag: "applyCssToHtmlJson",
-								transUnitId: "70000",
-								message: output,
-							});
-						}
-
-						return output;
-					} catch (err) {
-						logSyslogMessage({
-							severity: 3,
-							tag: "applyCssToHtmlJson",
-							transUnitId: "50000",
-							message: `${err}`,
-						});
-
-						return htmlJson;
-					}
-				};
-			};
-		},
-
-		// ANCHOR Utilities: convertCssToJson
+		// ANCHOR Util: convertCssToJson
 		/**
 		 * @summary Converts a CSS string into a JSON representation of CSS rules.
-		 * 
+		 *
 		 * - Parses CSS selectors, properties, and values into structured JSON.
 		 * - Calculates specificity for each selector and sorts the rules accordingly.
 		 * - Handles multiple selectors, inline styles, and block comments.
 		 * @see https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
-		 * 
+		 *
 		 * @function convertCssToJson
 		 * @memberof EASY_UTILS
 		 * @returns {Function} A higher-order function that takes `moduleSettings` and returns a function for CSS-to-JSON conversion.
-		 * 
+		 *
 		 * @param {Object} params - Parameters for the conversion.
 		 * @param {string} params.css - The input CSS string to convert.
-		 * 
+		 *
 		 * @returns {string} The resulting JSON string representing the parsed CSS rules.
-		 * 
+		 *
 		 * @example
-		 * // Example usage
 		 * const css = `
 		 *   div, p {
 		 *     color: red;
@@ -892,140 +301,56 @@ const EASY_UTILS = (() => {
 		 *     font-weight: bold;
 		 *   }
 		 * `;
-		 * 
+		 *
 		 * const cssJsonStr = convertCssToJson()(moduleSettings)({ css });
-		 * log(cssJsonStr);
-		 * // Output: JSON representation of the CSS rules
-		 * // [
-		 * //   {
-		 * //     "selector": "div",
-		 * //     "style": {
-		 * //       "color": "red",
-		 * //       "background": "blue"
-		 * //     },
-		 * //     "weight": 1,
-		 * //     "index": 0
-		 * //   },
-		 * //   {
-		 * //     "selector": "p",
-		 * //     "style": {
-		 * //       "color": "red",
-		 * //       "background": "blue"
-		 * //     },
-		 * //     "weight": 1,
-		 * //     "index": 1
-		 * //   },
-		 * //   {
-		 * //     "selector": "#myId",
-		 * //     "style": {
-		 * //       "margin": "10px"
-		 * //     },
-		 * //     "weight": 100,
-		 * //     "index": 2
-		 * //   },
-		 * //   {
-		 * //     "selector": ".myClass:hover",
-		 * //     "style": {
-		 * //       "font-weight": "bold"
-		 * //     },
-		 * //     "weight": 11,
-		 * //     "index": 3
-		 * //   }
-		 * // ]
 		 */
 		convertCssToJson: function () {
 			return (moduleSettings) => {
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings, });
 
-				// Subroutine: calculateSpecificity
+				const thisFuncDebugName = "convertCssToJson";
+
 				/**
-				 * @function calculateSpecificity
+				 * @function calculateSelectorSpecificity
 				 * @description Calculates the specificity of a CSS selector as a single numeric value.
-				 *              - ID selectors contribute 100 each.
-				 *              - Class selectors, pseudo-classes, and attribute selectors contribute 10 each.
-				 *              - Type selectors and pseudo-elements contribute 1 each.
-				 * 
 				 * @param {string} selector - The CSS selector to analyze.
 				 * @returns {number} The calculated specificity value.
 				 */
-				const calculateSpecificity = (selector) => {
-
-					// Remove spacing around combinator like '>', '+', '~' to simplify splitting
+				const calculateSelectorSpecificity = (selector) => {
 					const cleanedSelector = selector
-						.replace(/\s*>\s*/g, ">")
-						.replace(/\s*\+\s*/g, "+")
-						.replace(/\s*~\s*/g, "~")
-						.replace(/,\n/g, ",")
+						.replace(/\s*([>+~])\s*/g, "$1")
 						.trim();
 
-					// Split on combinator (space, >, +, ~) to evaluate each target element separately
-					const targetElementsArray = cleanedSelector.split(/\s|>|\+|~(?![^\[]*\])/g).filter(Boolean);
+					const selectorParts = cleanedSelector.split(/\s|(?=[>+~])/g).filter(Boolean);
 
-					let a = 0; // ID count
-					let b = 0; // Class, pseudo-class, attribute
-					let c = 0; // Type, pseudo-element
+					let idCount = 0;
+					let classAndAttributeCount = 0;
+					let typeAndPseudoElementCount = 0;
 
-					targetElementsArray.forEach((aTargetElement) => {
-
-						// Split aTargetElement by sub-selectors that might appear together
-						// e.g., "div.myClass:hover" => ["div", ".myClass", ":hover"]
-						const elementIdentifiers = aTargetElement.split(/(?=[#.:\[])/).filter(Boolean);
-
-						elementIdentifiers.forEach((propertyType) => {
-							if (propertyType.startsWith("#")) {
-								// ID => a
-								a += 1;
-							} else if (propertyType.startsWith(".")) {
-								// Class => b
-								b += 1;
-							} else if (propertyType.startsWith("[")) {
-								// Attribute => b
-								b += 1;
-							} else if (propertyType.startsWith(":")) {
-								// Pseudo-class or pseudo-element
-								// Single-colon => pseudo-class => b
-								// Double-colon => pseudo-element => c
-								if (propertyType.startsWith("::")) {
-									c += 1; // pseudo-element
-								} else {
-									b += 1; // pseudo-class
-								}
-							} else {
-								// Type selector => c
-								if (propertyType.trim() !== "") {
-									c += 1;
-								}
-							}
-						});
+					selectorParts.forEach((part) => {
+						if (part.startsWith("#")) {
+							idCount += 1;
+						} else if (part.startsWith(".") || part.startsWith("[") || part.startsWith(":") && !part.startsWith("::")) {
+							classAndAttributeCount += 1;
+						} else {
+							typeAndPseudoElementCount += 1;
+						}
 					});
 
-					// Calculate single specificity number
-					const specificity = a * 100 + b * 10 + c * 1;
-
-					return specificity;
+					return idCount * 100 + classAndAttributeCount * 10 + typeAndPseudoElementCount;
 				};
 
-				// Subroutine: compareSpecificity
 				/**
-				 * @function compareSpecificity
-				 * @description Compares two CSS rule objects by specificity and index for sorting.
-				 *              - Higher specificity weight comes first.
-				 *              - For ties, earlier rules (lower index) come first.
-				 * 
-				 * @param {Object} ruleA - The first CSS rule object to compare.
-				 * @param {Object} ruleB - The second CSS rule object to compare.
-				 * 
-				 * @returns {number} A negative number if `ruleA` should come before `ruleB`,
-				 *                   a positive number if `ruleB` should come before `ruleA`,
-				 *                   or 0 if they are equal.
+				 * @function sortRulesBySpecificity
+				 * @description Sorts CSS rules by specificity and index.
+				 * @param {Object} ruleA - The first rule to compare.
+				 * @param {Object} ruleB - The second rule to compare.
+				 * @returns {number} Sorting order value.
 				 */
-				const compareSpecificity = (ruleA, ruleB) => {
-					if (ruleA.weight !== ruleB.weight) {
-						return ruleA.weight - ruleB.weight;
+				const sortRulesBySpecificity = (ruleA, ruleB) => {
+					if (ruleA.specificity !== ruleB.specificity) {
+						return ruleB.specificity - ruleA.specificity;
 					}
 
-					// Tie-breaker => rule index
 					return ruleA.index - ruleB.index;
 				};
 
@@ -1034,81 +359,53 @@ const EASY_UTILS = (() => {
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ css }) => {
 					try {
-
-						/* Clean up the raw CSS
-						============================================================================================= */
 						const cleanedCss = css
-							.replace(/\/\*[\s\S]*?\*\//g, "") // Remove block comments
-							.replace(/\n/g, " ") // Replace newlines with spaces
-							.replace(/\s+/g, " ") // Collapse multiple spaces
+							.replace(/\/\*[\s\S]*?\*\//g, "")
+							.replace(/\n/g, " ")
+							.replace(/\s+/g, " ")
 							.trim();
 
-						/* Prepare the array that will hold all CSS rules objects
-						============================================================================================= */
-						const ruleList = [];
-
-						/* Define regex patterns to capture selectors and their style blocks
-						============================================================================================= */
+						const cssRules = [];
 						const ruleRegex = /([^\{]+)\{([^\}]+)\}/g;
-						const propertiesRegex = /([\w-]+)\s*:\s*([^;]+);/g;
+						const declarationRegex = /([\w-]+)\s*:\s*([^;]+);/g;
 
-						/* Iterate over each CSS rule block
-						============================================================================================= */
-						let ruleMatch;
+						let match;
 						let ruleIndex = 0;
-						while ((ruleMatch = ruleRegex.exec(cleanedCss))) {
-							const selectorsRaw = ruleMatch[1].trim(); // e.g., "div, p:hover, .myClass"
-							const declarationsRaw = ruleMatch[2].trim(); // e.g., "color: red; background: blue;"
 
-							// Parse the rule's declarations into an object
-							const declarationsObj = {};
-							let propMatch;
-							while ((propMatch = propertiesRegex.exec(declarationsRaw))) {
-								const propertyKey = propMatch[1].trim();
-								const propertyValue = propMatch[2].trim();
-								declarationsObj[propertyKey] = propertyValue;
+						while ((match = ruleRegex.exec(cleanedCss))) {
+							const selectors = match[1].split(",").map((s) => { return s.trim(); });
+							const declarations = match[2].trim();
+
+							const style = {};
+							let declarationMatch;
+							while ((declarationMatch = declarationRegex.exec(declarations))) {
+								const property = declarationMatch[1].trim();
+								const value = declarationMatch[2].trim();
+								style[property] = value;
 							}
 
-							// Split group, comma-separated, selectors => e.g., "div, p" => ["div", "p"]
-							// Then trim spaces from around combinator like ">,+,~"
-							const individualSelectors = selectorsRaw
-								.split(",")
-								.map((aSelector) => {
-									return aSelector.replace(/\s*>\s*/g, ">")
-										.replace(/\s*\+\s*/g, "+")
-										.replace(/\s*~\s*/g, "~")
-										.trim();
+							selectors.forEach((selector) => {
+								const specificity = calculateSelectorSpecificity(selector);
+								cssRules.push({
+									selector,
+									style,
+									specificity,
+									index: ruleIndex
 								});
-
-							// For each selector in the group, we add to the json representation as if the each tag in
-							// the group was written separately.
-							individualSelectors.forEach((aSelector) => {
-								const specificity = calculateSpecificity(aSelector);
-								ruleList.push({
-									selector: aSelector,
-									style: { ...declarationsObj },
-									weight: specificity,
-									index: ruleIndex,
-								});
-
-								// Increment for next rule (as a tie-breaker)
 								ruleIndex++;
 							});
 						}
 
-						/* Sort the array by weight (specificity) and index
-						============================================================================================= */
-						ruleList.sort(compareSpecificity);
+						cssRules.sort(sortRulesBySpecificity);
 
-						/* Convert the nested object structure into a JSON string 
-						============================================================================================= */
-						const output = JSON.stringify(ruleList, null, 2);
+						const output = JSON.stringify(cssRules, null, 2);
 
-						// Optional: debug logging
-						if (moduleSettings?.debug?.convertCssToJson ?? false) {
-							logSyslogMessage({
-								severity: 7, // DEBUG
-								tag: "convertCssToJson",
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
 								transUnitId: "70000",
 								message: output,
 							});
@@ -1118,358 +415,255 @@ const EASY_UTILS = (() => {
 
 					} catch (err) {
 
-						logSyslogMessage({
-							severity: 3,
-							tag: "applyCssToHtmlJson",
-							// "50000": "Error: {{ remark }}",
-							transUnitId: "50000",
-							message: `${err}`,
+						// "50000": "Error: {{ remark }}"
+						const msgId = "50000";
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: msgId,
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
 						});
 
-						// Return an empty array fallback
-						return JSON.stringify([]);
+						return "[]";
 					}
 				};
 			};
 		},
 
-		// ANCHOR Utilities: convertHtmlToJson
+		// ANCHOR Util: convertHtmlToJson
 		/**
 		 * @summary Converts an HTML string into an HTML JSON structure.
-		 * 
+		 *
 		 * - Parses HTML elements, attributes, and text nodes into a hierarchical JSON representation.
 		 * - Handles malformed or unclosed tags gracefully by logging warnings or errors.
-		 * - Supports inline styles, classListes, and custom attributes.
-		 * 
+		 * - Supports inline styles, classes, and custom attributes.
+		 *
 		 * @function convertHtmlToJson
 		 * @memberof EASY_UTILS
-		 * @returns {Function} A higher-order function that takes `moduleSettings` and returns a function for HTML-to-JSON conversion.
-		 * 
+		 * @returns {Function} A function for HTML-to-JSON conversion.
+		 *
 		 * @param {Object} params - Parameters for the conversion.
 		 * @param {string} params.html - The input HTML string to convert.
-		 * 
+		 *
 		 * @returns {string} The resulting JSON string representing the HTML structure.
-		 * 
+		 *
 		 * @example
 		 * // Example usage
-		 * const htmlJsonStr = convertHtmlToJson()(moduleSettings)({ 
+		 * const htmlJsonStr = convertHtmlToJson()(moduleSettings)({
 		 *     html: "<div id='container'><p>Hello, World!</p><img src='image.png' /></div>"
 		 * });
 		 * log(htmlJsonStr);
-		 * // Output:
-		 * // [
-		 * //   {
-		 * //     "element": "div",
-		 * //     "attributes": {
-		 * //       "id": "container",
-		 * //       "style": {},
-		 * //       "classList": [],
-		 * //       "inlineStyle": {}
-		 * //     },
-		 * //     "children": [
-		 * //       {
-		 * //         "element": "p",
-		 * //         "attributes": { "style": {}, "classList": [], "id": null, "inlineStyle": {} },
-		 * //         "children": [
-		 * //           { "element": "text", "children": [{ "innerText": "Hello, World!" }] }
-		 * //         ]
-		 * //       },
-		 * //       {
-		 * //         "element": "img",
-		 * //         "attributes": { "src": "image.png", "style": {}, "classList": [], "id": null, "inlineStyle": {} },
-		 * //         "children": []
-		 * //       }
-		 * //     ]
-		 * //   }
-		 * // ]
 		 */
 		convertHtmlToJson: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies (or any custom logging function you have)
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const thisFuncDebugName = "convertHtmlToJson";
+				const convertToSingleLine = EASY_UTILS.getFunction({ functionName: "convertToSingleLine", moduleSettings });
 
-				// A known set of tags that are ALWAYS treated as self-closing (even if the HTML doesn't have a slash)
-				const SELF_CLOSING_TAGS = new Set([
-					"br",
-					"hr",
-					"img",
-					"input",
-					"link",
-					"meta",
-					"base",
-					"area",
-					"source",
-					"track",
-					"col",
-					"embed"
+				const SELF_CLOSING_ELEMENTS = new Set([
+					"br", "hr", "img", "input", "link", "meta", "base", "area", "source", "track", "col", "embed"
 				]);
 
-				// Subroutine: parseAttributes
 				/**
 				 * @function parseAttributes
-				 * @description Parses a raw attribute string (e.g. `id="foo" style="color: red;"`) into
-				 *              an attributes object with `style`, `inlineStyle`, `classList`, etc.
-				 *              - `style` is kept as an **empty** object for future use.
-				 *              - `inlineStyle` stores the parsed CSS from `style="..."`.
+				 * @description Converts raw HTML attributes into a structured object.
 				 */
 				function parseAttributes(rawAttributes) {
-					const thisElementAttributes = {
-						style: {},      // remains empty
-						inlineStyle: {},
+					const attributes = {
+						inlineStyles: {},
 						classList: [],
 						id: null
 					};
 
-					if (!rawAttributes) { return thisElementAttributes; }
+					if (!rawAttributes) return attributes;
 
-					// A simple regex to capture key="value" pairs
 					const attributeRegex = /([\w-]+)\s*=\s*["']([^"']+)["']/g;
-					let attributeMatch;
-					while ((attributeMatch = attributeRegex.exec(rawAttributes))) {
-						const [, aAttrName, aAttrValue] = attributeMatch;
+					let match;
+					while ((match = attributeRegex.exec(rawAttributes))) {
 
-						switch (aAttrName) {
+						// eslint-disable-next-line no-unused-vars
+						const [_, name, value] = match;
+						switch (name) {
 						case "style":
-							// Convert inline style from "key: val; key2: val2" into an object
-							const thisInlineStyle = {};
-							aAttrValue.split(";").forEach((styleDecl) => {
-								const [key, val] = styleDecl.split(":").map((s) => { return s.trim(); });
-								if (key && val) {
-									thisInlineStyle[key] = val;
-								}
+							value.split(";").forEach((styleDeclaration) => {
+								const [property, styleValue] = styleDeclaration.split(":").map(s => { return s.trim(); });
+								if (property && styleValue) attributes.inlineStyles[property] = styleValue;
 							});
-							thisElementAttributes.inlineStyle = thisInlineStyle;
 							break;
-
 						case "class":
-							// Could appear as class="foo bar"
-							// .filter(Boolean) removes empty strings from new array
-							thisElementAttributes.classList = aAttrValue.split(" ").filter(Boolean);
+							attributes.classList = value.split(" ").filter(Boolean);
 							break;
-
 						case "id":
-							thisElementAttributes.id = aAttrValue;
+							attributes.id = value;
 							break;
-
 						default:
-							// Catch-all for other attributes: src, alt, name, etc.
-							thisElementAttributes[aAttrName] = aAttrValue;
-							break;
+							attributes[name] = value;
 						}
 					}
 
-					return thisElementAttributes;
+					return attributes;
 				}
 
-				// Subroutine: appendChild
 				/**
-				 * @function appendChild
-				 * @description Attaches a new child node to the given parent node, 
-				 *              setting the child's childIndex automatically.
-				 * @param {Object} parent - The parent node in the JSON structure.
-				 * @param {Object} child - The new child node to append.
+				 * @function appendChildNode
+				 * @description Adds a child node to a parent node, setting its childIndex.
 				 */
-				function appendChild(parent, child) {
+				function appendChildNode(parent, child) {
 					child.childIndex = parent.children.length + 1;
 					parent.children.push(child);
 				}
 
-				// Subroutine: parseHtmlToObj
 				/**
-				 * @function parseHtmlToObj
-				 * @description Converts tokens into a structured JSON tree.
-				 *              The root is always a <div id="rootContainer"> with children.
-				 *              Any existing HTML style attributes go to `inlineStyle`.
-				 *              `style` remains empty.
+				 * @function parseHtmlToTree
+				 * @description Converts an array of HTML tokens into a JSON tree.
 				 */
-				function parseHtmlToObj(tokens) {
-
-					const htmlJsonStack = [];
-
-					// Standard container for api rendered html
-					const rootContainer = {
+				function parseHtmlToTree(tokens) {
+					const stack = [];
+					const rootNode = {
 						element: "div",
 						attributes: {
 							id: "rootContainer",
 							style: {},
 							classList: [],
-							inlineStyle: {}
+							inlineStyles: {}
 						},
 						children: [],
 						childIndex: 1
 					};
 
-					htmlJsonStack.push(rootContainer);
+					stack.push(rootNode);
 
-					// Regex for opening or self-closing tags like <div>, <img/>, <br>, etc.
-					const openingTagRegex = /^<(\w+)([^>]*)\/?>$/;
-
-					// Regex for closing tags like </div>, </p>, etc.
-					const closingTagRegex = /^<\/(\w+)>$/;
+					const openTagRegex = /^<([\w-]+)([^>]*)\/?\s*>$/;
+					const closeTagRegex = /^<\/([\w-]+)>$/;
 
 					for (const token of tokens) {
-						const cleanedToken = token.trim();
-						if (!cleanedToken) continue;
+						const trimmedToken = token.trim();
+						if (!trimmedToken) continue;
 
-						// Check for closing tag (e.g. </div>)
-						const closingMatch = cleanedToken.match(closingTagRegex);
-						if (closingMatch) {
-							htmlJsonStack.pop();
+						const closingTagMatch = closeTagRegex.exec(trimmedToken);
+						if (closingTagMatch) {
+							stack.pop();
 							continue;
 						}
 
-						// Check for an opening or self-closing tag
-						const openMatch = cleanedToken.match(openingTagRegex);
-						if (openMatch) {
-							const [fullMatch, tagName, rawAttrPart] = openMatch;
+						const openingTagMatch = openTagRegex.exec(trimmedToken);
+						if (openingTagMatch) {
+							const [, tagName, rawAttributes] = openingTagMatch;
+							const isSelfClosing = SELF_CLOSING_ELEMENTS.has(tagName.toLowerCase()) || /\/>$/.test(trimmedToken);
 
-							// Determine if physically self-closing (ends with "/>") or if in known set
-							let isSelfClosing = /\/>$/.test(fullMatch);
-							if (SELF_CLOSING_TAGS.has(tagName.toLowerCase())) {
-								isSelfClosing = true;
-							}
-
-							// Parse the attributes
-							const thisElementAttributes = parseAttributes(rawAttrPart);
-
-							// Build the node
-							const newNode = {
+							const newElement = {
 								element: tagName,
-								attributes: thisElementAttributes,
+								attributes: parseAttributes(rawAttributes),
 								children: [],
-								childIndex: 0 // will set below
-							};
-
-							// Attach it to the current parent
-							const parent = htmlJsonStack[htmlJsonStack.length - 1];
-							if (parent) {
-								appendChild(parent, newNode);
-							}
-
-							// If it's NOT self-closing, push it onto the htmlJsonStack, so future tokens become its children
-							if (!isSelfClosing) {
-								htmlJsonStack.push(newNode);
-							}
-
-							continue;
-						}
-
-						// Otherwise, assume it is text node
-						const textVal = cleanedToken;
-						if (textVal) {
-							const textNode = {
-								element: "text",
-								// We can store the actual text in a child array or directly
-								children: [{ innerText: textVal }],
 								childIndex: 0
 							};
 
-							// Attach to current parent
-							const parent = htmlJsonStack[htmlJsonStack.length - 1];
-							if (parent) {
-								appendChild(parent, textNode);
+							const parent = stack[stack.length - 1];
+							appendChildNode(parent, newElement);
+
+							if (!isSelfClosing) {
+								stack.push(newElement);
 							}
+							continue;
 						}
+
+						const textNode = {
+							element: "text",
+							children: [{ innerText: trimmedToken }],
+							childIndex: 0 // Actual index calculated when appending to parent.
+						};
+
+						const parent = stack[stack.length - 1];
+						appendChildNode(parent, textNode);
 					}
 
-					// If htmlJsonStack > 1, we have unclosed tags
-					if (htmlJsonStack.length !== 1) {
-						throw new Error("Invalid HTML: Unclosed tags detected. Ensure HTML is well-formed.");
+					if (stack.length > 1) {
+						throw new Error("Unclosed tags detected. Ensure your HTML is well-formed.");
 					}
 
-					// Return the array containing only the root container at top level
-					return [rootContainer];
+					return [rootNode];
 				}
 
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
-				// │                           Main Closure                                                            │
+				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ html }) => {
 					try {
-
-						/* Normalize the raw HTML
-						============================================================================================= */
-						// Remove HTML comments
-						// Replace newlines with spaces
-						// Collapse multiple spaces
-						// Trim leading/trailing whitespace
 						const cleanedHtml = html
 							.replace(/<!--[\s\S]*?-->/g, "")
 							.replace(/\n/g, " ")
 							.replace(/\s+/g, " ")
 							.trim();
 
-						/* Parse html tags into opening, self closing, closing, and text tokens.
-						============================================================================================= */
-						// e.g. "<div> Hello <br/> World </div>" -> ["<div>", "Hello", "<br/>", "World", "</div>"]
-						const tokenRegex = /<\/?\w+[^>]*>|[^<>]+/g;
-						const rawTokens = cleanedHtml.match(tokenRegex) || [];
-						const tokenArray = rawTokens.map((t) => { return t.trim(); }).filter(Boolean);
+						const tokenRegex = /<\/?.*?>|[^<>]+/g;
+						const tokens = cleanedHtml.match(tokenRegex)?.map(token => { return token.trim(); }).filter(Boolean) || [];
 
-						/* Create a nested object structure from the array of tokens
-						============================================================================================= */
-						const nestedHtmlObj = parseHtmlToObj(tokenArray);
+						const htmlTree = parseHtmlToTree(tokens);
+						const output = JSON.stringify(htmlTree, null, 2);
 
-						/* Convert the nested object structure into a JSON string 
-						============================================================================================= */
-						const output = JSON.stringify(nestedHtmlObj, null, 2);
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
 
-						// Optional: debug logging
-						if (moduleSettings?.debug?.convertHtmlToJson) {
-
-							logSyslogMessage({
-								severity: 7, // DEBUG
-								tag: "convertHtmlToJson",
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: thisFuncDebugName,
 								transUnitId: "70000",
-								message: output
+								message: output,
 							});
 						}
 
 						return output;
+
 					} catch (err) {
 
-						logSyslogMessage({
-							severity: 3,
-							tag: "convertHtmlToJson",
-							// "50000": "Error: {{ remark }}",
-							transUnitId: "50000",
-							message: `${err}`,
+						// "50000": "Error: {{ remark }}"
+						const msgId = "50000";
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: msgId,
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
 						});
 
-						// Return a fallback JSON
-						return JSON.stringify([
+						return convertToSingleLine({
+							multiline: `
+						[
 							{
-								element: "div",
-								attributes: {
-									style: {},
-									classList: [],
-									id: "rootContainer",
-									inlineStyle: {}
+								"element": "div",
+								"attributes": {
+									"id": "rootContainer",
+									"classList": [],
+									"inlineStyles": {}
 								},
-								children: [
+								"children": [
 									{
-										element: "h1",
-										attributes: { style: {}, classList: [], id: null, inlineStyle: {} },
-										children: [
+										"element": "h1",
+										"attributes": {
+											"classList": [],
+											"id": null,
+											"inlineStyles": {}
+										},
+										"children": [
 											{
-												element: "text",
-												children: [{ innerText: "Malformed HTML" }],
-												childIndex: 1
+												"element": "text",
+												"children": [
+													{ "innerText": "Malformed HTML" }
+												],
+												"childIndex": 1
 											}
 										],
-										childIndex: 1
+										"childIndex": 1
 									}
 								],
-								childIndex: 1
+								"childIndex": 1
 							}
-						]);
+						]` });
 					}
 				};
 			};
 		},
 
-		// ANCHOR Utilities: convertMarkdownToHtml
+		// ANCHOR Util: convertMarkdownToHtml
 		/**
 		 * @summary Converts a Markdown document to an HTML string.
 		 * 
@@ -1512,11 +706,11 @@ const EASY_UTILS = (() => {
 		 * // Output: A valid HTML string based on the Markdown input
 		 */
 		convertMarkdownToHtml: function () {
-			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "getSharedForge";
+
 				// Cache Dependencies
-				// const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
 				const encodeCodeBlock = EASY_UTILS.getFunction({ functionName: "encodeCodeBlock", moduleSettings });
 
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -1646,7 +840,6 @@ const EASY_UTILS = (() => {
 								.replace(/<\/template>/g, "</div>")
 
 								// Convert tabs to 3 spaces
-								// REVIEW I do not believe the normalization for list items matters; more testing to refactor
 								.replace(/^ \*(.*)/, "*$1")
 								.replace(/^ -/, "-")
 								.replace(/^\+/, "+")
@@ -2056,178 +1249,97 @@ const EASY_UTILS = (() => {
 					// Close all remaining open tags
 					closeAllTags();
 
-					return htmlArray.join("\n");
+					const output = htmlArray.join("\n");
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: output,
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: convertJsonToHtml
+		// ANCHOR Util: convertJsonToHtml
 		/**
 		 * @summary Converts an HTML JSON structure into a corresponding HTML string.
-		 * Supports inline styles, class lists, IDs, and additional attributes.
-		 * 
+		 * - Supports inline styles, class lists, IDs, and additional attributes.
+		 *
 		 * @function convertJsonToHtml
 		 * @memberof EASY_UTILS
 		 * @returns {Function} A higher-order function that takes `moduleSettings` and returns a function for conversion.
-		 * 
+		 *
 		 * @param {Object} params - Parameters for conversion.
 		 * @param {string} params.htmlJson - A JSON string representing the HTML structure.
-		 * 
+		 *
 		 * @returns {string} The generated HTML string.
-		 * 
-		 * @example
-		 * // Example usage
-		 * const htmlStr = convertJsonToHtml()(moduleSettings)({ 
-		 *     htmlJson: JSON.stringify([
-		 *         {
-		 *             element: "div",
-		 *             attributes: { id: "container", class: ["main"] },
-		 *             children: [
-		 *                 {
-		 *                     element: "h1",
-		 *                     attributes: { style: { color: "red" } },
-		 *                     children: [
-		 *                         { element: "text", children: [{ innerText: "Hello, World!" }] }
-		 *                     ]
-		 *                 }
-		 *             ]
-		 *         }
-		 *     ])
-		 * });
-		 * log(htmlStr);
-		 * // Output: '<div id="container" class="main"><h1 style="color: red;">Hello, World!</h1></div>'
 		 */
 		convertJsonToHtml: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({
-					functionName: "logSyslogMessage",
-					moduleSettings
-				});
+				const thisFuncDebugName = "convertJsonToHtml";
 
-				// ──────────────────────────────────────────────────────────────────────────
-				// 1) Subroutine: camelCaseToKebabDeclarations
-				// ──────────────────────────────────────────────────────────────────────────
 				/**
-				 * @function camelCaseToKebabDeclarations
+				 * @function convertCamelCaseToKebabCase
 				 * @description Converts a JavaScript style object into a string of CSS declarations.
-				 *              - Converts camelCase property names to kebab-case.
-				 *              - Formats each key-value pair as a CSS declaration 
-				 *                (e.g., "margin-top: 10px; background-color: red;").
-				 * 
-				 * @param {Object} styleObj - The style object to convert, where keys are CSS 
-				 *                            property names in camelCase and values are strings.
-				 * 
-				 * @returns {string} A CSS string representing the style object, with 
-				 *                   declarations separated by semicolons and spaces.
-				 * 
-				 * @example
-				 * const styleObj = { marginTop: "10px", backgroundColor: "red" };
-				 * const cssString = camelCaseToKebabDeclarations(styleObj);
-				 * console.log(cssString); // "margin-top: 10px; background-color: red;"
+				 * @param {Object} styleObj - Style object with camelCase property names and values.
+				 * @returns {string} CSS string with declarations in kebab-case.
 				 */
-				function camelCaseToKebabDeclarations(styleObj) {
+				function convertCamelCaseToKebabCase(styleObj) {
 					return Object.entries(styleObj)
-						.map(([key, value]) => {
-							// Convert camelCase to kebab-case
-							const kebabKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-							// e.g., "marginTop" => "margin-top"
+						.map(([property, value]) => {
+							const kebabProperty = property.replace(/([A-Z])/g, "-$1").toLowerCase();
 
-							// Return a single CSS declaration
-							return `${kebabKey}: ${value};`;
+							return `${kebabProperty}: ${value};`;
 						})
 						.join(" ");
 				}
 
-				// ──────────────────────────────────────────────────────────────────────────
-				// 2) Subroutine: processNode
-				// ──────────────────────────────────────────────────────────────────────────
 				/**
-				 * @function processNode
-				 * @description Recursively transforms a single JSON node into its 
-				 *              corresponding HTML string.
-				 * 
-				 *              - Handles text nodes by returning their content directly.
-				 *              - Combines `style` and `inlineStyle` into a single `style` 
-				 *                attribute in the resulting HTML.
-				 *              - Processes attributes (e.g., `id`, `class`, custom attributes) 
-				 *                and builds valid HTML attributes.
-				 *              - Recursively processes child nodes to generate nested HTML.
-				 * 
-				 * @param {Object} node - The JSON representation of an HTML node.
-				 * @param {string} node.element - The tag name (e.g., "div", "span", or "text").
-				 * @param {Object} [node.attributes] - An object containing attributes 
-				 *                                     for this HTML node.
-				 * @param {Object} [node.attributes.style] - Style object (in camelCase), 
-				 *                                           merged into the final `style` attribute.
-				 * @param {Object} [node.attributes.inlineStyle] - Additional inline styles 
-				 *                                                (also in camelCase).
-				 * @param {string[]} [node.attributes.classList] - An array of class names.
-				 * @param {string} [node.attributes.id] - The ID of the element.
-				 * @param {Object[]} [node.children] - An array of child nodes 
-				 *                                     (each processed recursively).
-				 * 
-				 * @returns {string} The HTML string representation of the node and its children.
+				 * @function generateHtmlFromNode
+				 * @description Recursively transforms a JSON node into its HTML string representation.
+				 * @param {Object} node - JSON representation of an HTML node.
+				 * @returns {string} HTML string for the given node and its children.
 				 */
-				function processNode(node) {
-					// If there's no recognized element, return empty
-					if (!node.element) {
-						return "";
-					}
+				function generateHtmlFromNode(node) {
+					if (!node.element) return "";
 
-					// If it’s a text node, return the text content directly
 					if (node.element === "text") {
-						return node.children && node.children[0]?.innerText
-							? node.children[0].innerText
-							: "";
+						return node.children?.[0]?.innerText || "";
 					}
 
-					// Combine style and inlineStyle to produce final style object
-					const styleObj = {
-						...node.attributes?.style,
-						...node.attributes?.inlineStyle
-					};
-
-					// Convert the final style object to a kebab-case CSS string
-					const styleString = Object.keys(styleObj).length
-						? camelCaseToKebabDeclarations(styleObj)
+					const combinedStyle = { ...node.attributes?.style, ...node.attributes?.inlineStyle };
+					const styleString = Object.keys(combinedStyle).length
+						? convertCamelCaseToKebabCase(combinedStyle)
 						: "";
 
-					// Build the HTML attributes
 					const attributes = [];
-					if (styleString) {
-						attributes.push(`style="${styleString}"`);
-					}
+					if (styleString) attributes.push(`style="${styleString}"`);
 
-					// If we have classList => output as class="..."
 					if (Array.isArray(node.attributes?.classList) && node.attributes.classList.length > 0) {
 						attributes.push(`class="${node.attributes.classList.join(" ")}"`);
 					}
 
-					// If we have an id
-					if (node.attributes?.id) {
-						attributes.push(`id="${node.attributes.id}"`);
-					}
+					if (node.attributes?.id) attributes.push(`id="${node.attributes.id}"`);
 
-					// Add any other attributes (e.g. data- attributes, custom attributes)
-					Object.keys(node.attributes || {})
-						.filter((key) => { return !["style", "inlineStyle", "classList", "id"].includes(key); })
-						.forEach((key) => {
-							attributes.push(`${key}="${node.attributes[key]}"`);
+					Object.entries(node.attributes || {})
+						.filter(([key]) => { return !["style", "inlineStyle", "classList", "id"].includes(key); })
+						.forEach(([key, value]) => {
+							attributes.push(`${key}="${value}"`);
 						});
 
-					// Recursively process children
-					const childrenHtml = (node.children || [])
-						.map(processNode)
-						.join("");
+					const childrenHtml = (node.children || []).map(generateHtmlFromNode).join("");
 
-					// Return the final HTML string for this node
-					// Note: If attributes is empty, you might get an extra space. 
-					//       It's harmless, but if you want to remove it, just do a quick trim.
-					const attrString = attributes.length ? ` ${attributes.join(" ")}` : "";
+					const attributesString = attributes.length ? ` ${attributes.join(" ")}` : "";
 
-					return `<${node.element}${attrString}>${childrenHtml}</${node.element}>`;
+					return `<${node.element}${attributesString}>${childrenHtml}</${node.element}>`;
 				}
 
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -2235,37 +1347,34 @@ const EASY_UTILS = (() => {
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ htmlJson }) => {
 					try {
-						// 1) Parse the incoming JSON
 						const parsedJson = JSON.parse(htmlJson);
 
-						// 2) Build the final HTML string (handle root array vs. single object)
-						let output = "";
-						if (Array.isArray(parsedJson)) {
-							output = parsedJson.map(processNode).join("");
-						} else {
-							output = processNode(parsedJson);
-						}
+						const output = Array.isArray(parsedJson)
+							? parsedJson.map(generateHtmlFromNode).join("")
+							: generateHtmlFromNode(parsedJson);
 
-						// 3) Optional: debug logging
-						if (moduleSettings?.debug?.convertJsonToHtml) {
-							logSyslogMessage({
-								severity: 7, // DEBUG
-								tag: "convertJsonToHtml",
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
 								transUnitId: "70000",
-								message: output
+								message: output,
 							});
 						}
 
-						// 4) Return the final HTML string
 						return output;
 
 					} catch (err) {
-						// If parsing or processing fails, log an error and return fallback HTML
-						logSyslogMessage({
-							severity: 3, // ERROR
-							tag: "convertJsonToHtml",
-							transUnitId: "50000",
-							message: `${err}`
+
+						// "50000": "Error: {{ remark }}"
+						const msgId = "50000";
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: msgId,
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
 						});
 
 						return "<div><h1>Error transforming HTML JSON representation</h1></div>";
@@ -2274,8 +1383,7 @@ const EASY_UTILS = (() => {
 			};
 		},
 
-
-		// ANCHOR Utilities: convertToSingleLine
+		// ANCHOR Util: convertToSingleLine
 		/**
 		 * @summary Converts multiline text into a single line, preserving quoted text.
 		 * 
@@ -2295,16 +1403,31 @@ const EASY_UTILS = (() => {
 		 * // Output: "Hello World \"Keep This Intact\""
 		 */
 		convertToSingleLine: function () {
-			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "convertToSingleLine";
+
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ multiline }) => {
 					const regex = /("[^"]*"|'[^']*')|\s+/g;
 
-					return multiline.replace(regex, (_, quoted) => { return quoted ? quoted : " "; });
+					const output = multiline.replace(regex, (_, quoted) => { return quoted ? quoted : " "; });
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: output,
+						});
+					}
+
+					return output;
 				};
 			};
 		},
@@ -2404,7 +1527,9 @@ const EASY_UTILS = (() => {
 								"0x0004E2AF": "information",
 								"0x000058E0": "tip",
 								"0x02B2451A": "You entered the following command:",
-								"0x0834C8EE": "If you continue to experience issues contact the module author ({{ author }})."
+								"0x0834C8EE": "If you continue to experience issues contact the module author ({{ author }}).",
+								"0x03B6FF6E": "Invalid Arguments: There is one or more commands unrecognized. Check the commands spelling and usage.",
+								"0x09B11313": "Game Master Options"
 							};
 						} else if (languageCode === "frFR") {
 							return {
@@ -2425,7 +1550,10 @@ const EASY_UTILS = (() => {
 								"0x0004E2AF": "information",
 								"0x000058E0": "conseil",
 								"0x02B2451A": "Vous avez entré la commande suivante :",
-								"0x0834C8EE": "Si le problème persiste, contactez l'auteur du module ({{ author }})."
+								"0x0834C8EE": "Si le problème persiste, contactez l'auteur du module ({{ author }}).",
+								"0x03B6FF6E": "Arguments invalides : une ou plusieurs commandes ne sont pas reconnues. Vérifiez l'orthographe et l'utilisation des commandes.",
+								"0x09B11313": "Options du Maître du Jeu"
+
 							};
 						}
 
@@ -2701,6 +1829,7 @@ const EASY_UTILS = (() => {
 
 				// Cache Dependencies
 				//const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const convertToSingleLine = EASY_UTILS.getFunction({ functionName: "convertToSingleLine", moduleSettings });
 				const replacePlaceholders = EASY_UTILS.getFunction({ functionName: "replacePlaceholders", moduleSettings });
 				const getSharedForge = EASY_UTILS.getFunction({ functionName: "getSharedForge", moduleSettings });
 				const convertHtmlToJson = EASY_UTILS.getFunction({ functionName: "convertHtmlToJson", moduleSettings });
@@ -2758,7 +1887,7 @@ const EASY_UTILS = (() => {
 						switch (templateName) {
 						case "chatAlert":
 							return `
-								<div class="alert-box">
+								<div class="alert-box {{ alert-class }}">
 									<h3>{{ title }}</h3>
 									<p>{{ description }}</p>
 									<p class="alert-code">{{ code }}</p>
@@ -2768,7 +1897,7 @@ const EASY_UTILS = (() => {
 
 						case "chatMenu":
 							return `
-								<div class="menu-box">
+								<div class="menu-box {{ menu-class }}">
 									<h3>{{ title }}</h3>
 									<ul>
 										<!-- <li><a href="!api --menu">Option 1</a></li> -->
@@ -2814,7 +1943,7 @@ const EASY_UTILS = (() => {
 							// Retrieve and replace placeholders for other templates
 							const templateString = templateMemoryMap[template];
 
-							return replacePlaceholders({ text: templateString, expressions });
+							return convertToSingleLine({ multiline: (replacePlaceholders({ text: templateString, expressions })) });
 						},
 
 						/**
@@ -2921,6 +2050,7 @@ const EASY_UTILS = (() => {
 
 				// Cache Dependencies
 				// const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const convertToSingleLine = EASY_UTILS.getFunction({ functionName: "convertToSingleLine", moduleSettings });
 				const replacePlaceholders = EASY_UTILS.getFunction({ functionName: "replacePlaceholders", moduleSettings });
 				const getSharedForge = EASY_UTILS.getFunction({ functionName: "getSharedForge", moduleSettings });
 
@@ -3099,7 +2229,7 @@ const EASY_UTILS = (() => {
 							const themeString = themeMemoryMap[theme];
 
 							// 3) Replace placeholders and CSS variables, then normalize whitespace
-							return replacePlaceholders({ text: themeString, expressions, cssVars });
+							return convertToSingleLine({ multiline: (replacePlaceholders({ text: themeString, expressions, cssVars })) });
 						},
 
 						/**
@@ -3168,7 +2298,255 @@ const EASY_UTILS = (() => {
 			};
 		},
 
-		// ANCHOR Utilities: decodeCodeBlock
+		// ANCHOR Util: decodeBase64
+		// Github:   https://github.com/shdwjk/Roll20API/blob/master/Base64/Base64.js
+		// By:       The Aaron, Arcane Scriptomancer
+		// Contact:  https://app.roll20.net/users/104025/the-aaron
+		// modified from:  http://www.webtoolkit.info/
+		decodeBase64: function () {
+			return (moduleSettings) => {
+
+				const thisFuncDebugName = "decodeBase64";
+
+				// Cache Dependencies
+
+				// Base64 decoding logic
+				const base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+				const decodeUtf8 = (utf8Text) => {
+					let decodedString = "";
+					let index = 0;
+
+					while (index < utf8Text.length) {
+						const byte1 = utf8Text.charCodeAt(index);
+
+						if (byte1 < 128) {
+							decodedString += String.fromCharCode(byte1);
+							index++;
+						} else if (byte1 > 191 && byte1 < 224) {
+							const byte2 = utf8Text.charCodeAt(index + 1);
+							decodedString += String.fromCharCode(((byte1 & 31) << 6) | (byte2 & 63));
+							index += 2;
+						} else {
+							const byte2 = utf8Text.charCodeAt(index + 1);
+							const byte3 = utf8Text.charCodeAt(index + 2);
+							decodedString += String.fromCharCode(((byte1 & 15) << 12) | ((byte2 & 63) << 6) | (byte3 & 63));
+							index += 3;
+						}
+					}
+
+					return decodedString;
+				};
+
+				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+				// │                                      Main Closure                                                 │
+				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+				return ({ text }) => {
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `Before: ${text}`,
+						});
+					}
+
+					if (typeof text !== "string") {
+
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "40000",
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
+						});
+
+						return text;
+					}
+
+					try {
+						let decodedOutput = "";
+						let index = 0;
+
+						const sanitizedInput = text.replace(/[^A-Za-z0-9+/=]/g, "");
+
+						while (index < sanitizedInput.length) {
+							const encodedChar1 = base64Characters.indexOf(sanitizedInput.charAt(index++));
+							const encodedChar2 = base64Characters.indexOf(sanitizedInput.charAt(index++));
+							const encodedChar3 = base64Characters.indexOf(sanitizedInput.charAt(index++));
+							const encodedChar4 = base64Characters.indexOf(sanitizedInput.charAt(index++));
+
+							const decodedByte1 = (encodedChar1 << 2) | (encodedChar2 >> 4);
+							const decodedByte2 = ((encodedChar2 & 15) << 4) | (encodedChar3 >> 2);
+							const decodedByte3 = ((encodedChar3 & 3) << 6) | encodedChar4;
+
+							decodedOutput += String.fromCharCode(decodedByte1);
+
+							if (encodedChar3 !== 64) {
+								decodedOutput += String.fromCharCode(decodedByte2);
+							}
+							if (encodedChar4 !== 64) {
+								decodedOutput += String.fromCharCode(decodedByte3);
+							}
+						}
+
+						const output = decodeUtf8(decodedOutput);
+
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+								transUnitId: "70000",
+								message: `After: ${output}`,
+							});
+						}
+
+						return output;
+
+					} catch (err) {
+
+						// "50000": "Error: {{ remark }}"
+						const msgId = "50000";
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: msgId,
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+						});
+
+						return 1;
+					}
+				};
+			};
+		},
+
+		// ANCHOR Util: encodeBase64
+		// Github:   https://github.com/shdwjk/Roll20API/blob/master/Base64/Base64.js
+		// By:       The Aaron, Arcane Scriptomancer
+		// Contact:  https://app.roll20.net/users/104025/the-aaron
+		// modified from:  http://www.webtoolkit.info/
+		encodeBase64: function () {
+			return (moduleSettings) => {
+
+				const thisFuncDebugName = "encodeBase64";
+
+				// Cache Dependencies
+
+				// Base64 encoding logic
+				const base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+				const encodeUtf8 = (plainText) => {
+					let utf8Text = "";
+
+					for (let index = 0; index < plainText.length; index++) {
+						const charCode = plainText.charCodeAt(index);
+
+						if (charCode < 128) {
+							utf8Text += String.fromCharCode(charCode);
+						} else if (charCode > 127 && charCode < 2048) {
+							utf8Text += String.fromCharCode((charCode >> 6) | 192);
+							utf8Text += String.fromCharCode((charCode & 63) | 128);
+						} else {
+							utf8Text += String.fromCharCode((charCode >> 12) | 224);
+							utf8Text += String.fromCharCode(((charCode >> 6) & 63) | 128);
+							utf8Text += String.fromCharCode((charCode & 63) | 128);
+						}
+					}
+
+					return utf8Text;
+				};
+
+				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+				// │                                      Main Closure                                                 │
+				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+				return ({ text }) => {
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `Before: ${text}`,
+						});
+					}
+
+					if (typeof text !== "string") {
+
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "40000",
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
+						});
+
+						return text;
+					}
+
+					try {
+						let output = "";
+						let index = 0;
+
+						const utf8Text = encodeUtf8(text);
+
+						while (index < utf8Text.length) {
+							const byte1 = utf8Text.charCodeAt(index++);
+							const byte2 = utf8Text.charCodeAt(index++);
+							const byte3 = utf8Text.charCodeAt(index++);
+
+							const encodedChar1 = byte1 >> 2;
+							const encodedChar2 = ((byte1 & 3) << 4) | (byte2 >> 4);
+							const encodedChar3 = ((byte2 & 15) << 2) | (byte3 >> 6);
+							const encodedChar4 = byte3 & 63;
+
+							if (isNaN(byte2)) {
+								encodedChar3 = encodedChar4 = 64;
+							} else if (isNaN(byte3)) {
+								encodedChar4 = 64;
+							}
+
+							output += base64Characters.charAt(encodedChar1) +
+								base64Characters.charAt(encodedChar2) +
+								base64Characters.charAt(encodedChar3) +
+								base64Characters.charAt(encodedChar4);
+						}
+
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+								transUnitId: "70000",
+								message: `After: ${output}`,
+							});
+						}
+
+						return output;
+
+					} catch (err) {
+
+						// "50000": "Error: {{ remark }}"
+						const msgId = "50000";
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: msgId,
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+						});
+
+						return 1;
+					}
+				};
+			};
+		},
+
+		// ANCHOR Util: decodeCodeBlock
 		/**
 		 * @summary Decodes HTML-encoded code block content into plain text.
 		 * 
@@ -3189,28 +2567,38 @@ const EASY_UTILS = (() => {
 		decodeCodeBlock: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const thisFuncDebugName = "decodeCodeBlock";
 
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ text }) => {
-					if (typeof text !== "string") {
-						if (moduleSettings.verbose) {
 
-							logSyslogMessage({
-								severity: 7,
-								tag: "decodeCodeBlock",
-								transUnitId: "70000",
-								message: "Invalid Argument: 'text' is not a string, returning input."
-							});
-						}
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `Before: ${text}`,
+						});
+					}
+
+					if (typeof text !== "string") {
+
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "40000",
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
+						});
 
 						return text;
 					}
 
-					return text
+					const output = text
 						// Already existing replacements
 						.replace(/%%%LESSTHAN%%%/g, "&lt;")
 						.replace(/%%%GREATERTHAN%%%/g, "&gt;")
@@ -3235,11 +2623,24 @@ const EASY_UTILS = (() => {
 						.replace(/%%%RCURLY%%%/g, "&#125;") // }
 						.replace(/%%%LPAREN%%%/g, "&#40;")   // (
 						.replace(/%%%RPAREN%%%/g, "&#41;"); // )
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `After: ${output}`,
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: encodeCodeBlock
+		// ANCHOR Util: encodeCodeBlock
 		/**
 		 * @summary Encodes plain text into HTML-encoded code block content.
 		 * 
@@ -3260,28 +2661,38 @@ const EASY_UTILS = (() => {
 		encodeCodeBlock: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const thisFuncDebugName = "encodeCodeBlock";
 
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ text }) => {
-					if (typeof text !== "string") {
-						if (moduleSettings.verbose) {
 
-							logSyslogMessage({
-								severity: 7,
-								tag: "encodeCodeBlock",
-								transUnitId: "70000",
-								message: "Invalid Argument: 'text' is not a string, returning input."
-							});
-						}
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `Before: ${text}`,
+						});
+					}
+
+					if (typeof text !== "string") {
+
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "40000",
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
+						});
 
 						return text;
 					}
 
-					return text
+					const output = text
 						// Already existing replacements
 						.replace(/&/g, "%%%AMPERSAND%%%")
 						.replace(/</g, "%%%LESSTHAN%%%")
@@ -3306,11 +2717,24 @@ const EASY_UTILS = (() => {
 						.replace(/\}/g, "%%%RCURLY%%%")
 						.replace(/\(/g, "%%%LPAREN%%%")
 						.replace(/\)/g, "%%%RPAREN%%%");
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `After: ${output}`,
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: decodeNoteContent
+		// ANCHOR Util: decodeNoteContent
 		/**
 		 * @summary Decodes HTML-encoded note content into plain text. Needed when reading Roll20 content from handouts.
 		 * 
@@ -3331,29 +2755,38 @@ const EASY_UTILS = (() => {
 		decodeNoteContent: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const thisFuncDebugName = "decodeNoteContent";
 
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ text }) => {
 
-					if (typeof text !== "string") {
-						if (moduleSettings.verbose) {
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
 
-							logSyslogMessage({
-								severity: 7,
-								tag: "decodeNoteContent",
-								transUnitId: "70000",
-								message: "Invalid Argument: 'text' is not a string, returning input."
-							});
-						}
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `Before: ${text}`,
+						});
+					}
+
+					if (typeof text !== "string") {
+
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "40000",
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
+						});
 
 						return text;
 					}
 
-					return text
+					const output = text
 						// Normalize spaces that come from pasting content
 						.replace(" ", "&nbsp;")
 						.replace(/<p>/g, "")
@@ -3365,11 +2798,24 @@ const EASY_UTILS = (() => {
 						.replace(/&#39;/g, "'")
 						.replace(/&nbsp;/g, " ")
 						.replace(/&amp;/g, "&");
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `After: ${output}`,
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: encodeNoteContent
+		// ANCHOR Util: encodeNoteContent
 		/**
 		 * @summary Encodes plain text into HTML-encoded note content. Content needs encoded when writing it to Roll20
 		 * handout or character bios/notes sections.
@@ -3391,27 +2837,38 @@ const EASY_UTILS = (() => {
 		encodeNoteContent: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const thisFuncDebugName = "encodeNoteContent";
 
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ text }) => {
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `Before: ${text}`,
+						});
+					}
+
 					if (typeof text !== "string") {
-						if (moduleSettings.verbose) {
-							logSyslogMessage({
-								severity: 7,
-								tag: "encodeNoteContent",
-								transUnitId: "70000",
-								message: "Invalid Argument: 'text' is not a string, returning input."
-							});
-						}
+
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "40000",
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: "text !== string" } })
+						});
 
 						return text;
 					}
 
-					return text
+					const output = text
 						.replace(" ", "&nbsp;")
 						.replace(/&amp;/g, "&")
 						.replace(/&nbsp;/g, " ")
@@ -3422,11 +2879,24 @@ const EASY_UTILS = (() => {
 						.replace(/<br>/g, "\n")
 						.replace(/<\/p>/g, "")
 						.replace(/<p>/g, "");
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: `After: ${output}`,
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: getGLobalSettings
+		// ANCHOR Util: getGLobalSettings
 		/**
 		 * @summary Retrieves the global settings for the module.
 		 * 
@@ -3444,19 +2914,33 @@ const EASY_UTILS = (() => {
 		 * // Output: "EASY_VAULT"
 		 */
 		getGlobalSettings: function () {
-			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "getGlobalSettings";
+
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return () => {
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: JSON.stringify(globalSettings),
+						});
+					}
+
 					return globalSettings;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: getSharedForge
+		// ANCHOR Util: getSharedForge
 		/**
 		 * @summary Retrieves the global `EASY_FORGE` registry. Forges do not persist between sessions.
 		 * 
@@ -3474,26 +2958,33 @@ const EASY_UTILS = (() => {
 		 * // Output: { test: 1 }
 		 */
 		getSharedForge: function () {
-			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "getSharedForge";
+
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return () => {
-					// FIXME Dynamically load forge based on global settings.
-					// Because the sandbox does not have a global, we have to access the forge object by name.
-					// One alternative is to maintain the same name for a Forge object and manage multiple forges.
-					// Todo so means adding extra logic to factories and still the global multiple factory containing
-					// forge would still need to be a consistent name. At this moment this is no added benefit in
-					// managing multiple forges under a global object, therefore we access a singleton global Forge, and
-					// use the same name.
-					return EASY_FORGE;
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: JSON.stringify(globalSettings.sharedForge),
+						});
+					}
+
+					return globalSettings.sharedForge;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: getSharedVault
+		// ANCHOR Util: getSharedVault
 		/**
 		 * @summary Retrieves or initializes the shared vault state in Roll20.
 		 * 
@@ -3516,32 +3007,31 @@ const EASY_UTILS = (() => {
 		getSharedVault: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const thisFuncDebugName = "getSharedVault";
 
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return () => {
-					const vaultName = globalSettings.sharedVaultName;
-					if (!state[vaultName]) {
-						state[vaultName] = {};
-						if (moduleSettings.verbose) {
-							logSyslogMessage({
-								severity: 7,
-								tag: "getSharedVault",
-								transUnitId: "70000",
-								message: `Not Found: Shared vault undefined, initializing 'state.${vaultName}'.`,
-							});
-						}
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: JSON.stringify(globalSettings.sharedVault),
+						});
 					}
 
-					return state[vaultName];
+					return globalSettings.sharedVault;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: logSyslogMessage
+		// ANCHOR Util: logSyslogMessage
 		/**
 		 * @summary Logs a structured message with severity, module tagging, and a timestamp.
 		 * 
@@ -3579,37 +3069,49 @@ const EASY_UTILS = (() => {
 		 */
 		logSyslogMessage: function () {
 			return (moduleSettings) => {
-
+				// Cache Dependencies
 				const getSyslogTimestamp = () => { return new Date().toISOString(); };
 
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ severity, tag, transUnitId, message }) => {
-
 					const severityMap = {
 						3: "ERROR",
 						4: "WARN",
 						6: "INFO",
 						7: "DEBUG",
 					};
-					const normalizedSeverity = severityMap[severity] ? severity : 6;
+
+					const reverseSeverityMap = Object.fromEntries(
+						Object.entries(severityMap).map(([key, value]) => { return [value, parseInt(key)]; })
+					);
+
+					// Normalize severity
+					let normalizedSeverity;
+					if (typeof severity === "number" && severityMap[severity]) {
+						normalizedSeverity = severity;
+					} else if (typeof severity === "string" && reverseSeverityMap[severity.toUpperCase()]) {
+						normalizedSeverity = reverseSeverityMap[severity.toUpperCase()];
+					} else {
+						normalizedSeverity = 6; // Default to "INFO" if invalid
+					}
+
 					const moduleName = moduleSettings?.readableName || "UNKNOWN_MODULE";
 					const logMessage = `<${severityMap[normalizedSeverity]}> ${getSyslogTimestamp()} [${moduleName}](${tag}): {"transUnitId": ${transUnitId}, "message": "${message}"}`;
 
 					try {
 						log(logMessage);
 
-						return logMessage;
-					}
-					catch (err) {
-						log(err);
+						return 0;
+					} catch (err) {
+						return 1;
 					}
 				};
 			};
 		},
 
-		// ANCHOR Utilities: parseChatCommands
+		// ANCHOR Util: parseChatCommands
 		/**
 		 * @summary Parses chat input into a map of main and subcommands with their arguments.
 		 * 
@@ -3635,9 +3137,11 @@ const EASY_UTILS = (() => {
 		 * // Output: [["--alert", []], ["--lang", ["frFR"]]]
 		 */
 		parseChatCommands: function () {
-			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "parseChatCommands";
+
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -3655,12 +3159,25 @@ const EASY_UTILS = (() => {
 						commandMap.set(`--${cleanCommand}`, args);
 					});
 
-					return commandMap;
+					const output = commandMap;
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: JSON.stringify(output),
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: parseChatSubcommands
+		// ANCHOR Util: parseChatSubcommands
 		/**
 		 * @summary Parses subcommands into key-value pairs or flags.
 		 * 
@@ -3685,9 +3202,11 @@ const EASY_UTILS = (() => {
 		 * // Output: { key: "value", flag: true, setting: "enabled" }
 		 */
 		parseChatSubcommands: function () {
-			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "parseChatSubcommands";
+
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -3703,12 +3222,25 @@ const EASY_UTILS = (() => {
 						}
 					});
 
-					return subcommandMap;
+					const output = subcommandMap;
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: JSON.stringify(output),
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		// ANCHOR Utilities: replacePlaceholders
+		// ANCHOR Util: replacePlaceholders
 		/**
 		 * @summary Replaces placeholders in a string with token values and evaluates inline expressions.
 		 * 
@@ -3738,8 +3270,11 @@ const EASY_UTILS = (() => {
 		 * // Output: "Hello World! Your roll is <span class=\"inline-rolls\">[[1d20+5]]</span>."
 		 */
 		replacePlaceholders: function () {
-			// eslint-disable-next-line no-unused-vars
 			return (moduleSettings) => {
+
+				const thisFuncDebugName = "replacePlaceholders";
+
+				// Cache Dependencies
 
 				/**
 				 * @function resolveCssVar
@@ -3785,7 +3320,9 @@ const EASY_UTILS = (() => {
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
 				return ({ text, expressions = {}, cssVars = {} }) => {
 
-					/* Resolve CSS variables in the `cssVars` themselves first. Vars assigned values based on other vars
+					let output = "";
+
+					/* Resolve CSS variables in the `cssVars` first as some CSS variable values are other CSS variables
 					================================================================================================= */
 					const resolvedCssVars = {};
 					for (const [key, value] of Object.entries(cssVars)) {
@@ -3794,7 +3331,7 @@ const EASY_UTILS = (() => {
 
 					/* Replace placeholders in text
 					================================================================================================= */
-					return text
+					output = text
 						.replace(/{{(.*?)}}/g, (_, key) => {
 							return expressions[key.trim()] || "";
 						})
@@ -3806,13 +3343,26 @@ const EASY_UTILS = (() => {
 						.replace(/var\((--[\w-]+)\)/g, (_, cssVar) => {
 							return resolvedCssVars[cssVar.trim()] || `var(${cssVar.trim()})`;
 						});
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: output,
+						});
+					}
+
+					return output;
 				};
 			};
 		},
 
-		/* !SECTION End of Utilities: Low Level ***********************************************************************/
+		// !SECTION End of Inner Methods: Low Level Utilities
+		// SECTION: Inner Methods: High Level Utilities
 
-		/* SECTION: Utilities: High Level *****************************************************************************/
 		/**
 		 * @summary This section contains essential, reusable functions that handle complex tasks and module-level operations.
 		 *
@@ -3823,7 +3373,722 @@ const EASY_UTILS = (() => {
 		 *   error to the Roll20 API to ensure proper debugging and system stability.
 		 */
 
-		// ANCHOR Utilities: renderTemplateAsync
+		/**
+		 * @summary Basic, reusable, and stateless functions for small, specific tasks. 
+		 * 
+		 * - Support higher-level functions but can be used independently.
+		 * - Do not require `moduleSettings` but include it for consistency and optional logging.
+		 * - Handle errors gracefully (e.g., return default values or log warnings) without throwing exceptions.
+		 */
+
+		// ANCHOR Util: applyCssToHtmlJson
+		/**
+		 * @summary Applies CSS rules (provided as JSON) to an HTML-like structure (also provided as JSON).
+		 * 
+		 * - Parses and processes CSS rules, including `:root` variables, selectors, and pseudo-classes.
+		 * - Applies matching CSS styles as inline styles to nodes in the HTML JSON structure.
+		 * - Resolves `var(--css-variable)` values from `:root` variables or default values.
+		 * 
+		 * @function applyCssToHtmlJson
+		 * @memberof EASY_UTILS
+		 * @returns {Function} A higher-order function that takes `moduleSettings` and returns a function for applying CSS.
+		 * 
+		 * @param {Object} params - Parameters for the function.
+		 * @param {Array|Object} params.cssJson - The JSON representation of the CSS rules.
+		 * @param {Array|Object} params.htmlJson - The JSON representation of the HTML structure.
+		 * 
+		 * @returns {string} The resulting HTML JSON with styles applied as inline styles.
+		 * 
+		 * @example
+		 * const cssJson = [
+		 *   { selector: ":root", style: { "--main-color": "blue" } },
+		 *   { selector: "div", style: { color: "var(--main-color)", background: "white" } }
+		 * ];
+		 * const htmlJson = [
+		 *   {
+		 *     element: "div",
+		 *     attributes: { id: "rootContainer" },
+		 *     children: [
+		 *       { element: "span", attributes: { class: ["highlight"] }, children: [{ element: "text", innerText: "Hello" }] }
+		 *     ]
+		 *   }
+		 * ];
+		 * 
+		 * const updatedHtmlJson = applyCssToHtmlJson()(moduleSettings)({ cssJson, htmlJson });
+		 * log(updatedHtmlJson);
+		 * // Output: JSON with styles applied to matching nodes
+		 * // [
+		 * //   {
+		 * //     element: "div",
+		 * //     attributes: {
+		 * //       id: "rootContainer",
+		 * //       style: { color: "blue", background: "white" }
+		 * //     },
+		 * //     children: [...]
+		 * //   }
+		 * // ]
+		 */
+		applyCssToHtmlJson: function () {
+			return (moduleSettings) => {
+
+				const thisFuncDebugName = "applyCssToHtmlJson";
+
+				// Cache Dependencies
+				const replacePlaceholders = EASY_UTILS.getFunction({ functionName: "replacePlaceholders", moduleSettings, });
+
+				// Subroutine: preprocessRootRules
+				/**
+				 * @function preprocessRootRules
+				 * @summary Extracts CSS variables from the `:root` selector and applies non-variable properties 
+				 *          to the `#rootContainer` element in the HTML tree. It also removes the `:root` rule 
+				 *          from the CSS rules array for subsequent processing.
+				 *
+				 * @param {Array<Object>} cssRules - The array of CSS rule objects, where each rule contains a `selector` and `style` object.
+				 * @param {Array|Object} htmlTree - The HTML structure in JSON format, either as a single root node or an array of nodes.
+				 * 
+				 * @returns {Object} An object containing:
+				 *                   - `rootVariables` {Object}: Extracted CSS variables (key-value pairs from `:root`).
+				 *                   - `updatedRules` {Array<Object>}: The remaining CSS rules after removing the `:root` rule.
+				 */
+				function preprocessRootRules(cssRules, htmlTree) {
+					const rootIndex = cssRules.findIndex((r) => { return r.selector === ":root"; });
+					if (rootIndex < 0) {
+						return { rootVariables: {}, updatedRules: cssRules };
+					}
+
+					const rootRule = cssRules[rootIndex];
+					const rootStyle = rootRule.style ?? {};
+
+					// Separate variables from normal css declarations
+					const rootVariables = {};
+					const rootNonVars = {};
+					for (const [propKey, propValue] of Object.entries(rootStyle)) {
+						if (propKey.startsWith("--")) {
+							rootVariables[propKey] = propValue;
+						} else {
+							rootNonVars[propKey] = propValue;
+						}
+					}
+
+					// See if #rootContainer exists
+					const allNodes = flattenHtmlTree(htmlTree);
+					const rootContainerNode = allNodes.find(
+						(node) => { return node.attributes?.id === "rootContainer"; }
+					);
+					if (rootContainerNode) {
+						rootContainerNode.attributes = rootContainerNode.attributes || {};
+						rootContainerNode.attributes.style =
+							rootContainerNode.attributes.style || {};
+						mergeStyles(rootContainerNode.attributes.style, rootNonVars, rootVariables);
+					}
+
+					// Remove :root rule
+					const updatedRules = cssRules.filter((r) => { return r.selector !== ":root"; });
+
+					return { rootVariables, updatedRules };
+				}
+
+				// Subroutine: flattenHtmlTree
+				/**
+				 * @function flattenHtmlTree
+				 * @summary Depth-first traversal to collect all nodes in one flat array.
+				 *          Also adds `.parentNode` to each node.
+				 */
+				function flattenHtmlTree(nodeOrArray, results = [], parent = null) {
+					if (Array.isArray(nodeOrArray)) {
+						for (const child of nodeOrArray) {
+							flattenHtmlTree(child, results, parent);
+						}
+					} else if (nodeOrArray && typeof nodeOrArray === "object") {
+						nodeOrArray.parentNode = parent;
+						results.push(nodeOrArray);
+						if (Array.isArray(nodeOrArray.children)) {
+							for (const c of nodeOrArray.children) {
+								flattenHtmlTree(c, results, nodeOrArray);
+							}
+						}
+					}
+
+					return results;
+				}
+
+				// Subroutine: tokenizeSelector
+				/**
+				 * @function tokenizeSelector
+				 * @summary Splits a CSS selector string by `,` into groups, then parses each
+				 *          group to handle space (descendant) and `>` (direct child).
+				 *
+				 * @example
+				 *   "ul p, .class #id > span"
+				 *   => an array of chains, each chain is an array of
+				 *      { combinator: " " or ">", segment: "..." }
+				 * 
+				 *   For instance: "ul p" => [
+				 *       { combinator: null, segment: "ul" },
+				 *       { combinator: " ", segment: "p" }
+				 *   ]
+				 */
+				function tokenizeSelector(selector) {
+					// First, split by commas to handle multiple selectors:
+					const groups = selector.split(",").map((s) => { return s.trim(); });
+
+					// For each group, parse out direct child (>) vs descendant (space).
+					// We'll do a simple approach: split on whitespace or '>' to detect combinators.
+					const chainsArray = [];
+
+					for (const group of groups) {
+						const tokens = splitSelectorGroup(group);
+						// tokens might look like:
+						//   [
+						//     { combinator: null, segment: "ul" },
+						//     { combinator: " ", segment: "p" }
+						//   ]
+						chainsArray.push(tokens);
+					}
+
+					return chainsArray;
+				}
+
+				// Subroutine: splitSelectorGroup
+				/**
+				 * @function splitSelectorGroup
+				 * @summary Splits a single CSS selector group (no commas) into an array of objects, 
+				 *          each containing a `combinator` and a `segment`. This helps differentiate
+				 *          between direct child (`>`) and descendant (` `) relationships in CSS selectors.
+				 *
+				 * @param {string} group - A single CSS selector group without commas (e.g., "ul > li p").
+				 *
+				 * @returns {Array<Object>} An array of objects, where each object has:
+				 *                          - `combinator` {string|null}: The relationship between the current and next segment:
+				 *                            - `null` for the first segment.
+				 *                            - `" "` for descendant combinators (space-separated).
+				 *                            - `">"` for direct child combinators.
+				 *                          - `segment` {string}: The CSS selector part (e.g., "ul", "li", "p").
+				 *
+				 * @example
+				 * const group = "ul > li p";
+				 * const result = splitSelectorGroup(group);
+				 * console.log(result);
+				 * // Output:
+				 * // [
+				 * //   { combinator: null, segment: "ul" },
+				 * //   { combinator: ">", segment: "li" },
+				 * //   { combinator: " ", segment: "p" }
+				 * // ]
+				 *
+				 * @example
+				 * const group = "div > .class #id";
+				 * const result = splitSelectorGroup(group);
+				 * console.log(result);
+				 * // Output:
+				 * // [
+				 * //   { combinator: null, segment: "div" },
+				 * //   { combinator: ">", segment: ".class" },
+				 * //   { combinator: " ", segment: "#id" }
+				 * // ]
+				 */
+				function splitSelectorGroup(group) {
+					// Easiest is to insert space around '>' to ensure we can split on whitespace:
+					// "ul>li p" => "ul > li p"
+					// Then we split by whitespace to get tokens: ["ul", ">", "li", "p"]
+					// We'll walk them to see if they're ">" or a segment.
+					const spaced = group.replace(/>/g, " > ");
+					const rawTokens = spaced.split(/\s+/).filter(Boolean);
+
+					const results = [];
+					// We'll track the "current combinator" for the next segment.
+					let combinator = null;
+					for (const token of rawTokens) {
+						if (token === ">") {
+							// Next segment is a direct child
+							combinator = ">";
+						} else {
+							// It's a segment
+							results.push({ combinator, segment: token });
+							combinator = " "; // default any future segments to "descendant" if not '>'
+						}
+					}
+
+					// If the first item is a segment with combinator = null => it's the first part
+					// all subsequent ones get either ">" or " "
+					return results;
+				}
+
+				// Subroutine: parseSegment
+				/**
+				 * @function parseSegment
+				 * @summary Parses a single CSS selector segment to extract its components, such as tag name, ID, classes, attributes, and pseudo-classes.
+				 *
+				 * @param {string} segment - A CSS selector segment (e.g., "div#main.container[role='button']:nth-child(2):empty").
+				 *
+				 * @returns {Object} An object containing the parsed information:
+				 *                   - `tag` {string|null}: The tag name (e.g., "div").
+				 *                   - `id` {string|null}: The ID (e.g., "main").
+				 *                   - `classes` {Array<string>}: A list of classes (e.g., ["container"]).
+				 *                   - `attributes` {Object}: A map of attribute key-value pairs (e.g., { role: "button" }).
+				 *                   - `pseudo` {Object}:
+				 *                     - `nthChild` {string|number|null}: Specifies the `:nth-child()` pseudo-class value (e.g., "even", "odd", or a number).
+				 *                     - `firstChild` {boolean}: Whether the segment specifies `:first-child`.
+				 *                     - `lastChild` {boolean}: Whether the segment specifies `:last-child`.
+				 *                     - `empty` {boolean}: Whether the segment specifies `:empty`.
+				 */
+				function parseSegment(segment) {
+					const data = {
+						tag: null,
+						id: null,
+						classes: [],
+						attributes: {},
+						pseudo: {
+							nthChild: null,
+							firstChild: false,
+							lastChild: false,
+							empty: false,
+						},
+					};
+
+					let working = segment.trim();
+
+					// [attr="val"]
+					const attrRegex = /\[([\w-]+)\s*=\s*"([^"]+)"\]/g;
+					let attrMatch;
+					while ((attrMatch = attrRegex.exec(working)) !== null) {
+						const attrKey = attrMatch[1];
+						const attrVal = attrMatch[2];
+						data.attributes[attrKey] = attrVal;
+					}
+					working = working.replace(attrRegex, "");
+
+					// #id
+					const idRegex = /#([\w-]+)/;
+					const idMatch = idRegex.exec(working);
+					if (idMatch) {
+						data.id = idMatch[1];
+						working = working.replace(idRegex, "");
+					}
+
+					// .class
+					const classRegex = /\.([\w-]+)/g;
+					let cMatch;
+					while ((cMatch = classRegex.exec(working)) !== null) {
+						data.classes.push(cMatch[1]);
+					}
+					working = working.replace(classRegex, "");
+
+					// :first-child
+					if (/:first-child/.test(working)) {
+						data.pseudo.firstChild = true;
+						working = working.replace(":first-child", "");
+					}
+					// :last-child
+					if (/:last-child/.test(working)) {
+						data.pseudo.lastChild = true;
+						working = working.replace(":last-child", "");
+					}
+
+					// :nth-child(even|odd|number)
+					const nthRegex = /:nth-child\(\s*(even|odd|\d+)\s*\)/;
+					const nthMatch = nthRegex.exec(working);
+					if (nthMatch) {
+						const val = nthMatch[1];
+						if (val === "even" || val === "odd") {
+							data.pseudo.nthChild = val;
+						} else {
+							data.pseudo.nthChild = parseInt(val, 10);
+						}
+						working = working.replace(nthRegex, "");
+					}
+
+					// :empty
+					if (/:empty/.test(working)) {
+						data.pseudo.empty = true;
+						working = working.replace(":empty", "");
+					}
+
+					// leftover => tag
+					const leftover = working.trim();
+					if (leftover) {
+						data.tag = leftover;
+					}
+
+					return data;
+				}
+
+				// ---------------------------------------------------------------------------
+				// Subroutine doesNodeMatchSegment
+				// ---------------------------------------------------------------------------
+				function doesNodeMatchSegment(node, segmentData) {
+					// 1) tag
+					if (segmentData.tag && segmentData.tag !== node.element) {
+						return false;
+					}
+					// 2) id
+					if (segmentData.id && node.attributes?.id !== segmentData.id) {
+						return false;
+					}
+					// 3) classes
+					if (segmentData.classes.length > 0) {
+						const nodeClasses = node.attributes?.classList || [];
+						for (const neededClass of segmentData.classes) {
+							if (!nodeClasses.includes(neededClass)) {
+								return false;
+							}
+						}
+					}
+					// 4) attributes
+					for (const [k, v] of Object.entries(segmentData.attributes)) {
+						if (node.attributes?.[k] !== v) {
+							return false;
+						}
+					}
+					// 5) pseudo
+					const { firstChild, lastChild, nthChild, empty } = segmentData.pseudo;
+
+					// :empty => must have no children
+					if (empty) {
+						const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+						if (hasChildren) {
+							return false;
+						}
+					}
+
+					// handle :first-child, :last-child, :nth-child
+					if (firstChild || lastChild || nthChild !== null) {
+						const parent = node.parentNode;
+						if (!parent || !Array.isArray(parent.children)) {
+							return false;
+						}
+						const idx = parent.children.indexOf(node); // 0-based
+						if (firstChild && idx !== 0) {
+							return false;
+						}
+						if (lastChild && idx !== parent.children.length - 1) {
+							return false;
+						}
+						if (nthChild !== null) {
+							if (nthChild === "odd") {
+								if (idx % 2 !== 0) return false;
+							} else if (nthChild === "even") {
+								if (idx % 2 !== 1) return false;
+							} else {
+								// numeric => e.g. 3 => idx=2
+								if (idx !== nthChild - 1) return false;
+							}
+						}
+					}
+
+					return true;
+				}
+
+				// ---------------------------------------------------------------------------
+				// Subroutine filterNodesBySegment
+				// ---------------------------------------------------------------------------
+				function filterNodesBySegment(nodes, segmentData) {
+					const results = [];
+					for (const n of nodes) {
+						if (doesNodeMatchSegment(n, segmentData)) {
+							results.push(n);
+						}
+					}
+
+					return results;
+				}
+
+				// ---------------------------------------------------------------------------
+				// Descendant Gather Helpers
+				// ---------------------------------------------------------------------------
+				/**
+				 * Returns *all descendants* of `node` (including children, grandchildren, etc.).
+				 * We'll gather them in a flat list.
+				 */
+				function gatherDescendants(node) {
+					const result = [];
+					if (!node.children) return result;
+					for (const child of node.children) {
+						result.push(child);
+						result.push(...gatherDescendants(child));
+					}
+
+					return result;
+				}
+
+				// Subroutine: filterByChain
+				/**
+				 * @function filterByChain
+				 * @summary Given a single array of steps (with combinator/segment pairs), find all matching nodes.
+				 * @param {Object|Array<Object>} htmlRoot - The root of the HTML JSON tree.
+				 * @param {Array<{combinator: string|null, segment: string}>} chain
+				 */
+				function filterByChain(htmlRoot, chain) {
+					// Flatten tree once
+					const allNodes = flattenHtmlTree(htmlRoot, []);
+					// Parse the first segment
+					// eslint-disable-next-line no-unused-vars
+					const { segment: firstSeg, combinator: firstComb } = chain[0];
+					const firstData = parseSegment(firstSeg);
+
+					// We'll filter from all nodes for the first segment
+					let currentSet = filterNodesBySegment(allNodes, firstData);
+
+					// Process subsequent steps
+					for (let i = 1; i < chain.length; i++) {
+						const { combinator, segment } = chain[i];
+						const segData = parseSegment(segment);
+						const nextSet = [];
+
+						// For each node in currentSet, we look for matches among either its direct children or all descendants
+						for (const matchedNode of currentSet) {
+							// direct child combinator '>'
+							if (combinator === ">") {
+								if (Array.isArray(matchedNode.children)) {
+									for (const childNode of matchedNode.children) {
+										if (doesNodeMatchSegment(childNode, segData)) {
+											nextSet.push(childNode);
+										}
+									}
+								}
+							}
+							// descendant combinator ' '
+							else {
+								// gather *all* descendants
+								const descendants = gatherDescendants(matchedNode);
+								// filter them
+								const matched = filterNodesBySegment(descendants, segData);
+								nextSet.push(...matched);
+							}
+						}
+						currentSet = nextSet;
+					}
+
+					return currentSet;
+				}
+
+				// Subroutine: filterBySelector
+				/**
+				 * @function filterBySelector
+				 * @summary Handles multiple comma-separated groups; each group can have
+				 *          ">" or " " (descendant) combinators.
+				 */
+				function filterBySelector(htmlRoot, selector) {
+					const chainsArray = tokenizeSelector(selector);
+					const resultSet = new Set();
+
+					// For each chain (one group of the selector string), get matching nodes
+					for (const chain of chainsArray) {
+						const matched = filterByChain(htmlRoot, chain);
+						for (const node of matched) {
+							resultSet.add(node);
+						}
+					}
+
+					return [...resultSet];
+				}
+
+				// ---------------------------------------------------------------------------
+				// Subroutine mergeStyles
+				// ---------------------------------------------------------------------------
+				function mergeStyles(nodeStyle, newStyles, rootVars) {
+					for (const [prop, val] of Object.entries(newStyles)) {
+						nodeStyle[prop] = replacePlaceholders({ text: val, cssVars: rootVars });
+					}
+				}
+
+				// ---------------------------------------------------------------------------
+				// Subroutine removeParentRefs
+				// ---------------------------------------------------------------------------
+				function removeParentRefs(objOrArray) {
+					if (Array.isArray(objOrArray)) {
+						for (const item of objOrArray) {
+							removeParentRefs(item);
+						}
+					} else if (objOrArray && typeof objOrArray === "object") {
+						delete objOrArray.parentNode;
+						if (Array.isArray(objOrArray.children)) {
+							for (const child of objOrArray.children) {
+								removeParentRefs(child);
+							}
+						}
+					}
+				}
+
+				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+				// │                                      Main Closure                                                 │
+				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+				return ({ cssJson, htmlJson }) => {
+					try {
+						// Convert inputs if needed
+						let cssRules = typeof cssJson === "string" ? JSON.parse(cssJson) : cssJson;
+						let htmlTree = typeof htmlJson === "string" ? JSON.parse(htmlJson) : htmlJson;
+
+						if (!Array.isArray(cssRules)) {
+							cssRules = [];
+						}
+						if (!Array.isArray(htmlTree)) {
+							htmlTree = [htmlTree];
+						}
+
+						// Preprocess :root => rootVariables + #rootContainer
+						const { rootVariables, updatedRules } = preprocessRootRules(cssRules, htmlTree);
+						cssRules = updatedRules;
+
+						// For each rule => find matched => merge style
+						for (const rule of cssRules) {
+							const { selector, style } = rule;
+							// filter nodes
+							const matchedNodes = filterBySelector(htmlTree, selector);
+							// merge style
+							for (const node of matchedNodes) {
+								node.attributes = node.attributes || {};
+								node.attributes.style = node.attributes.style || {};
+								mergeStyles(node.attributes.style, style, rootVariables);
+							}
+						}
+
+						// remove .parentNode
+						removeParentRefs(htmlTree);
+						const output = JSON.stringify(htmlTree, null, 2);
+
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+								transUnitId: "70000",
+								message: output,
+							});
+						}
+
+						return output;
+
+					} catch (err) {
+
+						// "50000": "Error: {{ remark }}"
+						const msgId = "50000";
+						Utils.logSyslogMessage({
+							severity: "ERROR",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: msgId,
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+						});
+
+						return htmlJson;
+					}
+				};
+			};
+		},
+
+		// ANCHOR Util: handleApiCall
+		handleApiCall: function () {
+			return (moduleSettings) => {
+
+				const thisFuncDebugName = "handleApiCall";
+
+				// Cache Dependencies
+
+				const parseChatCommands = EASY_UTILS.getFunction({ functionName: "parseChatCommands", moduleSettings });
+				const parseChatSubcommands = EASY_UTILS.getFunction({ functionName: "parseChatSubcommands", moduleSettings });
+				const whisperAlertMessageAsync = EASY_UTILS.getFunction({ functionName: "whisperAlertMessageAsync", moduleSettings });
+
+				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+				// │                                      Main Closure                                                 │
+				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+				return ({ actionMap, apiCall }) => {
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: "apiCall: " + JSON.stringify(apiCall),
+						});
+					}
+
+					// Get the player object, name, and GM status
+					const playerObject = apiCall.playerid ? getObj("player", apiCall.playerid) : null;
+					const playerName = playerObject ? playerObject.get("_displayname").replace(/\(GM\)/g, "").trim() : "Unknown Player";
+					const isPlayerGM = playerObject && playerIsGM(apiCall.playerid);
+
+					// Initialize msgDetails
+					const msgDetails = {
+						schema: "0.0.1",
+						raw: apiCall,
+						commandMap: parseChatCommands({
+							apiCallContent: apiCall.content,
+						}),
+						isGm: isPlayerGM,
+						callerId: playerObject ? playerObject.get("_id") : null,
+						callerName: playerName,
+						selectedIds: [],
+					};
+
+					// Handle selected tokens or --ids command
+					if (msgDetails.commandMap.has("--ids")) {
+						// Use --ids and remove from the command map
+						msgDetails.selectedIds = msgDetails.commandMap.get("--ids");
+						msgDetails.commandMap.delete("--ids");
+					} else if (apiCall.selected && apiCall.selected.length > 0) {
+						// Use selected tokens if no --ids is provided
+						msgDetails.selectedIds = apiCall.selected.map((selection) => { return selection._id; });
+					}
+
+					// Categorize commands into valid and invalid
+					const validCommands = [];
+					const invalidCommands = [];
+
+					msgDetails.commandMap.forEach((args, commandName) => {
+						if (actionMap.hasOwnProperty(commandName)) {
+							validCommands.push({ commandName, args });
+						} else {
+							invalidCommands.push(commandName);
+						}
+					});
+
+					// Execute valid commands or default
+					if (validCommands.length === 0 && invalidCommands.length === 0) {
+						// Default to the menu action if no valid or invalid commands are present
+						actionMap["--default"](msgDetails, {});
+					} else {
+						// Process valid commands
+						validCommands.forEach(({ commandName, args }) => {
+							const parsedArgs = parseChatSubcommands({ subcommands: args });
+							actionMap[commandName](msgDetails, parsedArgs);
+						});
+
+						// Handle invalid commands
+						if (invalidCommands.length > 0) {
+
+							const whisperArguments = {
+								from: moduleSettings.readableName,
+								to: msgDetails.callerName,
+								toId: msgDetails.callerId,
+								severity: "ERROR",
+								apiCallContent: msgDetails.raw.content,
+								remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x03B6FF6E" })}`
+							};
+
+							whisperAlertMessageAsync(whisperArguments);
+						}
+					}
+
+					// Debug logging if desired
+					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+						Utils.logSyslogMessage({
+							severity: "DEBUG",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+							transUnitId: "70000",
+							message: "msgDetails: " + JSON.stringify(msgDetails),
+						});
+					}
+
+					return msgDetails;
+				};
+			};
+		},
+
+		// ANCHOR Util: renderTemplateAsync
 		/**
 		 * @summary Asynchronously renders an alert message template and whispers it to a player in Roll20.
 		 * @function whisperAlertMessageAsync
@@ -3853,8 +4118,9 @@ const EASY_UTILS = (() => {
 		renderTemplateAsync: function () {
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "renderTemplateAsync";
+
 				// Cache Dependencies
-				// const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
 				const templateFactory = EASY_UTILS.getFunction({ functionName: "createTemplateFactory", moduleSettings });
 				const themeFactory = EASY_UTILS.getFunction({ functionName: "createThemeFactory", moduleSettings });
 				const applyCssToHtmlJson = EASY_UTILS.getFunction({ functionName: "applyCssToHtmlJson", moduleSettings });
@@ -3881,16 +4147,28 @@ const EASY_UTILS = (() => {
 
 						const output = convertJsonToHtml({ htmlJson: decodeCodeBlock({ text: styledJson }) });
 
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+								transUnitId: "70000",
+								message: output,
+							});
+						}
+
 						return output;
+
 					} catch (err) {
 
 						// "50000": "Error: {{ remark }}"
 						const msgId = "50000";
-						logSyslogMessage({
+						Utils.logSyslogMessage({
 							severity: "ERROR",
-							tag: "renderTemplateAsync",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
 							transUnitId: msgId,
-							message: PhraseFactory.get({ transUnitId: msgId, remark: err })
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
 						});
 
 						return 1;
@@ -3899,7 +4177,7 @@ const EASY_UTILS = (() => {
 			};
 		},
 
-		// ANCHOR Utilities: whisperAlertMessageAsync
+		// ANCHOR Util: whisperAlertMessageAsync
 		/**
 		 * @summary Creates a function to asynchronously send an alert message to a player in Roll20 chat.
 		 * 
@@ -3934,8 +4212,9 @@ const EASY_UTILS = (() => {
 		whisperAlertMessageAsync: function () {
 			return (moduleSettings) => {
 
+				const thisFuncDebugName = "whisperAlertMessageAsync";
+
 				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
 				const renderTemplateAsync = EASY_UTILS.getFunction({ functionName: "renderTemplateAsync", moduleSettings });
 				const whisperPlayerMessage = EASY_UTILS.getFunction({ functionName: "whisperPlayerMessage", moduleSettings });
 				const PhraseFactory = EASY_UTILS.getFunction({ functionName: "createPhraseFactory", moduleSettings });
@@ -3984,9 +4263,14 @@ const EASY_UTILS = (() => {
 							// Content
 							// "0x0004E2AF": "information"
 							title: PhraseFactory.get({ playerId: toId, transUnitId: "0x0004E2AF" }),
-							description: "",
-							code: "",
-							footer: ""
+
+							// "0x02B2451A": "You entered the following command:",
+							description: PhraseFactory.get({ playerId: toId, transUnitId: "0x02B2451A" }),
+							code: apiCallContent,
+
+							// "0x0834C8EE": "If you continue to experience issues contact the module author ({{ author }})."
+							footer: PhraseFactory.get({ playerId: toId, transUnitId: "0x0834C8EE", expressions: { author: `${moduleSettings.author}` } })
+
 						},
 						debug: {
 							type: 7, // "DEBUG"
@@ -3997,9 +4281,11 @@ const EASY_UTILS = (() => {
 							title: PhraseFactory.get({ playerId: toId, transUnitId: "0x000058E0" }),
 
 							// "0x02B2451A": "You entered the following command:",
-							description: "",
+							description: PhraseFactory.get({ playerId: toId, transUnitId: "0x02B2451A" }),
 							code: apiCallContent,
-							footer: ""
+
+							// "0x0834C8EE": "If you continue to experience issues contact the module author ({{ author }})."
+							footer: PhraseFactory.get({ playerId: toId, transUnitId: "0x0834C8EE", expressions: { author: `${moduleSettings.author}` } })
 						}
 					};
 
@@ -4014,6 +4300,7 @@ const EASY_UTILS = (() => {
 					const alertConfig = typeEnum[resolvedSeverity] || typeEnum.info;
 
 					const alertContent = {
+						"alert-class": alertConfig.type,
 						title: alertConfig.title,
 						description: alertConfig.description,
 						code: alertConfig.code,
@@ -4034,19 +4321,29 @@ const EASY_UTILS = (() => {
 							cssVars: alertPalette,
 						});
 
-
 						whisperPlayerMessage({ from, to, message: styledMessage });
+
+						// Debug logging if desired
+						if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
+
+							Utils.logSyslogMessage({
+								severity: "DEBUG",
+								tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+								transUnitId: "70000",
+								message: styledMessage,
+							});
+						}
 
 						return 0;
 					} catch (err) {
 
 						// "50000": "Error: {{ remark }}"
 						const msgId = "50000";
-						logSyslogMessage({
+						Utils.logSyslogMessage({
 							severity: "ERROR",
-							tag: "whisperAlertMessageAsync",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
 							transUnitId: msgId,
-							message: PhraseFactory.get({ transUnitId: msgId, remark: err })
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
 						});
 
 						return 1;
@@ -4055,7 +4352,7 @@ const EASY_UTILS = (() => {
 			};
 		},
 
-		// ANCHOR Utilities: whisperPlayerMessage
+		// ANCHOR Util: whisperPlayerMessage
 		/**
 		 * @summary Creates a function to send a whispered message to a player in Roll20 chat.
 		 * 
@@ -4081,9 +4378,9 @@ const EASY_UTILS = (() => {
 		whisperPlayerMessage: function () {
 			return (moduleSettings) => {
 
-				// Cache Dependencies
-				const logSyslogMessage = EASY_UTILS.getFunction({ functionName: "logSyslogMessage", moduleSettings });
+				const thisFuncDebugName = "whisperPlayerMessage";
 
+				// Cache Dependencies
 				// ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
 				// │                                      Main Closure                                                 │
 				// └───────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -4099,11 +4396,11 @@ const EASY_UTILS = (() => {
 
 						// "50000": "Error: {{ remark }}"
 						const msgId = "50000";
-						logSyslogMessage({
+						Utils.logSyslogMessage({
 							severity: "ERROR",
-							tag: "checkInstall",
+							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
 							transUnitId: msgId,
-							message: PhraseFactory.get({ transUnitId: msgId, remark: err })
+							message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
 						});
 
 						return 1;
@@ -4113,16 +4410,20 @@ const EASY_UTILS = (() => {
 		},
 	};
 
-	/* !SECTION End of Utilities: High Level **************************************************************************/
-	/* !SECTION End of functionLoaders ********************************************************************************/
+	// !SECTION End of Inner Methods: High Level Utilities
+	// !SECTION End of Outer Method: functionLoaders
 
-	/* SECTION INITIALIZATION *****************************************************************************************/
+	// SECTION Event Hooks: Roll20 API
+
+	// ANCHOR Outer Method: checkInstall
 	const checkInstall = () => {
 
 		if (typeof EASY_UTILS !== "undefined") {
 
 			const requiredFunctions = [
 				"createPhraseFactory",
+				"createTemplateFactory",
+				"createThemeFactory",
 				"logSyslogMessage"
 			];
 
@@ -4160,7 +4461,18 @@ const EASY_UTILS = (() => {
 		}
 	};
 
+	// ANCHOR Event: on(ready)
 	on("ready", () => {
+
+		if (globalSettings.purgeState) {
+			// Purge state for testing
+			state = {};
+		}
+
+		// Debug logging if desired
+		if (moduleSettings?.debug?.onReady ?? false) {
+			log("Current State: " + JSON.stringify(state));
+		}
 
 		const continueMod = checkInstall();
 		if (continueMod === 0) {
@@ -4179,9 +4491,9 @@ const EASY_UTILS = (() => {
 		}
 	});
 
-	/* !SECTION END of INITIALIZATION *********************************************************************************/
+	// !SECTION End of Event Hooks: Roll20 API
 
-	/* SECTION: PUBLIC INTERFACE **************************************************************************************/
+	// SECTION: Public Methods: Exposed Interface
 	/**
 	 * @summary This section provides a streamlined interface to access utility functions and factories within the system.
 	 *
@@ -4237,7 +4549,7 @@ const EASY_UTILS = (() => {
 				const msgId = "40400";
 				Utils.logSyslogMessage({
 					severity: "WARN",
-					tag: `${moduleSettings.readableName}:checkInstall`,
+					tag: `${moduleSettings.readableName}.checkInstall`,
 					transUnitId: msgId,
 					message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: functionName } })
 				});
@@ -4288,7 +4600,7 @@ const EASY_UTILS = (() => {
 		 * });
 		 * 
 		 * utilities.applyCssToHtmlJson({ cssJson, htmlJson });
-		 * utilities.logSyslogMessage({ severity: "INFO", message: "Utilities loaded successfully" });
+		 * utilities.Utils.logSyslogMessage({ severity: "INFO", message: "Utilities loaded successfully" });
 		 */
 		fetchUtilities: ({ requiredFunctions, moduleSettings }) => {
 			return requiredFunctions.reduce((accumulator, functionName) => {
@@ -4299,14 +4611,8 @@ const EASY_UTILS = (() => {
 		}
 	};
 
-	/* !SECTION End of PUBLIC INTERFACE *******************************************************************************/
+	// !SECTION End of Public Methods: Exposed Interface
+	// !SECTION End of Object: EASY_UTILS
 
 })();
-
-/* !SECTION End of EASY_UTILS *****************************************************************************************/
-
-/* For Local testing when mocking Roll20
-export { EASY_MODULE_FORGE };
-export { EASY_UTILS };
-*/
 
