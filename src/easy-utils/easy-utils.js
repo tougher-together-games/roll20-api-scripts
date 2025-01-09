@@ -524,7 +524,6 @@ const EASY_UTILS = (() => {
 						element: "div",
 						attributes: {
 							id: "rootContainer",
-							style: {},
 							classList: [],
 							inlineStyle: {}
 						},
@@ -1311,58 +1310,58 @@ const EASY_UTILS = (() => {
 				 */
 				function generateHtmlFromNode(node) {
 					if (!node.element) return "";
-				
+
 					// If it's a text node, just return its text
 					if (node.element === "text") {
 						return node.children?.[0]?.innerText || "";
 					}
-				
+
 					// 1) Merge style & inlineStyle from node.attributes
 					const mergedStyle = {
 						...(node.attributes?.style || {}),
 						...(node.attributes?.inlineStyle || {}),
 					};
-				
+
 					// 2) Convert the merged style object into a valid CSS string
 					const styleString = Object.keys(mergedStyle).length
 						? convertCamelCaseToKebabCase(mergedStyle)
 						: "";
-				
+
 					// 3) Remove inlineStyle so it doesn't appear as an HTML attribute
 					if (node.attributes?.inlineStyle) {
 						delete node.attributes.inlineStyle;
 					}
-				
+
 					// Collect valid HTML attributes
 					const attributes = [];
-				
+
 					// (a) If we have a final style string, add it
 					if (styleString) {
 						attributes.push(`style="${styleString}"`);
 					}
-				
+
 					// (b) Handle classList, if present
 					if (Array.isArray(node.attributes?.classList) && node.attributes.classList.length > 0) {
 						attributes.push(`class="${node.attributes.classList.join(" ")}"`);
 					}
-				
+
 					// (c) Handle id
 					if (node.attributes?.id) {
 						attributes.push(`id="${node.attributes.id}"`);
 					}
-				
+
 					// (d) Any other attributes (besides style, inlineStyle, classList, id) get added as well
 					Object.entries(node.attributes || {})
-						.filter(([key]) => {return !["style", "inlineStyle", "classList", "id"].includes(key);})
+						.filter(([key]) => { return !["style", "inlineStyle", "classList", "id"].includes(key); })
 						.forEach(([key, value]) => {
 							attributes.push(`${key}="${value}"`);
 						});
-				
+
 					// Process children recursively
 					const childrenHtml = (node.children || [])
 						.map(generateHtmlFromNode)
 						.join("");
-				
+
 					// Build the final HTML tag
 					const attributesString = attributes.length ? ` ${attributes.join(" ")}` : "";
 
@@ -2438,9 +2437,9 @@ const EASY_UTILS = (() => {
 					if (typeof text !== "string") {
 						return text;
 					}
-				
+
 					const base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-				
+
 					// Helper to encode to UTF-8
 					function encodeUtf8(str) {
 						let utf8Text = "";
@@ -2460,22 +2459,22 @@ const EASY_UTILS = (() => {
 
 						return utf8Text;
 					}
-				
+
 					try {
 						let output = "";
 						let i = 0;
 						const utf8Text = encodeUtf8(text);
-				
+
 						while (i < utf8Text.length) {
 							const byte1 = utf8Text.charCodeAt(i++);
 							const byte2 = utf8Text.charCodeAt(i++);
 							const byte3 = utf8Text.charCodeAt(i++);
-				
+
 							const enc1 = byte1 >> 2;
 							let enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
 							let enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
 							let enc4 = byte3 & 63;
-				
+
 							if (isNaN(byte2)) {
 								enc2 = ((byte1 & 3) << 4);
 								enc3 = 64;
@@ -2484,21 +2483,21 @@ const EASY_UTILS = (() => {
 								enc3 = ((byte2 & 15) << 2);
 								enc4 = 64;
 							}
-				
+
 							output +=
 								base64Characters.charAt(enc1) +
 								base64Characters.charAt(enc2) +
 								base64Characters.charAt(enc3) +
 								base64Characters.charAt(enc4);
 						}
-				
+
 						return output;
 					} catch (err) {
 						// In a production script, you might log/handle errors differently
 						return "";
 					}
 				};
-				
+
 			};
 		},
 
@@ -3327,14 +3326,6 @@ const EASY_UTILS = (() => {
 		 * - High-level functions should attempt to fall back to default values or configurations when issues arise.
 		 * - If a fallback is not possible and the outcome remains erroneous, they should log the issue and throw an
 		 *   error to the Roll20 API to ensure proper debugging and system stability.
-		 */
-
-		/**
-		 * @summary Basic, reusable, and stateless functions for small, specific tasks. 
-		 * 
-		 * - Support higher-level functions but can be used independently.
-		 * - Do not require `moduleSettings` but include it for consistency and optional logging.
-		 * - Handle errors gracefully (e.g., return default values or log warnings) without throwing exceptions.
 		 */
 
 		// ANCHOR Util: applyCssToHtmlJson
