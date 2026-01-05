@@ -12,6 +12,6 @@
 
 ::: accent-detail
 
-<div id="easyCalendarData"></div>
+<div id="easyCalendarData">table here</div>
 
 :::

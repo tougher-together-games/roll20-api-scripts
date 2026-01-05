@@ -11,47 +11,38 @@
 <p> </p>
 </div>
 
-![player tab](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-bookmark-player.png "page-bookmark")
+![item tab](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-bookmark-mechanics.png "page-bookmark")
 
-::: portrait-frame
+# {{ ComponentName }}
 
-![Character Portrait]({{ AvatarUrl }} "portrait-image")
-![Portrait Border](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-portrait-border.png "portrait-border")
+<a title="button" href="&#96;!ezequip --add prompt|{{ ComponentName }}">Add</a>
+<a title="button" href="&#96;!ezequip --remove prompt|{{ ComponentName }}">Remove</a>
+<a title="button" href="&#96;!ezequip --build prompt|{{ ComponentName }}">Build</a>
+
+::: accent-detail third-wide
+
+#### Quick Reference
+|                 |                       |
+| :-------------- | :-------------------- |
+| Type            | {{ ComponentType }}   |
+| Rarity          | {{ Rarity }}          |
+| Attunement      | {{ Attunement }}      |
+| Source          | {{ Source }}          |
 
 :::
 
-# {{ CharacterName }}
+## Description
 
-<a title="button" href="&#96;!ezmarkdown --character {{ CharacterId }}">Refresh Bio</a>
-
-<a title="button" href="&#96;!ezspeak --menu">Speak Languages</a>
-
-<a title="button" href="&#96;!ezcomp --menu">Modify Components</a>
-
-## Appearance
-
-{{ BioCharacterAppearance }}
+{{ Description }}
 
 ***
 
-## Personality
+## Features
 
-::: accent-detail
-
-| | |
-| --- | --- |
-| **Personality Traits** | {{ BioPersonalityTraits }} |
-| **Ideals** | {{ BioIdeals }} |
-| **Bonds** | {{ BioBonds }} |
-| **Flaws** | {{ BioFlaws }} |
-
-:::
+{{ Features }}
 
 ***
 
-### Backstory
+## History
 
-::: two-columns
-{{ BioCharacterBackstory }}
-:::
-
+{{ History }}
