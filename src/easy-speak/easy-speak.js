@@ -1,538 +1,741 @@
 /*!
 @language: en-US
-@title: easy-menu.js
-@description: The EASY_MENU module integrates with EASY_UTILS to provide a menu-driven interface and 
-	control commands in the Roll20 environment. It uses factories (Phrase, Template, Theme) from the forge,
-	parses user chat commands, and renders styled alerts to players via whisper messages.
+@title: easy-speak.js
+@description: The EASY_SPEAK module integrates with EASY_UTILS to provide language-based communication
+	in the Roll20 environment. Players select a token and choose from known languages to speak.
+	Non-speakers see gibberish while speakers receive the actual message via whisper.
 @version: 1.0.0
 @author: Mhykiel
 @license: MIT
-@repository: {@link https://github.com/Tougher-Together-Gaming/roll20-api-scripts/blob/main/src/easy-utils/easy-utils-menu.js|GitHub Repository}
+@repository: {@link https://github.com/tougher-together-games/roll20-api-scripts|GitHub Repository}
 */
 
 // eslint-disable-next-line no-unused-vars
-const EASY_MENU = (() => {
+const EASY_SPEAK = (() => {
+	// SECTION Object: EASY_SPEAK
+	/**
+	 * @namespace EASY_SPEAK
+	 * @summary Language-based communication system for Roll20.
+	 * 
+	 * - **Purpose**:
+	 *   - Allows players to speak in languages their characters know
+	 *   - Non-speakers see random gibberish words from language handouts
+	 *   - Speakers and GM receive the actual message via whisper
+	 * 
+	 * - **Execution**:
+	 *   - Player selects a token and runs !ezspeak
+	 *   - Menu displays languages from character's other_languages attribute
+	 *   - Clicking a language prompts for message, then broadcasts gibberish and whispers translation
+	 * 
+	 * - **Design**:
+	 *   - Language handouts named "Language: <name>" contain gibberish words in GM notes
+	 *   - Words extracted from <div id="easySpeakWords">word1, word2, word3</div>
+	 *   - Player journal access on handouts determines who can understand
+	 */
 
-	/*******************************************************************************************************************
-	 * SECTION: MODULE CONFIGURATION
-	 *
-	 * Here we define configuration and state related to EASY_MENU itself. The `moduleSettings` object is passed 
-	 * to utility functions so they can behave according to the EASY_MENU module's preferences (e.g., verbose logging).
-	 ******************************************************************************************************************/
-
-	// TODO Fill out module meta data
+	// ANCHOR Member: moduleSettings
 	const moduleSettings = {
-		readableName: "Easy-Menu",
-		chatApiName: "ezmenu",
-		globalName: "EASY_MENU",
+		readableName: "Easy-Speak",
+		chatApiName: "ezspeak",
+		globalName: "EASY_SPEAK",
 		version: "1.0.0",
 		author: "Mhykiel",
-		verbose: false,
 		sendWelcomeMsg: true,
+		verbose: false,
+		debug: {
+			"onReady": false,
+			"processMenuAsync": false,
+			"processSpeakAsync": false,
+			"processAddAccess": false,
+			"processRemoveAccess": false,
+			"processListLanguages": false
+		}
 	};
 
+	// ANCHOR Member: Factory References
 	let Utils = {};
 	let PhraseFactory = {};
-	let TemplateFactory = {};
-	let ThemeFactory = {};
 
-	// TODO Add universal style colors
-	// NOTE: It's recommended to use a consistent naming convention for color variables in your CSS.
-	// This ensures a cohesive and consistent color scheme across all components, such as chat menus and modals. 
-	// Define your styles here in the `paletteColors` object and pass it into all theme-related requests.
+	// ANCHOR Member: Vault Reference
+	let EasySpeakVault = {};
 
-	const paletteColors = {
-		"--ez-primary-color": "#8655B6", // Primary theme color
-		"--ez-secondary-color": "#17AEE8", // Secondary theme color
-		"--ez-tertiary-color": "#34627B", // Tertiary theme color for accents
-		"--ez-accent-color": "#CC6699", // Accent color for highlights
-		"--ez-complement-color": "#FCEC52", // Complementary color for contrast
-		"--ez-contrast-color": "#C3B9C8", // Color for subtle contrasts
-		"--ez-primary-background-color": "#252B2C", // Primary background color
-		"--ez-secondary-background-color": "#3F3F3F", // Secondary background color
-		"--ez-subdued-background-color": "#f2f2f2", // Subdued or neutral background color
-		"--ez-text-color": "#000000", // Default text color
-		"--ez-overlay-text-color": "#ffffff", // Overlay text color (e.g., on dark backgrounds)
-		"--ez-border-color": "#000000", // Default border color
-		"--ez-shadow-color": "#4d4d4d", // Default shadow color
+	// SECTION Inner Methods: Utility Functions
+
+	// ANCHOR Function: normalizeLanguageName
+	/**
+	 * @summary Normalizes a language name from character sheet format to handout format.
+	 * Character sheets use spaces and apostrophes, handouts use hyphens and no apostrophes.
+	 * @param {string} name - The language name to normalize
+	 * @returns {string} Normalized name matching handout naming convention
+	 * @example
+	 * normalizeLanguageName("Deep Speech")         // "Deep-Speech"
+	 * normalizeLanguageName("Thieves' Cant")       // "Thieves-Cant"
+	 * normalizeLanguageName("Common Sign Language") // "Common-Sign-Language"
+	 */
+	const normalizeLanguageName = (name) => {
+		return name
+			.replace(/[''`]/g, "")      // Remove apostrophes
+			.replace(/\s+/g, "-")       // Replace spaces with hyphens
+			.trim();
 	};
 
-	// !SECTION END of MODULE CONFIGURATION
+	// ANCHOR Function: findLanguageHandout
+	/**
+	 * @summary Finds a language handout by name, normalizing for naming convention differences.
+	 * @param {string} languageName - The language name from character sheet
+	 * @returns {Object|null} The handout object or null if not found
+	 */
+	const findLanguageHandout = (languageName) => {
+		// First try exact match (in case handout matches character sheet exactly)
+		const exactMatch = findObjs({ _type: "handout", name: `Language: ${languageName}` })[0];
+		if (exactMatch) return exactMatch;
 
-	/*******************************************************************************************************************
-	 * SECTION: MODULE FUNCTIONS
-	 * ****************************************************************************************************************/
+		// Try normalized match (spaces to hyphens, no apostrophes)
+		const normalizedName = normalizeLanguageName(languageName);
+		const normalizedMatch = findObjs({ _type: "handout", name: `Language: ${normalizedName}` })[0];
+		if (normalizedMatch) return normalizedMatch;
 
-	// ANCHOR processMenuAsync
+		return null;
+	};
+
+	// ANCHOR Function: getAllLanguages
+	/**
+	 * @summary Scans all handouts for those prefixed with "Language:" and returns language names.
+	 * @returns {string[]} Array of language names
+	 */
+	const getAllLanguages = () => {
+		const languageHandouts = findObjs({ _type: "handout" })
+			.filter(handout => handout.get("name").startsWith("Language:"));
+
+		return languageHandouts
+			.map(handout => handout.get("name").replace("Language:", "").trim())
+			.filter(lang => lang);
+	};
+
+	// ANCHOR Function: getCharacterLanguages
+	/**
+	 * @summary Retrieves languages from a character's other_languages attribute.
+	 * @param {string} characterId - The character's Roll20 ID
+	 * @returns {string[]} Array of language names the character knows
+	 */
+	const getCharacterLanguages = (characterId) => {
+		const otherLanguagesAttr = findObjs({
+			_type: "attribute",
+			_characterid: characterId,
+			name: "other_languages"
+		})[0];
+
+		if (!otherLanguagesAttr) return [];
+
+		return otherLanguagesAttr.get("current")
+			.split(",")
+			.map(lang => lang.trim())
+			.filter(lang => lang);
+	};
+
+	// ANCHOR Function: decodeHtmlEntities
+	/**
+	 * @summary Decodes HTML entities in a string.
+	 * @param {string} html - String with HTML entities
+	 * @returns {string} Decoded string
+	 */
+	const decodeHtmlEntities = (html) => {
+		return html
+			.replace(/&lt;/g, "<")
+			.replace(/&gt;/g, ">")
+			.replace(/&quot;/g, "\"")
+			.replace(/&amp;/g, "&");
+	};
+
+	// ANCHOR Function: extractWords
+	/**
+	 * @summary Extracts words from the easySpeakWords div in handout GM notes.
+	 * @param {string} notes - GM notes content from handout
+	 * @returns {string[]} Array of words for gibberish generation
+	 */
+	const extractWords = (notes) => {
+		const decodedNotes = decodeHtmlEntities(notes);
+		const match = decodedNotes.match(/<div[^>]*id="easySpeakWords"[^>]*>(.*?)<\/div>/);
+
+		if (!match || !match[1]) return [];
+
+		return match[1]
+			.split(",")
+			.map(word => word.trim())
+			.filter(Boolean);
+	};
+
+	// ANCHOR Function: getRandomWords
+	/**
+	 * @summary Returns a random subset of words from an array.
+	 * @param {string[]} words - Array of available words
+	 * @param {number} count - Number of words to return
+	 * @returns {string[]} Random selection of words
+	 */
+	const getRandomWords = (words, count) => {
+		const shuffled = [...words].sort(() => 0.5 - Math.random());
+		return shuffled.slice(0, count);
+	};
+
+	// ANCHOR Function: getTokenAndCharacter
+	/**
+	 * @summary Validates selected token and returns token/character objects.
+	 * @param {string} tokenId - The token's Roll20 ID
+	 * @returns {Object|null} Object with token and character, or null if invalid
+	 */
+	const getTokenAndCharacter = (tokenId) => {
+		const token = getObj("graphic", tokenId);
+		if (!token) return null;
+
+		const character = getObj("character", token.get("represents"));
+		if (!character) return null;
+
+		return { token, character };
+	};
+
+	// ANCHOR Function: getControllingPlayers
+	/**
+	 * @summary Gets all controlling players for a token/character combination.
+	 * @param {Object} token - Roll20 token object
+	 * @param {Object} character - Roll20 character object
+	 * @returns {string[]} Array of player IDs with control
+	 */
+	const getControllingPlayers = (token, character) => {
+		const tokenControllers = token.get("controlledby").split(",").filter(Boolean);
+		const characterControllers = character.get("controlledby").split(",").filter(Boolean);
+
+		return [...new Set([...tokenControllers, ...characterControllers])];
+	};
+
+	// !SECTION End of Inner Methods: Utility Functions
+	// SECTION Inner Methods: Action Processors
+
+	// ANCHOR Function: processMenuAsync
+	/**
+	 * @summary Displays the language selection menu for a selected token.
+	 * @param {Object} msgDetails - Parsed message details from handleApiCall
+	 * @returns {Promise<number>} 0 on success, 1 on failure
+	 */
 	const processMenuAsync = async (msgDetails) => {
-
-		/*
-		<div class="menu-box">
-			<h3>{{ title }}</h3>
-			<ul>
-				<!-- <li><a href="!api --menu">Option 1</a></li> -->
-				{{ menuItems }}
-			</ul>
-			<p class="menu-footer">{{ footer }}</p>
-		</div>
-		*/
-
-		const moduleState = Utils.getGlobalSettings();
-		const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x03BDB2A5" });
-
-		// NOTE use the '\' to escape, make literal, the special characters like the backtick (`) and exclamation (!)
-		const menuItemsArray = [
-			`<li><a href="\`!${moduleSettings.chatApiName} --set-lang">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x08161075" })}</a></li>`,
-			`<li><a href="\`!${moduleSettings.chatApiName} --alerts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D842F34" })}</a></li>`,
-			`<li id="token"><a href="\`!${moduleSettings.chatApiName} --flip">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0382B96E" })}</a></li>`
-		];
-
-		const gmMenuItemsArray = [
-			"<h3>GM Only Options</h3>",
-			"<ul>",
-			`<li role="deletion"><a href="\`!${moduleSettings.chatApiName} --purge-state all">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0DD74385" })}</a></li>`,
-			`<li role="deletion"><a href="\`!${moduleSettings.chatApiName} --purge-state ${moduleState.sharedVaultName}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0009ADA5" })}</a></li>`,
-			"</ul>",
-		];
-
-		// Join them with a newline
-		const menuItemsHTML = menuItemsArray.join("\n");
-
-		let footer = "";
-		if (msgDetails.isGm) {
-			footer = gmMenuItemsArray.join("\n");
-		}
-
-		const menuContent = {
-			title,
-			menuItems: menuItemsHTML,
-			footer,
-		};
+		const thisFuncDebugName = "processMenuAsync";
 
 		try {
-			const styledMessage = await Utils.renderTemplateAsync({
-				template: "utilsMenu",
-				expressions: menuContent,
-				theme: "utilsMenu",
-				cssVars: paletteColors,
+			// Validate token selection
+			if (!msgDetails.selectedIds || msgDetails.selectedIds.length === 0) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C41" })
+				});
+				return 1;
+			}
+
+			// Process first selected token
+			const tokenId = msgDetails.selectedIds[0];
+			const tokenData = getTokenAndCharacter(tokenId);
+
+			if (!tokenData) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C42" })
+				});
+				return 1;
+			}
+
+			const { token, character } = tokenData;
+			const characterLanguages = getCharacterLanguages(character.id);
+
+			if (characterLanguages.length === 0) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "WARN",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0A1B2C43",
+						expressions: { name: character.get("name") }
+					})
+				});
+				return 1;
+			}
+
+			// Build menu items for character's languages
+			const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C3D" });
+			const menuItemsArray = characterLanguages.map(lang => {
+				// Normalize language name for URL (spaces to hyphens) to avoid parsing issues
+				const urlLang = normalizeLanguageName(lang);
+				// NOTE: Using \` to escape backtick and ?{} for Roll20 query prompt
+				return `<li><a role="button" href="\`!${moduleSettings.chatApiName} --speak lang|${urlLang} token|${tokenId} prompt|?{${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4A" })}}">${lang}</a></li>`;
 			});
 
-			const whisperArguments = {
-				from: moduleSettings.readableName,
-				to: msgDetails.callerName,
-				message: styledMessage
-			};
-			Utils.whisperPlayerMessage(whisperArguments);
+			// Add GM-specific options
+			const gmMenuItemsArray = [];
+			if (msgDetails.isGm) {
+				gmMenuItemsArray.push("</ul>");
+				gmMenuItemsArray.push(`<h4>${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x09B11313" })}</h4>`);
+				gmMenuItemsArray.push("<ul>");
 
-			return 0;
-		} catch (err) {
-			throw new Error(`${err}`);
-		}
-	};
+				// GM Speak As - all languages available
+				const allLanguages = EasySpeakVault.languages || [];
+				if (allLanguages.length > 0) {
+					// Normalize language names for URL (spaces to hyphens)
+					const langChoices = allLanguages.map(lang => normalizeLanguageName(lang)).join("|");
+					gmMenuItemsArray.push(`<li><a role="button" href="\`!${moduleSettings.chatApiName} --speak lang|?{${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C3E" })}|${langChoices}} as|?{${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4B" })}} prompt|?{${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4A" })}}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4C" })}</a></li>`);
+				}
 
-	// ANCHOR processSetLanguageAsync
-	const processSetLanguageAsync = async (msgDetails, parsedArgs) => {
+				// Add/Remove access buttons
+				gmMenuItemsArray.push(`<li><a role="button" href="\`!${moduleSettings.chatApiName} --add">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C3F" })}</a></li>`);
+				gmMenuItemsArray.push(`<li data-category="caution"><a role="button" href="\`!${moduleSettings.chatApiName} --remove">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C40" })}</a></li>`);
+			}
 
-		const _isEmptyObject = (obj) => {
-			return JSON.stringify(obj) === "{}";
-		};
-
-		if (_isEmptyObject(parsedArgs)) {
-
-			const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x03BDB2A5" });
-			const availableLanguagesArray = PhraseFactory.getLanguages();
-
-			const menuItemsArray = availableLanguagesArray.map(aLang => {
-				return `<li><a href="\`!${moduleSettings.chatApiName} --set-lang ${aLang}">${aLang}</a></li>`;
-			});
-
-			// Join them with a newline
-			const menuItemsHTML = menuItemsArray
-				.join("\n");
-
-			const footer = "";
+			const combinedMenuItems = msgDetails.isGm
+				? [...menuItemsArray, ...gmMenuItemsArray]
+				: menuItemsArray;
 
 			const menuContent = {
 				title,
-				menuItems: menuItemsHTML,
-				footer,
+				menuItems: combinedMenuItems.join("\n"),
+				footer: `${character.get("name")}`
 			};
 
-			try {
-				const styledMessage = await Utils.renderTemplateAsync({
-					template: "utilsMenu",
-					expressions: menuContent,
-					theme: "utilsMenu",
-					cssVars: paletteColors,
-				});
+			const styledMessage = await Utils.renderTemplateAsync({
+				template: "chatMenu",
+				expressions: menuContent,
+				theme: "chatMenu",
+				cssVars: {}
+			});
 
-				const whisperArguments = {
-					from: moduleSettings.readableName,
-					to: msgDetails.callerName,
-					message: styledMessage
-				};
-				Utils.whisperPlayerMessage(whisperArguments);
-
-				return 0;
-			} catch (err) {
-				throw new Error(`${err}`);
-			}
-		}
-		else {
-
-			const selectedLang = Object.keys(parsedArgs)[0];
-			PhraseFactory.setLanguage({ playerId: msgDetails.callerId, language: selectedLang });
-
-			// whisperAlertMessageAsync({ from, to, severity = 4, apiCallContent, remark })
-			const whisperArguments = {
+			Utils.whisperPlayerMessage({
 				from: moduleSettings.readableName,
 				to: msgDetails.callerName,
-				toId: msgDetails.callerId,
-				severity: 6, // INFORMATION
-				apiCallContent: msgDetails.raw.content,
-				remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x062D88F0", expressions: { remark: selectedLang } })}`
-			};
+				message: styledMessage
+			});
 
-			Utils.whisperAlertMessageAsync(whisperArguments);
+			return 0;
+
+		} catch (err) {
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+			return 1;
 		}
 	};
 
-	// ANCHOR processPurgeState
-	const processPurgeState = (msgDetails, parsedArgs) => {
+	// ANCHOR Function: processSpeakAsync
+	/**
+	 * @summary Processes a speak command - displays gibberish publicly and whispers translation.
+	 * @param {Object} msgDetails - Parsed message details from handleApiCall
+	 * @param {Object} parsedArgs - Parsed subcommand arguments
+	 * @returns {Promise<number>} 0 on success, 1 on failure
+	 */
+	const processSpeakAsync = async (msgDetails, parsedArgs) => {
+		const thisFuncDebugName = "processSpeakAsync";
 
-		if (parsedArgs.all) {
+		try {
+			const language = parsedArgs.lang;
+			const message = parsedArgs.prompt;
+			const tokenId = parsedArgs.token;
+			const speakAs = parsedArgs.as;
 
-			state = {};
+			// Validate required parameters
+			if (!language || !message) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "40000", expressions: { remark: "lang, prompt" } })
+				});
+				return 1;
+			}
 
-			const whisperArguments = {
-				from: moduleSettings.readableName,
-				to: msgDetails.callerName,
-				toId: msgDetails.callerId,
-				severity: 4, // WARNING
-				apiCallContent: msgDetails.raw.content,
-				remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x084D29DE", expressions: { remark: "" }})}`
-			};
-	
-			Utils.whisperAlertMessageAsync(whisperArguments);
-
-		} else {
-
-			Object.keys(parsedArgs).forEach((name) => {
-				if (parsedArgs[name] === true && name !== "all") {
-					state[name] = {};
-
-					const whisperArguments = {
+			// Determine display name
+			let displayName;
+			if (tokenId) {
+				const token = getObj("graphic", tokenId);
+				if (!token) {
+					await Utils.whisperAlertMessageAsync({
 						from: moduleSettings.readableName,
 						to: msgDetails.callerName,
 						toId: msgDetails.callerId,
-						severity: 4, // WARNING
+						severity: "ERROR",
 						apiCallContent: msgDetails.raw.content,
-						remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x084D29DE", expressions: { remark: `.${name}` }})}`
-					};
-			
-					Utils.whisperAlertMessageAsync(whisperArguments);
+						remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "40400", expressions: { remark: "token" } })
+					});
+					return 1;
 				}
-			});
-		}
-	};
+				displayName = token.get("name");
+			} else if (speakAs) {
+				displayName = speakAs;
+			} else {
+				displayName = msgDetails.callerName;
+			}
 
-	// ANCHOR processExampleAlerts
-	const processExampleAlerts = (msgDetails) => {
-
-		let whisperArguments = {};
-
-		// whisperAlertMessageAsync({ from, to, severity = 4, apiCallContent, remark })
-		whisperArguments = {
-			from: moduleSettings.readableName,
-			to: msgDetails.callerName,
-			toId: msgDetails.callerId,
-			severity: 3, // ERROR
-			apiCallContent: msgDetails.raw.content,
-			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x07845DCE" })}`
-		};
-
-		Utils.whisperAlertMessageAsync(whisperArguments);
-
-		// whisperAlertMessageAsync({ from, to, severity = 4, apiCallContent, remark })
-		whisperArguments = {
-			from: moduleSettings.readableName,
-			to: msgDetails.callerName,
-			toId: msgDetails.callerId,
-			severity: 4, // WARNING
-			apiCallContent: msgDetails.raw.content,
-			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x06F2AA1E" })}`
-		};
-
-		Utils.whisperAlertMessageAsync(whisperArguments);
-
-		// whisperAlertMessageAsync({ from, to, severity = 4, apiCallContent, remark })
-		whisperArguments = {
-			from: moduleSettings.readableName,
-			to: msgDetails.callerName,
-			toId: msgDetails.callerId,
-			severity: 6, // INFORMATION
-			apiCallContent: msgDetails.raw.content,
-			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0512C293" })}`
-		};
-
-		Utils.whisperAlertMessageAsync(whisperArguments);
-
-		// whisperAlertMessageAsync({ from, to, severity = 4, apiCallContent, remark })
-		whisperArguments = {
-			from: moduleSettings.readableName,
-			to: msgDetails.callerName,
-			toId: msgDetails.callerId,
-			severity: 7, // TIP
-			apiCallContent: msgDetails.raw.content,
-			remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x061115DE" })}`
-		};
-
-		Utils.whisperAlertMessageAsync(whisperArguments);
-	};
-
-	// ANCHOR flipSelectedTokens
-	const flipSelectedTokens = async (msgDetails) => {
-		// Check if there are selected IDs
-		const { selectedIds } = msgDetails;
-		let doContinue = false;
-
-		if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
-			
-			const whisperArguments = {
-				from: moduleSettings.readableName,
-				to: msgDetails.callerName,
-				toId: msgDetails.callerId,
-				severity: 3, // ERROR
-				apiCallContent: msgDetails.raw.content,
-				remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D9A441E" })}`
-			};
-	
-			Utils.whisperAlertMessageAsync(whisperArguments);
-
-			return;
-		}
-
-		// Process each selected token asynchronously
-		for (const id of selectedIds) {
-			// Get the token object using the ID
-			const token = getObj("graphic", id);
-
-			if (!token) {
-					
-				const whisperArguments = {
+			// Find language handout (fuzzy match for punctuation differences)
+			const handout = findLanguageHandout(language);
+			if (!handout) {
+				await Utils.whisperAlertMessageAsync({
 					from: moduleSettings.readableName,
 					to: msgDetails.callerName,
 					toId: msgDetails.callerId,
-					severity: 3, // ERROR
+					severity: "ERROR",
 					apiCallContent: msgDetails.raw.content,
-					remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "40400", expressions: { remark: id }})}`
-				};
-			
-				Utils.whisperAlertMessageAsync(whisperArguments);
-
-				continue;
+					remark: PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0A1B2C44",
+						expressions: { lang: language }
+					})
+				});
+				return 1;
 			}
 
-			// Flip the token horizontally (toggle 'fliph' property)
-			const currentFlipH = token.get("fliph");
-			token.set("fliph", !currentFlipH);
+			// Get gibberish words from handout GM notes
+			const gmNotes = await new Promise((resolve) => {
+				handout.get("gmnotes", (notes) => resolve(notes || ""));
+			});
 
-			// Flip the token vertically (toggle 'flipv' property)
-			const currentFlipV = token.get("flipv");
-			token.set("flipv", !currentFlipV);
+			const words = extractWords(gmNotes);
+			if (words.length === 0) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "WARN",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0A1B2C45",
+						expressions: { lang: language }
+					})
+				});
+				return 1;
+			}
 
-			doContinue = true;
-		}
+			// Generate gibberish and broadcast
+			const randomWords = getRandomWords(words, 5);
+			const gibberish = randomWords.join(" ");
 
-		if (doContinue) {
-			const whisperArguments = {
-				from: moduleSettings.readableName,
-				to: msgDetails.callerName,
-				toId: msgDetails.callerId,
-				severity: 6, // INFORMATION
-				apiCallContent: msgDetails.raw.content,
-				remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0C2A2E7E" })}`
-			};
-	
-			Utils.whisperAlertMessageAsync(whisperArguments);
+			// Public emote with gibberish (everyone sees this)
+			sendChat(displayName, `/em ${PhraseFactory.get({ transUnitId: "0x0A1B2C48", expressions: { gibberish } })}`);
+
+			// Whisper real message to GM
+			sendChat(displayName, `/w gm (${PhraseFactory.get({ transUnitId: "0x0A1B2C49", expressions: { lang: language } })}): ${message}`);
+
+			// Whisper real message to players with access to this language
+			const journalPlayers = handout.get("inplayerjournals").split(",").filter(Boolean);
+			if (journalPlayers.length > 0) {
+				for (const playerId of journalPlayers) {
+					const player = getObj("player", playerId);
+					if (player) {
+						const playerName = player.get("_displayname");
+						sendChat(displayName, `/w "${playerName}" (${PhraseFactory.get({ transUnitId: "0x0A1B2C49", expressions: { lang: language } })}): ${message}`);
+					}
+				}
+			} else {
+				// Warn speaker that no players understand this language
+				Utils.whisperPlayerMessage({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					message: PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0A1B2C50",
+						expressions: { lang: language }
+					})
+				});
+			}
+
+			return 0;
+
+		} catch (err) {
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+			return 1;
 		}
 	};
 
+	// ANCHOR Function: processAddAccess
+	/**
+	 * @summary Adds controlling players of selected tokens to their language handout journals.
+	 * @param {Object} msgDetails - Parsed message details from handleApiCall
+	 * @returns {Promise<number>} 0 on success, 1 on failure
+	 */
+	const processAddAccess = async (msgDetails) => {
+		const thisFuncDebugName = "processAddAccess";
 
+		try {
+			// GM only
+			if (!msgDetails.isGm) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4D" })
+				});
+				return 1;
+			}
 
-	// !SECTION END of Module Functions
+			// Validate token selection
+			if (!msgDetails.selectedIds || msgDetails.selectedIds.length === 0) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C41" })
+				});
+				return 1;
+			}
 
-	/*******************************************************************************************************************
-	 * SECTION: EVENT HANDLERS
-	 * ****************************************************************************************************************/
+			// Process each selected token
+			for (const tokenId of msgDetails.selectedIds) {
+				const tokenData = getTokenAndCharacter(tokenId);
+				if (!tokenData) continue;
 
-	// ANCHOR actionMap
+				const { token, character } = tokenData;
+				const controllingPlayers = getControllingPlayers(token, character);
+				if (controllingPlayers.length === 0) continue;
+
+				const languages = getCharacterLanguages(character.id);
+				if (languages.length === 0) continue;
+
+				// Add players to each language handout
+				for (const lang of languages) {
+					const handout = findLanguageHandout(lang);
+					if (!handout) continue;
+
+					const currentJournals = handout.get("inplayerjournals").split(",").filter(Boolean);
+
+					for (const playerId of controllingPlayers) {
+						if (!currentJournals.includes(playerId)) {
+							currentJournals.push(playerId);
+						}
+					}
+
+					handout.set("inplayerjournals", currentJournals.join(","));
+				}
+
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "INFO",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0A1B2C46",
+						expressions: { name: character.get("name") }
+					})
+				});
+			}
+
+			return 0;
+
+		} catch (err) {
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+			return 1;
+		}
+	};
+
+	// ANCHOR Function: processRemoveAccess
+	/**
+	 * @summary Removes controlling players of selected tokens from their language handout journals.
+	 * @param {Object} msgDetails - Parsed message details from handleApiCall
+	 * @returns {Promise<number>} 0 on success, 1 on failure
+	 */
+	const processRemoveAccess = async (msgDetails) => {
+		const thisFuncDebugName = "processRemoveAccess";
+
+		try {
+			// GM only
+			if (!msgDetails.isGm) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4D" })
+				});
+				return 1;
+			}
+
+			// Validate token selection
+			if (!msgDetails.selectedIds || msgDetails.selectedIds.length === 0) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C41" })
+				});
+				return 1;
+			}
+
+			// Process each selected token
+			for (const tokenId of msgDetails.selectedIds) {
+				const tokenData = getTokenAndCharacter(tokenId);
+				if (!tokenData) continue;
+
+				const { token, character } = tokenData;
+				const controllingPlayers = getControllingPlayers(token, character);
+				if (controllingPlayers.length === 0) continue;
+
+				const languages = getCharacterLanguages(character.id);
+				if (languages.length === 0) continue;
+
+				// Remove players from each language handout
+				for (const lang of languages) {
+					const handout = findLanguageHandout(lang);
+					if (!handout) continue;
+
+					const currentJournals = handout.get("inplayerjournals").split(",").filter(Boolean);
+					const updatedJournals = currentJournals.filter(id => !controllingPlayers.includes(id));
+
+					handout.set("inplayerjournals", updatedJournals.join(","));
+				}
+
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "INFO",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0A1B2C47",
+						expressions: { name: character.get("name") }
+					})
+				});
+			}
+
+			return 0;
+
+		} catch (err) {
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+			return 1;
+		}
+	};
+
+	// ANCHOR Function: processListLanguages
+	/**
+	 * @summary Whispers a list of all available languages to the caller.
+	 * @param {Object} msgDetails - Parsed message details from handleApiCall
+	 * @returns {Promise<number>} 0 on success, 1 on failure
+	 */
+	const processListLanguages = async (msgDetails) => {
+		const thisFuncDebugName = "processListLanguages";
+
+		try {
+			const languages = EasySpeakVault.languages || [];
+
+			if (languages.length === 0) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "WARN",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4E" })
+				});
+				return 1;
+			}
+
+			await Utils.whisperAlertMessageAsync({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				toId: msgDetails.callerId,
+				severity: "INFO",
+				apiCallContent: msgDetails.raw.content,
+				remark: `${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C4F" })}: ${languages.join(", ")}`
+			});
+
+			return 0;
+
+		} catch (err) {
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+			return 1;
+		}
+	};
+
+	// !SECTION End of Inner Methods: Action Processors
+	// SECTION Event Hooks: Roll20 API
+
+	// ANCHOR Member: actionMap
 	const actionMap = {
-		// 	whisperAlertMessageAsync({ from, to, severity = 6, apiCallContent, remark })
-		"--menu": (msgDetails) => { return processMenuAsync(msgDetails); },
-		"--set-lang": (msgDetails, parsedArgs) => { return processSetLanguageAsync(msgDetails, parsedArgs); },
-		"--alerts": (msgDetails) => { return processExampleAlerts(msgDetails); },
-		"--flip": (msgDetails) => { return flipSelectedTokens(msgDetails); },
-		"--purge-state": (msgDetails, parsedArgs) => { return processPurgeState(msgDetails, parsedArgs); },
-		"--echo-inline-roll": (msgDetails) => { Utils.whisperPlayerMessage({ from: moduleSettings.readableName, to: msgDetails.callerName, message: JSON.stringify(msgDetails.raw) }); },
+		"--menu": (msgDetails) => processMenuAsync(msgDetails),
+		"--speak": (msgDetails, parsedArgs) => processSpeakAsync(msgDetails, parsedArgs),
+		"--add": (msgDetails) => processAddAccess(msgDetails),
+		"--remove": (msgDetails) => processRemoveAccess(msgDetails),
+		"--list": (msgDetails) => processListLanguages(msgDetails)
 	};
 
-	const handleChatMessages = (apiCall) => {
+	// Set Default Action
+	actionMap["--default"] = actionMap["--menu"];
 
-		/* NOTE: If the message originates from a player, `thisPlayerId` will store the corresponding player object. 
-		This can be used for actions like retrieving the player's name or sending them a whisper. 
-		If the message does not come from a player (e.g., it comes from an API script), `thisPlayerId` will be set to `null`. 
-		If a function needs the playerId it should check for its existence or provide a default.
-		*/
-		const thisPlayerObj = apiCall.playerid ? getObj("player", apiCall.playerid) : null;
-		const thisPlayerName = thisPlayerObj ? thisPlayerObj.get("_displayname") : "Unknown Player";
-		const thisPlayerIsGm = thisPlayerObj && playerIsGM(apiCall.playerid) ? true : false;
-
-		const msgDetails = {
-			raw: apiCall,
-			commandMap: Utils.parseChatCommands({
-				apiCallContent: apiCall.content,
-			}),
-			isGm: thisPlayerIsGm,
-			callerId: thisPlayerObj.get("_id"),
-			callerName: thisPlayerName.replace(/\(GM\)/g, "").trim(),
-		};
-
-		// Check if --ids is provided
-		if (!msgDetails.commandMap.has("--ids")) {
-			if (!apiCall.selected || apiCall.selected.length === 0) {
-				// No --ids and no tokens selected error
-
-				// In functions be sure to check if the --ids is empty.
-				msgDetails.selectedIds = [];
-
-			} else {
-
-				// --ids not provided. Use selected token IDs
-				const selectedIds = apiCall.selected.map(aSelection => { return aSelection._id; });
-				msgDetails.selectedIds = selectedIds;
-			}
-
-		} else {
-
-			// --ids was provided use those for the selected tokens, and remove the command from further parsing.
-			msgDetails.selectedIds = msgDetails.commandMap.get("--ids");
-			msgDetails.commandMap.delete("--ids");
-		}
-
-		// Check if command exists in the methodMap and execute the corresponding action
-		// Separate valid and invalid commands
-		const validCommands = [];
-		const invalidCommands = [];
-
-		// Categorize commands as valid or invalid
-		msgDetails.commandMap.forEach((args, aCommandName) => {
-			if (actionMap.hasOwnProperty(aCommandName)) {
-				validCommands.push({ aCommandName, args });
-			} else {
-				invalidCommands.push(aCommandName);
-			}
-		});
-
-		// Check if both arrays are empty and default to calling the menu action
-		if (validCommands.length === 0 && invalidCommands.length === 0) {
-
-			// Default to menu if no command is provided
-			actionMap["--menu"](msgDetails, {});
-		} else {
-			// Execute valid commands
-			validCommands.forEach(({ aCommandName, args }) => {
-				const parsedArgs = Utils.parseChatSubcommands({ subcommands: args });
-				actionMap[aCommandName](msgDetails, parsedArgs);
-			});
-
-			// Handle invalid commands
-			if (invalidCommands.length > 0) {
-				let whisperArguments = {};
-
-				// whisperAlertMessageAsync({ from, to, severity = 4, apiCallContent, remark })
-				whisperArguments = {
-					from: moduleSettings.readableName,
-					to: msgDetails.callerName,
-					toId: msgDetails.callerId,
-					severity: 3, // ERROR
-					apiCallContent: msgDetails.raw.content,
-					remark: `${PhraseFactory.get({ transUnitId: "0x03B6FF6E" })}`
-				};
-
-				Utils.whisperAlertMessageAsync(whisperArguments);
-			}
-		}
-	};
-	// !SECTION END of Event Handlers
-
-	/*******************************************************************************************************************
-	 * SECTION: INITIALIZATION
-	 ******************************************************************************************************************/
-
-	// ANCHOR Function: registerEventHandlers
+	// ANCHOR Outer Method: registerEventHandlers
 	const registerEventHandlers = () => {
 		on("chat:message", (apiCall) => {
 			if (apiCall.type === "api" && apiCall.content.startsWith(`!${moduleSettings.chatApiName}`)) {
-				handleChatMessages(apiCall);
+				Utils.handleApiCall({ actionMap, apiCall });
 			}
 		});
 
 		return 0;
 	};
 
-	// ANCHOR Function: checkInstall
+	// ANCHOR Outer Method: checkInstall
 	const checkInstall = () => {
-
 		if (typeof EASY_UTILS !== "undefined") {
 
-			/*
-			"applyCssToHtmlJson",
-			"convertCssToJson",
-			"convertHtmlToJson",
-			"convertJsonToHtml",
-			"convertToSingleLine",
-			"createPhraseFactory",
-			"createTemplateFactory",
-			"createThemeFactory",
-			"decodeNoteContent",
-			"encodeNoteContent",
-			"getGlobalSettings",
-			"getSharedForge",
-			"getSharedVault",
-			"logSyslogMessage",
-			"parseChatCommands",
-			"parseChatSubcommands",
-			"renderTemplateAsync",
-			"replacePlaceholders",
-			"whisperAlertMessageAsync",
-			"whisperPlayerMessage"
-			*/
-
-			// TODO Limit the functions fetched down to the ones this module uses for memory efficiency.
 			const requiredFunctions = [
-				"applyCssToHtmlJson",
-				"convertCssToJson",
-				"convertHtmlToJson",
-				"convertJsonToHtml",
-				"convertToSingleLine",
-				"createPhraseFactory",
-				"createTemplateFactory",
-				"createThemeFactory",
-				"decodeNoteContent",
-				"encodeNoteContent",
-				"getGlobalSettings",
 				"getSharedForge",
 				"getSharedVault",
+				"handleApiCall",
 				"logSyslogMessage",
-				"parseChatCommands",
-				"parseChatSubcommands",
 				"renderTemplateAsync",
-				"replacePlaceholders",
 				"whisperAlertMessageAsync",
-				"whisperPlayerMessage",
-				// This function is not in EASY_UTILS; when trying to retrieve it a warning will be logged.
-				"badFunction"
+				"whisperPlayerMessage"
 			];
 
 			Utils = EASY_UTILS.fetchUtilities({
@@ -540,180 +743,60 @@ const EASY_MENU = (() => {
 				moduleSettings
 			});
 
-			// Get reference to and assign pre-existing factories
+			// Get reference to shared forge and factories
 			const easySharedForge = Utils.getSharedForge();
-
 			PhraseFactory = easySharedForge.getFactory({ name: "PhraseFactory" });
-			TemplateFactory = easySharedForge.getFactory({ name: "TemplateFactory" });
-			ThemeFactory = easySharedForge.getFactory({ name: "ThemeFactory" });
 
-			// Log the module is initializing.
-			const msgId = "10000";
-			Utils.logSyslogMessage({
-				severity: 6,
-				tag: "checkInstall",
-				transUnitId: msgId,
-				message: PhraseFactory.get({ transUnitId: msgId })
-			});
+			// Initialize vault storage
+			const sharedVault = Utils.getSharedVault();
+			sharedVault.EasySpeak = sharedVault.EasySpeak || {};
+			EasySpeakVault = sharedVault.EasySpeak;
 
-			// Continue with other Set Up Tasks.
+			// Cache available languages
+			EasySpeakVault.languages = getAllLanguages();
 
-			// TODO Add custom localization
+			if (moduleSettings.verbose) {
+				const msgId = "10000";
+				Utils.logSyslogMessage({
+					severity: "INFO",
+					tag: moduleSettings.readableName,
+					transUnitId: msgId,
+					message: PhraseFactory.get({ transUnitId: msgId })
+				});
+			}
+
+			// Add localization phrases
 			PhraseFactory.add({
 				newMap: {
 					enUS: {
-						"0x03BDB2A5": "Custom Menu",
-						"0x08161075": "Set Preferred Language",
-						"0x062D88F0": "Whispers to you from 'EASY-MODULES' will be in {{ remark }} (if available). ",
-						"0x0DD74385": "Purge ALL Game State",
-						"0x0009ADA5": "Purge module Game State",
-						"0x084D29DE": "The Roll20 API state{{ remark }} was purged.",
-						"0x0D842F34": "Example Alert Messages",
-						"0x0382B96E": "Example Change Token(s)",
-						"0x0C2A2E7E": "Tokens were successfully flipped.",
-						"0x07845DCE": "This is an example error alert whispered to players.",
-						"0x06F2AA1E": "Example warning, suggesting a possibly dangerous thing happened.",
-						"0x0512C293": "This is an example information notification whispered to players",
-						"0x061115DE": "An example tip or confirmation styled Notification.",
-						"0x03B6FF6E": "Invalid Arguments: There is one or more commands unrecognized. Check the commands spelling and usage."
-					},
-					frFR: {
-						"0x03BDB2A5": "Menu personnalisé",
-						"0x08161075": "Définir la langue préférée",
-						"0x062D88F0": "Les chuchotements de 'EASY-MODULES' vous parviendront en {{ remark }} (si disponible).",
-						"0x0DD74385": "Purger TOUT l'état de la partie",
-						"0x0009ADA5": "Purger l'état du module de la partie",
-						"0x084D29DE": "L'état de l'API Roll20.{{ remark }} a été purgé.",
-						"0x0D842F34": "Exemples de messages d'alerte",
-						"0x0382B96E": "Exemple de modification de(s) jeton(s)",
-						"0x0C2A2E7E": "Les jetons ont été retournés avec succès.",
-						"0x07845DCE": "Ceci est un exemple d'alerte d'erreur chuchotée aux joueurs.",
-						"0x06F2AA1E": "Exemple d'avertissement, suggérant un événement potentiellement dangereux.",
-						"0x0512C293": "Ceci est un exemple de notification d'information chuchotée aux joueurs.",
-						"0x061115DE": "Un exemple de notification de type conseil ou confirmation.",
-						"0x03B6FF6E": "Arguments invalides : une ou plusieurs commandes ne sont pas reconnues. Vérifiez l'orthographe et l'utilisation des commandes."
+						"0x0A1B2C3D": "Easy-Speak Menu",
+						"0x0A1B2C3E": "Choose Language",
+						"0x0A1B2C3F": "Add Language Access",
+						"0x0A1B2C40": "Remove Language Access",
+						"0x0A1B2C41": "No tokens selected.",
+						"0x0A1B2C42": "Token is not linked to a character.",
+						"0x0A1B2C43": "No languages found for {{ name }}.",
+						"0x0A1B2C44": "No handout found for language: {{ lang }}.",
+						"0x0A1B2C45": "No words available for language: {{ lang }}.",
+						"0x0A1B2C46": "Players added to language access for {{ name }}.",
+						"0x0A1B2C47": "Players removed from language access for {{ name }}.",
+						"0x0A1B2C48": "in an unknown language says, \"{{ gibberish }}\"",
+						"0x0A1B2C49": "In {{ lang }}",
+						"0x0A1B2C4A": "Message",
+						"0x0A1B2C4B": "Speak As",
+						"0x0A1B2C4C": "GM Speak As",
+						"0x0A1B2C4D": "This command is restricted to GM.",
+						"0x0A1B2C4E": "No language handouts found.",
+						"0x0A1B2C4F": "Available languages",
+						"0x0A1B2C50": "No players have access to {{ lang }}."
 					}
 				}
 			});
 
-			// TODO Add Templates
-			const menuHtml = `
-<div class="menu-box">
-	<h3>{{ title }}</h3>
-	<ul>
-		<!-- <li><a href="!api --menu">Option 1</a></li> -->
-		{{ menuItems }}
-	</ul>
-	<p class="menu-footer">{{ footer }}</p>
-</div>
-			`;
-
-			TemplateFactory.add({
-				newTemplates: {
-					"utilsMenu": `${menuHtml}`
-				}
-			});
-
-			// TODO Add Themes
-			const menuCss = `
-:root {
-  /* Palette Colors */
-  --ez-primary-color: #8655B6; 
-  --ez-secondary-color: #17AEE8; 
-  --ez-primary-background-color: #252B2C; 
-  --ez-subdued-background-color: #F2F2F2; 
-  --ez-overlay-text-color: #ffffff; 
-  --ez-border-color: #000000; 
-}
-
-/* Chat Menu CSS Rules */
-.menu-box {
-  font-size: 1.2em;
-  background-color: var(--ez-primary-background-color);
-  border: 2px solid var(--ez-border-color);
-  border-radius: 8px;
-  padding: 10px;
-  max-width: 100%;
-  font-family: Arial, sans-serif;
-  color: var(--ez-overlay-text-color);
-  margin: 5px;
-}
-
-h3 {
-  margin: 0;
-  font-size: 1.2em;
-  text-transform: uppercase;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 10px;
-  color: var(--ez-overlay-text-color);
-  background-color: var(--ez-primary-color);
-  border: 2px solid var(--ez-border-color);
-  border-radius: 5px;
-  padding: 5px;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-li {
-  margin: 5px 0;
-  width: 90%;
-  background-color: var(--ez-secondary-color);
-  border: 2px solid var(--ez-border-color);
-  color: var(--ez-overlay-text-color);
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-li[role="deletion"] {
-  background-color: red;
-}
-
-li:nth-child(even) {
-  background-color: var(--ez-primary-color);
-}
-
-#token {
-  background-color: green;
-}
-
-/* Strip styles from Anchor tags (<a>) */
-li > a {
-    text-decoration: none;
-    color: var(--ez-overlay-text-color);
-    font-weight: bold;
-    font-size: inherit;
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.menu-footer {
-  color: var(--ez-subdued-background-color);
-}
-
-.inline-rolls {
-color: black;
-}
-`;
-
-			ThemeFactory.add({
-				newThemes: {
-					"utilsMenu": `${menuCss}`
-				}
-			});
-
 			return 0;
-		} else {
 
-			// EASY_UTILS is unavailable. In Roll20, scripts that are in the most left tab are loaded first into a global
-			// sandbox; as if all the script are pasted into one.
-			const _getSyslogTimestamp = () => { return new Date().toISOString(); };
+		} else {
+			const _getSyslogTimestamp = () => new Date().toISOString();
 			const logMessage = `<ERROR> ${_getSyslogTimestamp()} [${moduleSettings.readableName}](checkInstall): {"transUnitId": 50000, "message": "Not Found: EASY_UTILS is unavailable. Ensure it is loaded before this module in the API console."}`;
 			log(logMessage);
 
@@ -721,44 +804,36 @@ color: black;
 		}
 	};
 
-	// !SECTION END of INITIALIZATION
-
-	/*******************************************************************************************************************
-	 * SECTION: ROLL20 STARTUP HOOK
-	 ******************************************************************************************************************/
-
+	// ANCHOR Event: on(ready)
 	on("ready", () => {
 		const continueMod = checkInstall();
+
 		if (continueMod === 0) {
 			registerEventHandlers();
-		}
 
-		// Log the Module is now ready for use.
-		const msgId = "20000";
-		Utils.logSyslogMessage({
-			severity: 6,
-			tag: "registerEventHandlers",
-			transUnitId: msgId,
-			message: PhraseFactory.get({ transUnitId: msgId })
-		});
+			const msgId = "20000";
+			Utils.logSyslogMessage({
+				severity: "INFO",
+				tag: moduleSettings.readableName,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId })
+			});
 
-		if (moduleSettings.sendWelcomeMsg) {
-			const whisperArguments = {
-				from: moduleSettings.readableName,
-				to: "gm",
-				message: PhraseFactory.get({ transUnitId: "20000" })
-			};
-			Utils.whisperPlayerMessage(whisperArguments);
+			if (moduleSettings.sendWelcomeMsg) {
+				Utils.whisperPlayerMessage({
+					from: moduleSettings.readableName,
+					to: "gm",
+					message: PhraseFactory.get({ transUnitId: msgId })
+				});
+			}
 		}
 	});
 
-	// !SECTION END of ROLL20 STARTUP HOOK
-
-	/*******************************************************************************************************************
-	 * SECTION: PUBLIC INTERFACE
-	 ******************************************************************************************************************/
+	// !SECTION End of Event Hooks: Roll20 API
+	// SECTION Public Methods: Exposed Interface
 
 	return {};
-	// !SECTION END of PUBLIC INTERFACE
 
+	// !SECTION End of Public Methods: Exposed Interface
+	// !SECTION End of Object: EASY_SPEAK
 })();

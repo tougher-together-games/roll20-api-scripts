@@ -4,7 +4,7 @@
 @description: The EASY_MARKDOWN module integrates with EASY_UTILS to provide a menu-driven interface and 
 	control commands in the Roll20 environment. It uses factories (Phrase, Template, Theme) from the forge,
 	parses user chat commands, and renders styled alerts to players via whisper messages.
-@version: 1.0.0
+@version: 1.1.0
 @author: Mhykiel
 @license: MIT
 @repository: {@link https://github.com/tougher-together-games/roll20-api-scripts/blob/main/src/easy-utils/easy-utils-menu.js|GitHub Repository}
@@ -14,67 +14,28 @@
 const EASY_MARKDOWN = (() => {
 
 	// SECTION Object: EASY_MARKDOWN
-	/**
-	 * @namespace EASY_MARKDOWN
-	 * @summary Example use of EASY_UTILS.
-	 * 
-	 * - **Purpose**:
-	 *   - // TODO Fill in Purpose
-	 * 
-	 * - **Execution**:
-	 *   - // TODO Fill in Execution
-	 * 
-	 * - **Design**:
-	 *   - // TODO Fill in Design
-	 * 
-	 * @see https://example.com
-	 */
 
 	// ANCHOR Member: moduleSettings
 	const moduleSettings = {
 		readableName: "Easy-Markdown",
 		chatApiName: "ezmarkdown",
 		globalName: "EASY_MARKDOWN",
-		version: "1.0.0",
+		version: "1.1.0",
 		author: "Mhykiel",
 		sendWelcomeMsg: true,
 		verbose: false,
-		debug: {
-			"onReady": false,
-			"convertCssToJson": false,
-			"convertHtmlToJson": false,
-			"convertMarkdownToHtml": false,
-			"convertJsonToHtml": false,
-			"convertToSingleLine": false,
-			"createPhraseFactory": false,
-			"createTemplateFactory": false,
-			"createThemeFactory": false,
-			"decodeBase64": false,
-			"encodeBase64": false,
-			"decodeCodeBlock": false,
-			"encodeCodeBlock": false,
-			"decodeNoteContent": false,
-			"encodeNoteContent": false,
-			"getGlobalSettings": false,
-			"getSharedForge": false,
-			"getSharedVault": false,
-			"logSyslogMessage": false,
-			"parseChatCommands": false,
-			"parseChatSubcommands": false,
-			"replacePlaceholders": false,
-			"applyCssToHtmlJson": false,
-			"handleChatApi": false,
-			"renderTemplateAsync": false,
-			"whisperAlertMessageAsync": false,
-			"whisperPlayerMessage": false
-		}
+		debug: {}
 	};
 
-	// ANCHOR Factory References
+	// ANCHOR Member: Factory References
 	let Utils = {};
 	let PhraseFactory = {};
 	let TemplateFactory = {};
 	let ThemeFactory = {};
+
+	// ANCHOR Member: State - Last Converted Items
+	let lastConvertedHandouts = [];
+	let lastConvertedCharacters = [];
 
 	// SECTION Inner Methods
 
@@ -87,12 +48,11 @@ const EASY_MARKDOWN = (() => {
 		if (!msgDetails.isGm) {
 
 			if (moduleSettings.verbose) {
-				// Only for GM Use
 				Utils.whisperAlertMessageAsync({
 					from: moduleSettings.readableName,
 					to: msgDetails.callerName,
 					toId: msgDetails.callerId,
-					severity: "ERROR", // ERROR
+					severity: "ERROR",
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
 				});
@@ -103,7 +63,8 @@ const EASY_MARKDOWN = (() => {
 
 		const menuItemsArray = [
 			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --styles">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D813F3C" })}</a></li>`,
-			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --handouts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x005A0033" })}</a></li>`
+			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --handouts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x005A0033" })}</a></li>`,
+			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --characters">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0C4A2B1E" })}</a></li>`
 		];
 
 		const menuItemsHTML = menuItemsArray.join("\n");
@@ -131,7 +92,6 @@ const EASY_MARKDOWN = (() => {
 			return 0;
 		} catch (err) {
 
-			// "50000": "Error: {{ remark }}"
 			const msgId = "50000";
 			Utils.logSyslogMessage({
 				severity: "ERROR",
@@ -151,12 +111,11 @@ const EASY_MARKDOWN = (() => {
 
 		if (!msgDetails.isGm) {
 
-			// Only for GM Use
 			Utils.whisperAlertMessageAsync({
 				from: moduleSettings.readableName,
 				to: msgDetails.callerName,
 				toId: msgDetails.callerId,
-				severity: "ERROR", // ERROR
+				severity: "ERROR",
 				apiCallContent: msgDetails.raw.content,
 				remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
 			});
@@ -171,7 +130,6 @@ const EASY_MARKDOWN = (() => {
 
 			if (styleSheets.length === 0) {
 
-				// "0x0027BD4E": "No StyleSheet handouts found. Ensure the handout name is prefixed with 'StyleSheet:'.",
 				await Utils.whisperAlertMessageAsync({
 					from: moduleSettings.readableName,
 					to: msgDetails.callerName,
@@ -194,7 +152,6 @@ const EASY_MARKDOWN = (() => {
 
 							if (!decodedNotes.trim()) {
 
-								// "40000": "Invalid Arguments: {{ remark }}",
 								const msgId = "40000";
 								Utils.logSyslogMessage({
 									severity: "WARN",
@@ -237,7 +194,6 @@ const EASY_MARKDOWN = (() => {
 			return 0;
 		} catch (err) {
 
-			// "50000": "Error: {{ remark }}"
 			const msgId = "50000";
 			Utils.logSyslogMessage({
 				severity: "ERROR",
@@ -257,7 +213,6 @@ const EASY_MARKDOWN = (() => {
 
 		if (!msgDetails.isGm) {
 			if (moduleSettings.verbose) {
-				// Only for GM Use
 				Utils.whisperAlertMessageAsync({
 					from: moduleSettings.readableName,
 					to: msgDetails.callerName,
@@ -271,10 +226,7 @@ const EASY_MARKDOWN = (() => {
 			return 0;
 		}
 
-		//------------------------------------------------------------------
-		// Subroutine: parseCssOverrides
-		//    Splits CSS declarations in :root {...}, storing key:value in an object.
-		//------------------------------------------------------------------
+		// ANCHOR Subroutine: parseCssOverrides
 		const parseCssOverrides = (rootContent) => {
 			const cssVars = {};
 			const declarations = rootContent.split(";");
@@ -299,50 +251,26 @@ const EASY_MARKDOWN = (() => {
 			return cssVars;
 		};
 
-		//------------------------------------------------------------------
-		// Subroutine: extractRollTableBlocks
-		//    Finds ::: ... ::: blocks with a class like 'rolltable-something',
-		//    capturing the 'something' (tableId) and the block content.
-		//------------------------------------------------------------------
+		// ANCHOR Subroutine: extractRollTableBlocks
 		const extractRollTableBlocks = (markdown) => {
-			// e.g. ::: another-class rolltable-tableID ... :::
-			// /:::[^\n]*?(rolltable-(\S+))([\s\S]*?):::/gm
 			const blockRegex = /:::[^\n]*?(rolltable-(\S+))([\s\S]*?):::/gm;
 			const blocks = [];
 
 			let match;
 			while ((match = blockRegex.exec(markdown)) !== null) {
-				const entireMatch = match[0];
-				const fullClass = match[1];    // e.g. "rolltable-tableID"
-				const tableId = match[2];      // e.g. "tableID"
-				const blockContent = match[3]; // text between ::: ... :::
+				const tableId = match[2];
+				const blockContent = match[3];
 				blocks.push({
 					tableId,
-					blockContent: blockContent.trim(),
-					entireMatch
+					blockContent: blockContent.trim()
 				});
 			}
 
 			return blocks;
 		};
 
-		/**
-		 * parseDiceTable
-		 * 1) The first row’s first column is the dice expression (e.g. "1d8+1d10").
-		 * 2) We skip the alignment row (the row of dashes/colons).
-		 * 3) For each subsequent row, we assume:
-		 *    - Column 1 => numeric or range (e.g. "2-3")
-		 *    - Column 2 => result text (Base64-encoded).
-		 *
-		 * @param {string} blockContent - the markdown inside ::: ... :::
-		 * @returns {Object} { diceExpression, csv }
-		 *          diceExpression: string (e.g. "1d8+1d10")
-		 *          csv: comma-separated pairs: "2-3=AAAA,4-8=BBBB,9=CCCC" etc.
-		 */
-		function parseDiceTable(blockContent) {
-			// Typical row pattern: "| col1 | col2 | ..."
-			// We capture only the first two columns:
-			//   ^\|\s*([^|]+)\|\s*([^|]+)\|.*$
+		// ANCHOR Subroutine: parseDiceTable
+		const parseDiceTable = (blockContent) => {
 			const rowRegex = /^\|\s*([^|]+)\|\s*([^|]+)\|.*$/gm;
 
 			let diceExpression = "";
@@ -355,20 +283,15 @@ const EASY_MARKDOWN = (() => {
 				const col1 = match[1].trim();
 				const col2 = match[2].trim();
 
-				// 1) Check if this row is the alignment row:
-				//    e.g., ":---", "---", ":----:", or any combination of dashes/colons/spaces
 				const alignmentRegex = /^[\-\:\s]+$/;
 				const isAlignmentRow = alignmentRegex.test(col1) && alignmentRegex.test(col2);
 				if (isAlignmentRow) {
-					// Skip this row altogether
 					continue;
 				}
 
-				// 2) If rowIndex===0 => the first *non-alignment* row is the dice expression row
 				if (rowIndex === 0) {
-					diceExpression = col1;  // e.g., "1d8+1d10"
+					diceExpression = col1;
 				} else {
-					// All subsequent rows => col1 is range, col2 is the table result
 					const rangePart = col1;
 					const encodedResult = Utils.encodeBase64({ text: col2 });
 					entries.push(`${rangePart}=${encodedResult}`);
@@ -377,33 +300,21 @@ const EASY_MARKDOWN = (() => {
 				rowIndex++;
 			}
 
-			// Build a comma-separated string => "range=encodedResult,range=encodedResult,..."
 			const csv = entries.join(",");
 
 			return { diceExpression, csv };
 		};
 
-		//------------------------------------------------------------------
-		// Subroutine: replaceRollTablesInMarkdown
-		//    For each ::: rolltable-xxx ::: block:
-		//     1) Parse the dice expression from first row, subsequent ranges/entries.
-		//     2) Replace link placeholders like: href="{{ %rolltable-xxx% }}"
-		//     3) Insert the final command with dynamic dice expression & CSV data.
-		//------------------------------------------------------------------
+		// ANCHOR Subroutine: replaceRollTablesInMarkdown
 		const replaceRollTablesInMarkdown = (markdown) => {
-			// 1) Extract all rolltable blocks
 			const blocks = extractRollTableBlocks(markdown);
 			let updatedMarkdown = markdown;
 
 			for (const { tableId, blockContent } of blocks) {
-				// 2) Parse out the dice expression + row data
 				const { diceExpression, csv } = parseDiceTable(blockContent);
 
-				// 3) Build the final href
-				// Example: `href="`!ezmarkdown --rolltable result#[[1d8+1d10]] table#2-3=AAAA,4-8=BBBB"`
 				const replacement = `href="&#96;!ezmarkdown --rolltable &#91;&#91;${diceExpression}&#93;&#93; ${csv}"`;
 
-				// 4) Replace the link placeholder: {{ %rolltable-<tableId>% }}
 				const placeholderRegex = new RegExp(`href="\\{\\{\\s*%rolltable-${tableId}%\\s*\\}\\}"`, "g");
 				updatedMarkdown = updatedMarkdown.replace(placeholderRegex, replacement);
 			}
@@ -412,69 +323,57 @@ const EASY_MARKDOWN = (() => {
 		};
 
 		try {
-			// Grab all handouts
 			const handouts = findObjs({ type: "handout" });
 			const handoutsConverted = [];
 
-			// Iterate over all handouts in a serial (await) fashion
 			for (const handout of handouts) {
 				let styledContent = "";
 				const handoutName = handout.get("name")?.trim();
 				const handoutId = handout.get("_id");
 
-				// Skip if handout has no valid name
 				if (!handoutName) continue;
 
-				// Skip if this is a stylesheet handout
 				if (handoutName.startsWith("StyleSheet:")) {
 					continue;
 				}
 
-				// Retrieve the GM notes asynchronously
 				const gmNotes = await new Promise((resolve) => {
 					handout.get("gmnotes", (notes) => { return resolve(notes); });
 				});
 
-				// Decode the GM notes
 				const avatarUrlRaw = JSON.stringify(handout.get("avatar"));
 				const decodedNotes = Utils.decodeNoteContent({ text: gmNotes });
 
-				// Attempt to match the <style> block
 				const styleMatch = decodedNotes.match(/<style([\s\S]*?)<\/style>/i);
 				if (!styleMatch) {
-					// No <style> block => no @import => skip
 					continue;
 				}
 				const styleContent = styleMatch[1].trim();
 
-				// Attempt to match an @import line
 				const importMatch = styleContent.match(/@import\s+url\(["'](.+?)["']\);/i);
 				if (!importMatch || !importMatch[1]) {
-					// No @import => skip
 					continue;
 				}
 
-				// The stylesheet name we're looking for, e.g. "DarkTheme" in @import url("DarkTheme");
 				const themeName = importMatch[1].trim();
 
-				// Transform the avatar URL if present
 				let avatarUrl = "";
 				if (avatarUrlRaw) {
 					avatarUrl = avatarUrlRaw
-						.replace(/^"|"$/g, "") // remove surrounding quotes
-						.replace(/\/med\.jpg(\?.*)?$/, "/original.jpg"); // /med.jpg -> /original.jpg
+						.replace(/^"|"$/g, "")
+						.replace(/\/med\.png(\?.*)?$/, "/original.png")
+						.replace(/\/med\.jpg(\?.*)?$/, "/original.jpg")
+						.replace(/\/thumb\.png(\?.*)?$/, "/original.png")
+						.replace(/\/thumb\.jpg(\?.*)?$/, "/original.jpg");
 				}
 
-				// Clean out the <style> block and replace {{ AvatarUrl }} placeholders
 				const cleanedNotes = decodedNotes
 					.replace(/<style[\s\S]*?<\/style>/i, "")
-					.replace(/{{\s*AvatarUrl\s*}}/, avatarUrl)
+					.replace(/{{\s*AvatarUrl\s*}}/g, avatarUrl)
 					.trim();
 
-				// --- NEW STEP: Replace any rolltable placeholders ---
 				const replacedNotes = replaceRollTablesInMarkdown(cleanedNotes);
 
-				// Find the theme handout by name
 				const themeHandout = findObjs({
 					type: "handout",
 					name: `StyleSheet: ${themeName}`,
@@ -491,14 +390,11 @@ const EASY_MARKDOWN = (() => {
 					continue;
 				}
 
-				// Attempt to extract any CSS variables (e.g. from :root {...})
 				const rootMatch = styleContent.match(/:root\s*{([\s\S]*?)}/i);
-				const cssVars = rootMatch ? parseCssOverrides(rootMatch[1], handoutName) : {};
+				const cssVars = rootMatch ? parseCssOverrides(rootMatch[1]) : {};
 
-				// Convert final (replaced) Markdown to HTML
 				const htmlConversion = Utils.convertMarkdownToHtml({ content: replacedNotes });
 
-				// Register this handout's content as a template in the TemplateFactory
 				TemplateFactory.add({
 					newTemplates: {
 						[handoutId]: htmlConversion
@@ -506,7 +402,6 @@ const EASY_MARKDOWN = (() => {
 				});
 
 				try {
-					// Render this handout with the correct theme
 					styledContent = await Utils.renderTemplateAsync({
 						template: handoutId,
 						expressions: {},
@@ -514,13 +409,10 @@ const EASY_MARKDOWN = (() => {
 						cssVars
 					});
 
-					// Remove from TemplateFactory after rendering
 					TemplateFactory.remove({ template: handoutId });
 
-					// Update the handout’s notes
 					handout.set("notes", styledContent);
 
-					log("styledContent: " + styledContent);
 					styledContent = "";
 					handoutsConverted.push(handoutName);
 
@@ -538,13 +430,12 @@ const EASY_MARKDOWN = (() => {
 				}
 			}
 
-			// Post-processing: whisper a summary to whoever initiated this
 			if (handoutsConverted.length === 0) {
 				const whisperArguments = {
 					from: moduleSettings.readableName,
 					to: msgDetails.callerName,
 					toId: msgDetails.callerId,
-					severity: 4, // WARNING
+					severity: 4,
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({
 						playerId: msgDetails.callerId,
@@ -553,16 +444,20 @@ const EASY_MARKDOWN = (() => {
 				};
 				await Utils.whisperAlertMessageAsync(whisperArguments);
 			} else {
+				// Store for details command
+				lastConvertedHandouts = handoutsConverted.slice();
+
 				const whisperArguments = {
 					from: moduleSettings.readableName,
 					to: msgDetails.callerName,
 					toId: msgDetails.callerId,
-					severity: 6, // INFORMATION
+					severity: 6,
 					apiCallContent: msgDetails.raw.content,
 					remark: `${PhraseFactory.get({
 						playerId: msgDetails.callerId,
-						transUnitId: "0x0DFBD0E4"
-					})} ${handoutsConverted}`,
+						transUnitId: "0x0DFBD0E4",
+						expressions: { count: handoutsConverted.length }
+					})} <a href="\`!${moduleSettings.chatApiName} --handout-details">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0H8C9D0E" })}</a>`,
 				};
 				await Utils.whisperAlertMessageAsync(whisperArguments);
 			}
@@ -582,14 +477,452 @@ const EASY_MARKDOWN = (() => {
 		}
 	};
 
+	// ANCHOR Function: renderCharacterBio
+	//    Shared rendering logic for single character
+	const renderCharacterBio = async (character) => {
+
+		// ANCHOR Subroutine: parseCssOverrides
+		const parseCssOverrides = (rootContent) => {
+			const cssVars = {};
+			const declarations = rootContent.split(";");
+
+			declarations.forEach(declaration => {
+				const trimmedDeclaration = declaration.trim();
+				if (!trimmedDeclaration || trimmedDeclaration.startsWith("/*")) {
+					return;
+				}
+				const colonIndex = trimmedDeclaration.indexOf(":");
+				if (colonIndex === -1) {
+					return;
+				}
+				let key = trimmedDeclaration.substring(0, colonIndex).trim();
+				const value = trimmedDeclaration.substring(colonIndex + 1).trim();
+				if (!key.startsWith("--")) {
+					key = `--${key}`;
+				}
+				cssVars[key] = value;
+			});
+
+			return cssVars;
+		};
+
+		// ANCHOR Subroutine: extractRollTableBlocks
+		const extractRollTableBlocks = (markdown) => {
+			const blockRegex = /:::[^\n]*?(rolltable-(\S+))([\s\S]*?):::/gm;
+			const blocks = [];
+
+			let match;
+			while ((match = blockRegex.exec(markdown)) !== null) {
+				const tableId = match[2];
+				const blockContent = match[3];
+				blocks.push({
+					tableId,
+					blockContent: blockContent.trim()
+				});
+			}
+
+			return blocks;
+		};
+
+		// ANCHOR Subroutine: parseDiceTable
+		const parseDiceTable = (blockContent) => {
+			const rowRegex = /^\|\s*([^|]+)\|\s*([^|]+)\|.*$/gm;
+
+			let diceExpression = "";
+			const entries = [];
+
+			let rowIndex = 0;
+			let match;
+
+			while ((match = rowRegex.exec(blockContent)) !== null) {
+				const col1 = match[1].trim();
+				const col2 = match[2].trim();
+
+				const alignmentRegex = /^[\-\:\s]+$/;
+				const isAlignmentRow = alignmentRegex.test(col1) && alignmentRegex.test(col2);
+				if (isAlignmentRow) {
+					continue;
+				}
+
+				if (rowIndex === 0) {
+					diceExpression = col1;
+				} else {
+					const rangePart = col1;
+					const encodedResult = Utils.encodeBase64({ text: col2 });
+					entries.push(`${rangePart}=${encodedResult}`);
+				}
+
+				rowIndex++;
+			}
+
+			const csv = entries.join(",");
+
+			return { diceExpression, csv };
+		};
+
+		// ANCHOR Subroutine: replaceRollTablesInMarkdown
+		const replaceRollTablesInMarkdown = (markdown) => {
+			const blocks = extractRollTableBlocks(markdown);
+			let updatedMarkdown = markdown;
+
+			for (const { tableId, blockContent } of blocks) {
+				const { diceExpression, csv } = parseDiceTable(blockContent);
+
+				const replacement = `href="&#96;!ezmarkdown --rolltable &#91;&#91;${diceExpression}&#93;&#93; ${csv}"`;
+
+				const placeholderRegex = new RegExp(`href="\\{\\{\\s*%rolltable-${tableId}%\\s*\\}\\}"`, "g");
+				updatedMarkdown = updatedMarkdown.replace(placeholderRegex, replacement);
+			}
+
+			return updatedMarkdown;
+		};
+
+		// ANCHOR Subroutine: getCharacterAttribute
+		//    Tries multiple naming conventions to find attribute value
+		const getCharacterAttribute = (characterId, attrName) => {
+			// Try exact name first
+			let attr = findObjs({ type: "attribute", characterid: characterId, name: attrName })[0];
+			if (attr) return attr.get("current") || "";
+
+			// Try lowercase
+			attr = findObjs({ type: "attribute", characterid: characterId, name: attrName.toLowerCase() })[0];
+			if (attr) return attr.get("current") || "";
+
+			// Try snake_case conversion (CamelCase -> snake_case)
+			const snakeCase = attrName.replace(/([A-Z])/g, "_$1").toLowerCase().replace(/^_/, "");
+			attr = findObjs({ type: "attribute", characterid: characterId, name: snakeCase })[0];
+			if (attr) return attr.get("current") || "";
+
+			// Try with underscores between words (BioPersonalityTraits -> bio_personality_traits)
+			const underscored = attrName.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+			attr = findObjs({ type: "attribute", characterid: characterId, name: underscored })[0];
+			if (attr) return attr.get("current") || "";
+
+			// Try removing "Bio" prefix if present (BioPersonalityTraits -> personality_traits)
+			if (attrName.startsWith("Bio")) {
+				const withoutBio = attrName.substring(3);
+				const withoutBioSnake = withoutBio.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+				attr = findObjs({ type: "attribute", characterid: characterId, name: withoutBioSnake })[0];
+				if (attr) return attr.get("current") || "";
+			}
+
+			return "";
+		};
+
+		// ANCHOR Subroutine: replaceAllPlaceholders
+		//    Replaces all {{ placeholder }} patterns with character attribute values
+		const replaceAllPlaceholders = (markdown, characterId, characterName, avatarUrl) => {
+			// Find all {{ placeholder }} patterns
+			const placeholderRegex = /\{\{\s*([^}]+)\s*\}\}/g;
+
+			return markdown.replace(placeholderRegex, (match, placeholderName) => {
+				const trimmedName = placeholderName.trim();
+
+				// Handle special built-in placeholders
+				switch (trimmedName) {
+					case "CharacterName":
+						return characterName;
+					case "CharacterId":
+						return characterId;
+					case "AvatarUrl":
+						return avatarUrl;
+					default:
+						// Look up as character attribute
+						return getCharacterAttribute(characterId, trimmedName);
+				}
+			});
+		};
+
+		const characterName = character.get("name")?.trim();
+		const characterId = character.get("_id");
+
+		if (!characterName) {
+			return { success: false, error: "No character name" };
+		}
+
+		// Retrieve the GM notes asynchronously
+		const gmNotes = await new Promise((resolve) => {
+			character.get("gmnotes", (notes) => { return resolve(notes); });
+		});
+
+		const decodedNotes = Utils.decodeNoteContent({ text: gmNotes });
+
+		// Attempt to match the <style> block
+		const styleMatch = decodedNotes.match(/<style([\s\S]*?)<\/style>/i);
+		if (!styleMatch) {
+			return { success: false, error: "No style block found" };
+		}
+		const styleContent = styleMatch[1].trim();
+
+		// Attempt to match an @import line
+		const importMatch = styleContent.match(/@import\s+url\(["'](.+?)["']\);/i);
+		if (!importMatch || !importMatch[1]) {
+			return { success: false, error: "No @import found" };
+		}
+
+		const themeName = importMatch[1].trim();
+
+		// Transform the avatar URL if present
+		const avatarUrlRaw = character.get("avatar") || "";
+		let avatarUrl = "";
+		if (avatarUrlRaw) {
+			avatarUrl = avatarUrlRaw
+				.replace(/\/med\.png(\?.*)?$/, "/original.png")
+				.replace(/\/med\.jpg(\?.*)?$/, "/original.jpg")
+				.replace(/\/thumb\.png(\?.*)?$/, "/original.png")
+				.replace(/\/thumb\.jpg(\?.*)?$/, "/original.jpg");
+		}
+
+		// Clean out the <style> block
+		let cleanedNotes = decodedNotes
+			.replace(/<style[\s\S]*?<\/style>/i, "")
+			.trim();
+
+		// Replace all {{ placeholder }} patterns with character attributes
+		cleanedNotes = replaceAllPlaceholders(cleanedNotes, characterId, characterName, avatarUrl);
+
+		// Replace any rolltable placeholders
+		const replacedNotes = replaceRollTablesInMarkdown(cleanedNotes);
+
+		// Find the theme handout by name
+		const themeHandout = findObjs({
+			type: "handout",
+			name: `StyleSheet: ${themeName}`,
+		})[0];
+
+		if (!themeHandout) {
+			return { success: false, error: `Theme not found: ${themeName}` };
+		}
+
+		// Extract CSS variables
+		const rootMatch = styleContent.match(/:root\s*{([\s\S]*?)}/i);
+		const cssVars = rootMatch ? parseCssOverrides(rootMatch[1]) : {};
+
+		// Convert Markdown to HTML
+		const htmlConversion = Utils.convertMarkdownToHtml({ content: replacedNotes });
+
+		// Register as template
+		TemplateFactory.add({
+			newTemplates: {
+				[characterId]: htmlConversion
+			}
+		});
+
+		try {
+			// Render with theme
+			const styledContent = await Utils.renderTemplateAsync({
+				template: characterId,
+				expressions: {},
+				theme: themeHandout.get("_id"),
+				cssVars
+			});
+
+			// Remove from TemplateFactory after rendering
+			TemplateFactory.remove({ template: characterId });
+
+			// Update the character's bio
+			character.set("bio", styledContent);
+
+			return { success: true, characterName };
+
+		} catch (err) {
+			return { success: false, error: err.message || err };
+		}
+	};
+
+	// ANCHOR Function: processCharactersAsync
+	const processCharactersAsync = async (msgDetails) => {
+
+		const thisFuncDebugName = "processCharactersAsync";
+
+		if (!msgDetails.isGm) {
+			if (moduleSettings.verbose) {
+				Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: `${PhraseFactory.get({ transUnitId: "0x031B122E" })}`
+				});
+			}
+
+			return 0;
+		}
+
+		try {
+			const characters = findObjs({ type: "character" });
+			const charactersConverted = [];
+
+			for (const character of characters) {
+				const result = await renderCharacterBio(character);
+
+				if (result.success) {
+					charactersConverted.push(result.characterName);
+				} else if (result.error && !result.error.includes("No style block")) {
+					Utils.logSyslogMessage({
+						severity: 6,
+						tag: thisFuncDebugName,
+						transUnitId: "50000",
+						message: `Error rendering "${character.get("name")}": ${result.error}`
+					});
+				}
+			}
+
+			// Whisper summary
+			if (charactersConverted.length === 0) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: 4,
+					apiCallContent: msgDetails.raw.content,
+					remark: `${PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0B2D4C5E"
+					})}`
+				});
+			} else {
+				// Store for details command
+				lastConvertedCharacters = charactersConverted.slice();
+
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: 6,
+					apiCallContent: msgDetails.raw.content,
+					remark: `${PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0E3F1A2B",
+						expressions: { count: charactersConverted.length }
+					})} <a href="\`!${moduleSettings.chatApiName} --character-details">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0H8C9D0E" })}</a>`
+				});
+			}
+
+			return 0;
+
+		} catch (err) {
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+
+			return 1;
+		}
+	};
+
+	// ANCHOR Function: processCharacterAsync
+	//    Render a single character by ID - allows players to refresh their own bio
+	const processCharacterAsync = async (msgDetails, parsedArgs) => {
+
+		const thisFuncDebugName = "processCharacterAsync";
+
+		// Get character ID from parsedArgs (first key that looks like an ID)
+		let characterId = null;
+		for (const key of Object.keys(parsedArgs)) {
+			if (key.startsWith("-") && key.length > 10) {
+				characterId = key;
+				break;
+			}
+		}
+
+		if (!characterId) {
+			await Utils.whisperAlertMessageAsync({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				toId: msgDetails.callerId,
+				severity: "ERROR",
+				apiCallContent: msgDetails.raw.content,
+				remark: `${PhraseFactory.get({ transUnitId: "0x0A1B2C3D" })}`
+			});
+
+			return 1;
+		}
+
+		// Find the character
+		const character = getObj("character", characterId);
+
+		if (!character) {
+			await Utils.whisperAlertMessageAsync({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				toId: msgDetails.callerId,
+				severity: "ERROR",
+				apiCallContent: msgDetails.raw.content,
+				remark: `${PhraseFactory.get({ transUnitId: "0x0D4E5F6A" })}`
+			});
+
+			return 1;
+		}
+
+		// Check permissions - GM can always render, players only if they control the character
+		const controlledBy = character.get("controlledby") || "";
+		const canControl = msgDetails.isGm ||
+			controlledBy === "all" ||
+			(controlledBy && controlledBy.includes(msgDetails.callerId));
+
+		if (!canControl) {
+			await Utils.whisperAlertMessageAsync({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				toId: msgDetails.callerId,
+				severity: "ERROR",
+				apiCallContent: msgDetails.raw.content,
+				remark: `${PhraseFactory.get({ transUnitId: "0x0E5F6A7B" })}`
+			});
+
+			return 1;
+		}
+
+		try {
+			const result = await renderCharacterBio(character);
+
+			if (result.success) {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: 6,
+					apiCallContent: msgDetails.raw.content,
+					remark: `${PhraseFactory.get({
+						playerId: msgDetails.callerId,
+						transUnitId: "0x0F6A7B8C"
+					})} ${result.characterName}`
+				});
+			} else {
+				await Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "ERROR",
+					apiCallContent: msgDetails.raw.content,
+					remark: `${PhraseFactory.get({ transUnitId: "0x0G7B8C9D" })} ${result.error}`
+				});
+			}
+
+			return 0;
+
+		} catch (err) {
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+
+			return 1;
+		}
+	};
+
 	// ANCHOR Subroutine: processRollTable
-	//   (Unchanged, or adapted if you want to handle the "table#2-3=AAAA" approach.)
 	const processRollTable = async (msgDetails, parsedArgs) => {
 		try {
-			
-			sendChat("System", `/w "${msgDetails.callerName}" args: ${JSON.stringify(parsedArgs)}`);
 
-			// Check if parsedArgs is not empty
 			const keys = Object.keys(parsedArgs);
 			if (keys.length === 0) {
 				sendChat("System", `/w "${msgDetails.callerName}" No valid roll table entries found.`);
@@ -597,16 +930,12 @@ const EASY_MARKDOWN = (() => {
 				return;
 			}
 
-			// Randomly select one of the keys
 			const randomKey = keys[Math.floor(Math.random() * keys.length)];
 
-			// Decode the Base64 key
 			const decodedValue = Utils.decodeBase64({ text: randomKey });
 
-			// Prepare the output message
 			const output = `&{template:default} {{name=Roll Table Result}} {{Result=${decodedValue}}}`;
 
-			// Send the formatted roll table output to Roll20 chat
 			sendChat(msgDetails.callerName, output);
 
 		} catch (err) {
@@ -615,6 +944,51 @@ const EASY_MARKDOWN = (() => {
 		}
 	};
 
+	// ANCHOR Function: processHandoutDetails
+	//    Shows the list of last converted handouts
+	const processHandoutDetails = async (msgDetails) => {
+		if (!msgDetails.isGm) return 0;
+
+		if (lastConvertedHandouts.length === 0) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0I9D0E1F" })
+			});
+		} else {
+			const list = lastConvertedHandouts.map(name => `• ${name}`).join("<br>");
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: `<strong>${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0J0E1F2G" })}</strong><br>${list}`
+			});
+		}
+
+		return 0;
+	};
+
+	// ANCHOR Function: processCharacterDetails
+	//    Shows the list of last converted characters
+	const processCharacterDetails = async (msgDetails) => {
+		if (!msgDetails.isGm) return 0;
+
+		if (lastConvertedCharacters.length === 0) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0K1F2G3H" })
+			});
+		} else {
+			const list = lastConvertedCharacters.map(name => `• ${name}`).join("<br>");
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: `<strong>${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0L2G3H4I" })}</strong><br>${list}`
+			});
+		}
+
+		return 0;
+	};
 
 	// !SECTION End of Inner Methods
 	// SECTION Event Hooks: Roll20 API
@@ -624,13 +998,17 @@ const EASY_MARKDOWN = (() => {
 		"--menu": (msgDetails) => { return processMenuAsync(msgDetails); },
 		"--styles": (msgDetails) => { return processStylesAsync(msgDetails); },
 		"--handouts": (msgDetails) => { return processHandoutsAsync(msgDetails); },
+		"--handout-details": (msgDetails) => { return processHandoutDetails(msgDetails); },
+		"--characters": (msgDetails) => { return processCharactersAsync(msgDetails); },
+		"--character-details": (msgDetails) => { return processCharacterDetails(msgDetails); },
+		"--character": (msgDetails, parsedArgs) => { return processCharacterAsync(msgDetails, parsedArgs); },
 		"--rolltable": (msgDetails, parsedArgs) => { return processRollTable(msgDetails, parsedArgs); },
 	};
 
 	// Set Default Action
 	actionMap["--default"] = actionMap["--menu"];
 
-	// ANCHOR Outer Method: registerEventHandlers
+	// ANCHOR Function: registerEventHandlers
 	const registerEventHandlers = () => {
 		on("chat:message", (apiCall) => {
 			if (apiCall.type === "api" && apiCall.content.startsWith(`!${moduleSettings.chatApiName}`)) {
@@ -641,38 +1019,12 @@ const EASY_MARKDOWN = (() => {
 		return 0;
 	};
 
-	// ANCHOR Outer Method: checkInstall
+	// ANCHOR Function: checkInstall
 	const checkInstall = () => {
 
 		if (typeof EASY_UTILS !== "undefined") {
 
-			// TODO Limit the functions fetched down to the ones this module uses for memory efficiency.
 			const requiredFunctions = [
-				/*
-				"convertCssToJson",
-				"convertHtmlToJson",
-				"convertMarkdownToHtml",
-				"convertJsonToHtml",
-				"convertToSingleLine",
-				"decodeBase64",
-				"encodeBase64",
-				"decodeCodeBlock",
-				"encodeCodeBlock",
-				"decodeNoteContent",
-				"encodeNoteContent",
-				"getGlobalSettings",
-				"getSharedForge",
-				"getSharedVault",
-				"logSyslogMessage",
-				"parseChatCommands",
-				"parseChatSubcommands",
-				"replacePlaceholders",
-				"applyCssToHtmlJson",
-				"handleChatApi",
-				"renderTemplateAsync",
-				"whisperAlertMessageAsync",
-				"whisperPlayerMessage"
-				*/
 				"convertMarkdownToHtml",
 				"decodeBase64",
 				"encodeBase64",
@@ -693,7 +1045,6 @@ const EASY_MARKDOWN = (() => {
 				moduleSettings
 			});
 
-			// Get reference to and assign pre-existing factories
 			const easySharedForge = Utils.getSharedForge();
 
 			PhraseFactory = easySharedForge.getFactory({ name: "PhraseFactory" });
@@ -702,7 +1053,6 @@ const EASY_MARKDOWN = (() => {
 
 			if (moduleSettings.verbose) {
 
-				// "10000": ".=> Initializing <=.",
 				const msgId = "10000";
 				Utils.logSyslogMessage({
 					severity: "INFO",
@@ -715,24 +1065,50 @@ const EASY_MARKDOWN = (() => {
 			PhraseFactory.add({
 				newMap: {
 					enUS: {
-						"0x0FF56D55": "Easy-Markdown",
+						"0x0FF56D55": "Easy-Markdown Menu",
 						"0x0D813F3C": "Load Style Sheets",
 						"0x005A0033": "Render Markdown Handouts",
+						"0x0C4A2B1E": "Render Character Bios",
 						"0x0027BD4E": "No StyleSheet handouts found. Ensure the handout name is prefixed with 'StyleSheet:'.",
 						"0x089BBAAA": "The following styles were saved:",
-						"0x0DFBD0E4": "The following handouts were converted:",
+						"0x0DFBD0E4": "Handouts converted: {{ count }}.",
+						"0x0E3F1A2B": "Characters rendered: {{ count }}.",
 						"0x031B122E": "You have to be GM to use handout styling commands.",
-						"0x0FD080D4": "no handouts were rendered",
+						"0x0FD080D4": "No handouts were rendered",
+						"0x0B2D4C5E": "No characters were rendered",
+						"0x0A1B2C3D": "No character ID provided. Usage: !ezmarkdown --character <characterId>",
+						"0x0D4E5F6A": "Character not found.",
+						"0x0E5F6A7B": "You do not have permission to edit this character.",
+						"0x0F6A7B8C": "Character bio rendered:",
+						"0x0G7B8C9D": "Failed to render character bio:",
+						"0x0H8C9D0E": "Show Details",
+						"0x0I9D0E1F": "No handouts have been converted yet.",
+						"0x0J0E1F2G": "Converted Handouts:",
+						"0x0K1F2G3H": "No characters have been rendered yet.",
+						"0x0L2G3H4I": "Rendered Characters:",
 					},
 					frFR: {
 						"0x0FF56D55": "Easy-Markdown",
 						"0x0D813F3C": "Charger les feuilles de style",
 						"0x005A0033": "Rendre les handouts en Markdown",
+						"0x0C4A2B1E": "Rendre les bios des personnages",
 						"0x0027BD4E": "Aucune feuille de style trouvée. Assurez-vous que le nom du handout commence par 'StyleSheet:'.",
 						"0x089BBAAA": "Les styles suivants ont été enregistrés :",
-						"0x0DFBD0E4": "Les handouts suivants ont été convertis :",
+						"0x0DFBD0E4": "Handouts convertis : {{ count }}.",
+						"0x0E3F1A2B": "Personnages rendus : {{ count }}.",
 						"0x031B122E": "Vous devez être GM pour utiliser les commandes de style des handouts.",
-						"0x0FD080D4": "aucun handout n'a été rendu"
+						"0x0FD080D4": "Aucun handout n'a été rendu",
+						"0x0B2D4C5E": "Aucun personnage n'a été rendu",
+						"0x0A1B2C3D": "Aucun ID de personnage fourni. Usage: !ezmarkdown --character <characterId>",
+						"0x0D4E5F6A": "Personnage non trouvé.",
+						"0x0E5F6A7B": "Vous n'avez pas la permission de modifier ce personnage.",
+						"0x0F6A7B8C": "Bio du personnage rendue :",
+						"0x0G7B8C9D": "Échec du rendu de la bio du personnage :",
+						"0x0H8C9D0E": "Afficher les détails",
+						"0x0I9D0E1F": "Aucun handout n'a encore été converti.",
+						"0x0J0E1F2G": "Handouts convertis :",
+						"0x0K1F2G3H": "Aucun personnage n'a encore été rendu.",
+						"0x0L2G3H4I": "Personnages rendus :",
 					}
 				}
 			});
@@ -740,16 +1116,15 @@ const EASY_MARKDOWN = (() => {
 			return 0;
 		} else {
 
-			// EASY_UTILS is unavailable. In Roll20, scripts that are in the most left tab are loaded first into a global
-			// sandbox; as if all the script are pasted into one.
 			const _getSyslogTimestamp = () => { return new Date().toISOString(); };
-			const logMessage = `<ERROR> ${_getSyslogTimestamp()} [${moduleSettings.readableName}](checkInstall): {"transUnitId": 50000, "message": "Not Found: EASY_UTILS is unavailable. Ensure it is loaded before this module in the API console."}`;
+			const logMessage = `<e> ${_getSyslogTimestamp()} [${moduleSettings.readableName}](checkInstall): {"transUnitId": 50000, "message": "Not Found: EASY_UTILS is unavailable. Ensure it is loaded before this module in the API console."}`;
 			log(logMessage);
 
 			return 1;
 		}
 	};
 
+	// ANCHOR Event: on(ready)
 	on("ready", () => {
 
 		const continueMod = checkInstall();
@@ -757,7 +1132,6 @@ const EASY_MARKDOWN = (() => {
 
 			registerEventHandlers();
 
-			// "20000": ".=> Ready <=.",
 			const msgId = "20000";
 
 			Utils.logSyslogMessage({
@@ -779,11 +1153,7 @@ const EASY_MARKDOWN = (() => {
 	});
 
 	// !SECTION End of Event Hooks: Roll20 API
-	// SECTION Public Methods: Exposed Interface
 
 	return {};
 
-	// !SECTION End of Public Methods: Exposed Interface
-	// !SECTION End of Object: EASY_MARKDOWN
 })();
-

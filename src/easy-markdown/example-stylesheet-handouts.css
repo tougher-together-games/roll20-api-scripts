@@ -47,6 +47,7 @@ h5,
 h6 {
 	text-wrap: balance;
 }
+
 /*** END of Normalize and Reset ***/
 
 /* Global variables (optional) */
@@ -133,8 +134,10 @@ h6 {
 	--ez-handout-page-bullet-list: url('https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-page-list-bullet.png');
 
 	/* handout container offset */
-	--ez-handout-container-offset: -15px -30px -30px -30px;
+	--ez-handout-container-offset: 0px;
 
+	display: block;
+	position: relative;
 	margin: var(--ez-handout-container-offset);
 	padding: 97px 30px 97px 30px;
 	background:
@@ -156,13 +159,18 @@ h6 {
 /*** Inline Text ***/
 
 /* Headings */
-h1,h2,h3,h4,h5,h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
 	margin-bottom: 0.5em;
 	color: var(--ez-color-text-tertiary);
 	font-family: var(--ez-font-family-serif);
-    font-weight: bold;
-    /*font-variant: small-caps; FIXME */
-    text-transform: uppercase;
+	font-weight: bold;
+	/*font-variant: small-caps; FIXME */
+	text-transform: uppercase;
 }
 
 h1 {
@@ -189,7 +197,8 @@ h5 {
 }
 
 h6 {
-	font-size: 12px;
+	color: var(--ez-color-text-complement);
+	font-size: 16px;
 }
 
 /* Horizontal Rules */
@@ -224,8 +233,8 @@ hr.asterisk-hr {
 
 p {
 	margin-bottom: 1em;
-	font-size: 14px;
-	line-height: 1.4;
+	font-size: 16px;
+	line-height: 1.6;
 	text-indent: 10px;
 }
 
@@ -311,29 +320,31 @@ code.inline-code {
 
 /* Images and Links */
 a {
-	margin: 0px 3px;
+	margin: 0px 3px 3px;
 	color: #FF0000;
 	text-decoration: underline;
 }
 
 a[title="button"] {
 	display: inline-block;
-	padding: 5px 10px -5px -10px;
-	border: 3px double var(--ez-color-border-contrast);
-	border-radius: 5px;
-	color: var(--ez-color-text-contrast);
+	padding: 8px 16px;
+	border: none;
+	border-radius: 3px;
+	color: #ffffff;
+	font-family: Arial, sans-serif;
 	font-weight: bold;
-	font-size: 16px;
+	font-size: 14px;
 	text-align: center;
 	text-decoration: none;
 	cursor: pointer;
-	background-color: var(--ez-color-accent);
+	background-color: #ce0058;
 }
 
 /* Lists (UL / OL) */
 #rootContainer>ul>li.dash-bullet {
 	list-style: none outside var(--ez-handout-page-bullet-list);
-	margin-top: -7px; /* Adjust as needed for spacing */
+	margin-top: -7px;
+	/* Adjust as needed for spacing */
 }
 
 ul>ul {
@@ -386,7 +397,15 @@ ul ul {
 }
 
 .half-wide {
+	margin: 0px;
+	padding: 10px 10px 10px 0;
 	width: 50%;
+}
+
+.third-wide {
+	margin: 0px;
+	padding: 10px 10px 10px 0;
+	width: 75%;
 }
 
 /*** Handout Specific **/
@@ -398,19 +417,53 @@ ul ul {
 	/* For absolute elements reverse the offset of the rootContainer padding. 	padding: 97px 30px 97px 30px; */
 	position: absolute;
 	top: 0px;
-	left: -30px;
+	left: 0px;
 }
 
 img[title="page-bookmark"] {
 	display: block;
-	position: absolute;
-	top: 0;
-	left: -15px;
+	float: right;
+	margin-top: -110px;
+	margin-right: 0px;
 	width: 100px;
 	height: 300px;
 }
 
-div.avatar-banner {
+img[title="bookmark-spacer"] {
+	display: inline-block;
+	width: 120px;
+	height: 120px;
+}
+
+/*** Character Bio Portrait ***/
+div.portrait-frame {
+	display: block;
+	position: relative;
+	float: left;
+	width: 300px;
+	height: 500px;
+	margin: -109px 15px 10px -240px;
+	overflow: hidden;
+}
+
+img[title="portrait-image"] {
+	display: block;
+	width: 300px;
+	height: 500px;
+	object-fit: cover;
+}
+
+img[title="portrait-border"] {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 300px;
+	height: 500px;
+	pointer-events: none;
+}
+
+/*** Handout Avatar ***/
+div.page-banner {
 	display: block;
 	position: relative;
 	width: 630px;
@@ -419,17 +472,16 @@ div.avatar-banner {
 	margin-bottom: 10px;
 	overflow: hidden;
 	text-align: center;
-	transform: rotate(30deg);
 }
 
-img[title="avatar-image"] {
+img[title="banner-image"] {
 	display: block;
 	width: 630px;
 	height: 260px;
 	margin: 0 auto;
 }
 
-img[title="avatar-border"] {
+img[title="banner-border"] {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -444,10 +496,27 @@ img[title="avatar-border"] {
 	padding: 48px 35px;
 	font-size: 90%;
 	background:
-	var(--ez-handout-blockquote-top) top center no-repeat,
-	var(--ez-handout-blockquote-bottom) bottom center no-repeat,
-	var(--ez-handout-blockquote-middle) center repeat;
-	
+		var(--ez-handout-blockquote-top) top center no-repeat,
+		var(--ez-handout-blockquote-bottom) bottom center no-repeat,
+		var(--ez-handout-blockquote-middle) center repeat;
+
+	/* Background sizes */
+	background-size:
+		100% 48px,
+		100% 48px,
+		100% auto;
+}
+
+.third-wide>blockquote {
+	border: none;
+	color: var(--ez-color-border-contrast);
+	padding: 48px 35px;
+	font-size: 90%;
+	background:
+		var(--ez-handout-blockquote-top) top center no-repeat,
+		var(--ez-handout-blockquote-bottom) bottom center no-repeat,
+		var(--ez-handout-blockquote-middle) center repeat;
+
 	/* Background sizes */
 	background-size:
 		100% 48px,
@@ -461,10 +530,10 @@ img[title="avatar-border"] {
 	padding: 48px 35px;
 	font-size: 90%;
 	background:
-	var(--ez-handout-blockquote-top) top center no-repeat,
-	var(--ez-handout-blockquote-bottom) bottom center no-repeat,
-	var(--ez-handout-blockquote-middle) center repeat;
-	
+		var(--ez-handout-blockquote-top) top center no-repeat,
+		var(--ez-handout-blockquote-bottom) bottom center no-repeat,
+		var(--ez-handout-blockquote-middle) center repeat;
+
 	/* Background sizes */
 	background-size:
 		100% 48px,
@@ -528,4 +597,11 @@ tfoot {
 
 tr:nth-child(even) {
 	background-color: rgba(102, 0, 0, 0.2);
+}
+
+/* Target Roll20's injected avatar in character bio */
+.charsheet .bio img:first-child,
+.dialog.characterviewer img.avatar {
+	display: none !important;
+	/* or: float: none; position: absolute; left: -9999px; */
 }

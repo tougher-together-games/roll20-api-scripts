@@ -2,23 +2,23 @@
 @import url("Handouts");
 
 :root {
-   --ez-handout-container-offset: -340px -30px -30px -30px;
+   --ez-handout-container-offset: 0px -15px 0px -15px;
 }
 </style>
 
 <!-- The handout is designed for a width of 930px; This bar helps consistently resize the roll20 window. -->
 <div id="sizing-guide">
-<p>empty</p>
+<p> </p>
 </div>
 
 ![monster tab](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-bookmark-monster.png "page-bookmark")
 
 # h1 Heading
 
-::: avatar-banner
+::: page-banner
 
-![Handout Avatar.]({{ AvatarUrl }} "avatar-image")
-![Stylized border of leather straps holding banner picture in place.](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-avatar-border.png "avatar-border")
+![Handout Banner.]({{ AvatarUrl }} "banner-image")
+![Stylized border of leather straps holding banner picture in place.](https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/handout-avatar-border.png "banner-border")
 
 :::
 
@@ -36,7 +36,7 @@ To use Easy-Markdown in Roll20, you'll need a Pro account, as custom [API script
 
 ::: float-left half-wide
 
-> #### Steps to Set Up Easy-Markdown
+> ###### Steps to Set Up Easy-Markdown
 >
 > 1. Open the API Mod Page in Roll20.  
 > 2. Upload these two scripts:  
@@ -298,7 +298,7 @@ Blockquotes are useful for emphasizing text or nesting content. Use the `>` symb
 
 > This is a blockquote. It can include headers, tables, or other elements:
 >
-> #### Nested Table
+> ###### Nested Table
 >
 > ---
 > | Item          | Description                       |
