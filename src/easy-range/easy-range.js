@@ -626,7 +626,7 @@ const EASY_RANGE = (() => {
 						"0x0RA01003": "Source token not found.",
 						"0x0RA01004": "Target token not found.",
 						"0x0RA01010": "Only the GM can configure this module.",
-						"0x0RA01020": "Easy-Range Finder",
+						"0x0RA01020": "Range Finder",
 						"0x0RA01021": "Configuration"
 					}
 				}

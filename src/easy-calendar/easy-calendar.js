@@ -67,13 +67,13 @@ const EASY_CALENDAR = (() => {
 	const DEFAULT_IMAGES = {
 		moon: {
 			"new":             { url: `${IMAGE_BASE_PATH}/moon/new-moon.jpg`, label: "New Moon" },
-			"waxing-crescent": { url: `${IMAGE_BASE_PATH}/moon/waxing-crescent.jpg`, label: "Waxing Crescent" },
-			"first-quarter":   { url: `${IMAGE_BASE_PATH}/moon/first-quarter.jpg`, label: "First Quarter" },
-			"waxing-gibbous":  { url: `${IMAGE_BASE_PATH}/moon/waxing-gibbous.jpg`, label: "Waxing Gibbous" },
+			"waxing-crescent": { url: `${IMAGE_BASE_PATH}/moon/waxing-crescent-moon.jpg`, label: "Waxing Crescent" },
+			"first-quarter":   { url: `${IMAGE_BASE_PATH}/moon/first-quarter-moon.jpg`, label: "First Quarter" },
+			"waxing-gibbous":  { url: `${IMAGE_BASE_PATH}/moon/waxing-gibbous-moon.jpg`, label: "Waxing Gibbous" },
 			"full":            { url: `${IMAGE_BASE_PATH}/moon/full-moon.jpg`, label: "Full Moon" },
-			"waning-gibbous":  { url: `${IMAGE_BASE_PATH}/moon/waning-gibbous.jpg`, label: "Waning Gibbous" },
-			"last-quarter":    { url: `${IMAGE_BASE_PATH}/moon/last-quarter.jpg`, label: "Last Quarter" },
-			"waning-crescent": { url: `${IMAGE_BASE_PATH}/moon/waning-crescent.jpg`, label: "Waning Crescent" }
+			"waning-gibbous":  { url: `${IMAGE_BASE_PATH}/moon/waning-gibbous-moon.jpg`, label: "Waning Gibbous" },
+			"last-quarter":    { url: `${IMAGE_BASE_PATH}/moon/last-quarter-moon.jpg`, label: "Last Quarter" },
+			"waning-crescent": { url: `${IMAGE_BASE_PATH}/moon/waning-crescent-moon.jpg`, label: "Waning Crescent" }
 		},
 		sun: {
 			"night": { url: `${IMAGE_BASE_PATH}/sun/night.jpg`, label: "Night" },
@@ -114,6 +114,8 @@ const EASY_CALENDAR = (() => {
 				{ id: "luna", name: "Luna", cycle: 29.53059, offset: 0 }
 			],
 
+			weekdays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+
 			months: [
 				{ name: "January", days: 31 },
 				{ name: "February", days: 28, leapDays: 29 },
@@ -127,6 +129,13 @@ const EASY_CALENDAR = (() => {
 				{ name: "October", days: 31 },
 				{ name: "November", days: 30 },
 				{ name: "December", days: 31 }
+			],
+
+			holidays: [
+				{ monthIndex: 0, day: 1, name: "New Year's Day" },
+				{ monthIndex: 9, day: 31, name: "Halloween" },
+				{ monthIndex: 11, day: 25, name: "Christmas" },
+				{ monthIndex: 11, day: 31, name: "New Year's Eve" }
 			],
 
 			leapYear: (y) => (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0)
@@ -146,6 +155,8 @@ const EASY_CALENDAR = (() => {
 			moons: [
 				{ id: "selune", name: "Selûne", cycle: 30.4375, offset: 0 }
 			],
+
+			weekdays: ["First-day", "Second-day", "Third-day", "Fourth-day", "Fifth-day", "Sixth-day", "Seventh-day", "Eighth-day", "Ninth-day", "Tenth-day"],
 
 			months: [
 				{ name: "Hammer", days: 30 },
@@ -168,6 +179,17 @@ const EASY_CALENDAR = (() => {
 				{ name: "Nightal", days: 30 }
 			],
 
+			holidays: [
+				{ monthName: "Midwinter", name: "Midwinter Festival" },
+				{ monthName: "Greengrass", name: "Greengrass Festival" },
+				{ monthName: "Midsummer", name: "Midsummer Festival" },
+				{ monthName: "Shieldmeet", name: "Shieldmeet (Leap Years)" },
+				{ monthName: "Highharvestide", name: "Highharvestide Festival" },
+				{ monthName: "Feast of the Moon", name: "Feast of the Moon" },
+				{ monthIndex: 6, day: 7, name: "Sornyn (Lovers' tryst)" },
+				{ monthIndex: 14, day: 15, name: "Liar's Night" }
+			],
+
 			leapYear: (y) => y % 4 === 0
 		},
 
@@ -187,6 +209,8 @@ const EASY_CALENDAR = (() => {
 				{ id: "celene", name: "Celene", cycle: 91, offset: 45 }
 			],
 
+			weekdays: ["Starday", "Sunday", "Moonday", "Godsday", "Waterday", "Earthday", "Freeday"],
+
 			months: [
 				{ name: "Needfest", days: 7, festival: true },
 				{ name: "Fireseek", days: 28 },
@@ -204,6 +228,13 @@ const EASY_CALENDAR = (() => {
 				{ name: "Patchwall", days: 28 },
 				{ name: "Ready'reat", days: 28 },
 				{ name: "Sunsebb", days: 28 }
+			],
+
+			holidays: [
+				{ monthName: "Needfest", name: "Needfest (Midwinter)" },
+				{ monthName: "Growfest", name: "Growfest (Spring)" },
+				{ monthName: "Richfest", name: "Richfest (Midsummer)" },
+				{ monthName: "Brewfest", name: "Brewfest (Autumn)" }
 			],
 
 			leapYear: () => false
@@ -235,6 +266,8 @@ const EASY_CALENDAR = (() => {
 				{ id: "vult", name: "Vult", cycle: 28, offset: 26 }
 			],
 
+			weekdays: ["Sul", "Mol", "Zol", "Wir", "Zor", "Far", "Sar"],
+
 			months: [
 				{ name: "Zarantyr", days: 28 },
 				{ name: "Olarune", days: 28 },
@@ -248,6 +281,13 @@ const EASY_CALENDAR = (() => {
 				{ name: "Sypheros", days: 28 },
 				{ name: "Aryth", days: 28 },
 				{ name: "Vult", days: 28 }
+			],
+
+			holidays: [
+				{ monthIndex: 2, day: 11, name: "The Day of Mourning" },
+				{ monthIndex: 6, day: 12, name: "Thronehold Treaty Day" },
+				{ monthIndex: 8, day: 15, name: "Sun's Blessing" },
+				{ monthIndex: 11, day: 28, name: "Long Shadows" }
 			],
 
 			leapYear: () => false
@@ -269,6 +309,8 @@ const EASY_CALENDAR = (() => {
 				{ id: "ruidus", name: "Ruidus", cycle: 328, offset: 0 }
 			],
 
+			weekdays: ["Miresen", "Grissen", "Whelsen", "Conthsen", "Folsen", "Yulisen", "Da'leysen"],
+
 			months: [
 				{ name: "Horisal", days: 29 },
 				{ name: "Misuthar", days: 30 },
@@ -281,6 +323,16 @@ const EASY_CALENDAR = (() => {
 				{ name: "Quen'pillar", days: 27 },
 				{ name: "Cuersaar", days: 29 },
 				{ name: "Duscar", days: 32 }
+			],
+
+			holidays: [
+				{ monthIndex: 0, day: 11, name: "Hillsgold" },
+				{ monthIndex: 2, day: 26, name: "Day of Challenging" },
+				{ monthIndex: 3, day: 23, name: "Harvest's Rise" },
+				{ monthIndex: 5, day: 13, name: "Zenith" },
+				{ monthIndex: 6, day: 2, name: "Morn of Largesse" },
+				{ monthIndex: 9, day: 5, name: "Night of Ascension" },
+				{ monthIndex: 10, day: 32, name: "Barren Eve" }
 			],
 
 			leapYear: () => false
@@ -302,6 +354,8 @@ const EASY_CALENDAR = (() => {
 				{ id: "guthay-moon", name: "Guthay", cycle: 125, offset: 60 }
 			],
 
+			weekdays: ["Firstday", "Secondday", "Thirdday", "Fourthday", "Fifthday", "Sixthday"],
+
 			months: [
 				{ name: "Scorch", days: 30 },
 				{ name: "Morrow", days: 30 },
@@ -317,8 +371,83 @@ const EASY_CALENDAR = (() => {
 				{ name: "Sorrow", days: 30 }
 			],
 
+			holidays: [
+				{ monthIndex: 0, day: 1, name: "Festival of the Highest Sun" },
+				{ monthIndex: 4, day: 15, name: "Silt's Calm" },
+				{ monthIndex: 8, day: 30, name: "Endurance" },
+				{ monthIndex: 11, day: 30, name: "Remembrance" }
+			],
+
 			leapYear: () => false,
 			epochOffset: -1726  // Year 190 (Free Year) = Modern 2026
+		},
+
+		// NOTE: Celtic Tree Calendar (Shaman Tree)
+		celtic: {
+			id: "celtic",
+			name: "Celtic Tree Calendar",
+			hoursInDay: 24,
+			epochOffset: 0,
+
+			suns: [
+				{ id: "sun", name: "The Sun", riseHour: 6, setHour: 18 }
+			],
+
+			moons: [
+				{ id: "luna", name: "The Moon", cycle: 29.53059, offset: 0 }
+			],
+
+			weekdays: ["Moonday", "Marsday", "Mercuryday", "Jupiterday", "Venusday", "Saturnday", "Sunday"],
+
+			months: [
+				{ name: "Birch (Beth)", days: 28 },        // Dec 24 - Jan 20
+				{ name: "Rowan (Luis)", days: 28 },        // Jan 21 - Feb 17
+				{ name: "Ash (Nion)", days: 28 },          // Feb 18 - Mar 17
+				{ name: "Alder (Fearn)", days: 28 },       // Mar 18 - Apr 14
+				{ name: "Willow (Saille)", days: 28 },     // Apr 15 - May 12
+				{ name: "Hawthorn (Huath)", days: 28 },    // May 13 - Jun 9
+				{ name: "Oak (Duir)", days: 28 },          // Jun 10 - Jul 7
+				{ name: "Holly (Tinne)", days: 28 },       // Jul 8 - Aug 4
+				{ name: "Hazel (Coll)", days: 28 },        // Aug 5 - Sep 1
+				{ name: "Vine (Muin)", days: 28 },         // Sep 2 - Sep 29
+				{ name: "Ivy (Gort)", days: 28 },          // Sep 30 - Oct 27
+				{ name: "Reed (Ngetal)", days: 28 },       // Oct 28 - Nov 24
+				{ name: "Elder (Ruis)", days: 28 },        // Nov 25 - Dec 22
+				{ name: "The Nameless Day", days: 1, festival: true }  // Dec 23
+			],
+
+			holidays: [
+				// Samhain - Oct 31 / Nov 1 (Reed month, ~day 4-5)
+				{ monthIndex: 11, day: 4, name: "Samhain Eve" },
+				{ monthIndex: 11, day: 5, name: "Samhain" },
+
+				// Yule - Dec 21 (Elder month, ~day 27)
+				{ monthIndex: 12, day: 27, name: "Yule (Winter Solstice)" },
+
+				// Imbolc - Feb 1-2 (Rowan month, ~day 12-13)
+				{ monthIndex: 1, day: 12, name: "Imbolc Eve" },
+				{ monthIndex: 1, day: 13, name: "Imbolc" },
+
+				// Ostara - Mar 20-21 (Alder month, ~day 3-4)
+				{ monthIndex: 3, day: 3, name: "Ostara (Spring Equinox)" },
+
+				// Beltane - May 1 (Willow month, ~day 17)
+				{ monthIndex: 4, day: 17, name: "Beltane" },
+
+				// Litha - Jun 21 (Oak month, ~day 12)
+				{ monthIndex: 6, day: 12, name: "Litha (Summer Solstice)" },
+
+				// Lughnasadh/Lammas - Aug 1 (Holly month, ~day 25)
+				{ monthIndex: 7, day: 25, name: "Lughnasadh (Lammas)" },
+
+				// Mabon - Sep 21-22 (Vine month, ~day 20)
+				{ monthIndex: 9, day: 20, name: "Mabon (Autumn Equinox)" },
+
+				// The Nameless Day
+				{ monthName: "The Nameless Day", name: "The Nameless Day (Between the Years)" }
+			],
+
+			leapYear: (y) => (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0)
 		}
 	};
 
@@ -633,6 +762,218 @@ const EASY_CALENDAR = (() => {
 		return getImageData("weather", weatherKey) || getImageData("weather", "clear");
 	};
 
+	// ANCHOR Function: randomizeWeather
+	/**
+	 * @summary Randomly selects weather from all available weather keys.
+	 */
+	const randomizeWeather = () => {
+		const weatherKeys = getAllImageKeys("weather");
+		const randomIndex = Math.floor(Math.random() * weatherKeys.length);
+		EasyCalendarVault.weather = weatherKeys[randomIndex];
+	};
+
+	// ANCHOR Function: getHolidaysForDay
+	/**
+	 * @summary Gets holidays for a specific epoch day.
+	 * @param {number} epochDay - Days since universal epoch
+	 * @param {string} worldId - World identifier
+	 * @returns {string[]} Array of holiday names
+	 */
+	const getHolidaysForDay = (epochDay, worldId) => {
+		const config = getWorldConfig(worldId);
+		const date = epochDayToDate(epochDay, worldId);
+		const holidays = [];
+
+		if (!config.holidays) return holidays;
+
+		for (const holiday of config.holidays) {
+			// NOTE: Check festival month match
+			if (holiday.monthName && holiday.monthName === date.monthName) {
+				holidays.push(holiday.name);
+			}
+			// NOTE: Check specific day match
+			if (holiday.monthIndex !== undefined && holiday.day !== undefined) {
+				if (holiday.monthIndex === date.monthIndex && holiday.day === date.day) {
+					holidays.push(holiday.name);
+				}
+			}
+		}
+
+		return holidays;
+	};
+
+	// ANCHOR Function: getEventsForDay
+	/**
+	 * @summary Gets user events for a specific epoch day.
+	 * @param {number} epochDay - Days since universal epoch
+	 * @returns {Object[]} Array of event objects
+	 */
+	const getEventsForDay = (epochDay) => {
+		return EasyCalendarVault.events[epochDay] || [];
+	};
+
+	// ANCHOR Function: addEventToDay
+	/**
+	 * @summary Adds an event to a specific epoch day.
+	 * @param {number} epochDay - Days since universal epoch
+	 * @param {string} name - Event name
+	 * @param {string} time - General time description
+	 * @param {string} description - Event description
+	 * @param {string} addedBy - Player ID who added the event
+	 * @returns {number} Event index
+	 */
+	const addEventToDay = (epochDay, name, time, description, addedBy) => {
+		if (!EasyCalendarVault.events[epochDay]) {
+			EasyCalendarVault.events[epochDay] = [];
+		}
+		const eventIndex = EasyCalendarVault.events[epochDay].length;
+		EasyCalendarVault.events[epochDay].push({ name, time, description, addedBy });
+		return eventIndex;
+	};
+
+	// ANCHOR Function: getMonthStartEpochDay
+	/**
+	 * @summary Gets the epoch day for the first day of a month.
+	 * @param {number} year - Year
+	 * @param {number} monthIndex - Month index
+	 * @param {string} worldId - World identifier
+	 * @returns {number} Epoch day of month start
+	 */
+	const getMonthStartEpochDay = (year, monthIndex, worldId) => {
+		return dateToEpochDay(year, monthIndex, 1, worldId);
+	};
+
+	// ANCHOR Function: buildCalendarGridHtml
+	/**
+	 * @summary Builds the calendar grid HTML for the easyCalendarData div.
+	 * @param {number} year - Year to display
+	 * @param {number} monthIndex - Month index to display
+	 * @param {string} worldId - World identifier
+	 * @returns {string} Calendar grid HTML (inner content only)
+	 */
+	const buildCalendarGridHtml = (year, monthIndex, worldId) => {
+		const config = getWorldConfig(worldId);
+		const month = config.months[monthIndex];
+		const isLeap = config.leapYear(year);
+		const daysInMonth = (isLeap && month.leapDays) ? month.leapDays : month.days;
+		const weekdays = config.weekdays || ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"];
+		const numCols = weekdays.length;
+
+		// NOTE: Calendar styles
+		const styles = {
+			table: "width: 100%; border-collapse: collapse; table-layout: fixed;",
+			th: "background-color: #8655b6; color: #fff; padding: 8px; text-align: center; border: 1px solid #ddd; font-size: 12px;",
+			td: "border: 1px solid #ddd; padding: 5px; vertical-align: top; height: 80px; font-size: 11px;",
+			dayNum: "display: inline-block; background-color: #8655b6; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 11px; cursor: pointer; text-decoration: none;",
+			dayNumToday: "display: inline-block; background-color: #7E2D40; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 11px; cursor: pointer; text-decoration: none;",
+			holiday: "background-color: #ffe0b2; padding: 2px 4px; border-radius: 2px; font-size: 9px; color: #e65100; display: block; margin-top: 3px; cursor: default;",
+			moonPhase: "background-color: #e8eaf6; padding: 2px 4px; border-radius: 2px; font-size: 9px; color: #3949ab; display: block; margin-top: 2px; cursor: default;",
+			event: "background-color: #e3f2fd; padding: 2px 4px; border-radius: 2px; font-size: 9px; color: #1565c0; display: block; margin-top: 2px; cursor: pointer; text-decoration: none;",
+			empty: "background-color: #fafafa;"
+		};
+
+		// NOTE: Build header row with weekday names
+		let headerRow = "<tr>";
+		if (EasyCalendarVault.showWeekdays) {
+			for (const dayName of weekdays) {
+				headerRow += `<th style="${styles.th}">${dayName}</th>`;
+			}
+		} else {
+			for (let i = 0; i < numCols; i++) {
+				headerRow += `<th style="${styles.th}">${i + 1}</th>`;
+			}
+		}
+		headerRow += "</tr>";
+
+		// NOTE: Get current day for highlighting
+		const currentDate = epochDayToDate(EasyCalendarVault.epochDay, worldId);
+		const isCurrentMonth = (currentDate.year === year && currentDate.monthIndex === monthIndex);
+
+		// NOTE: Build calendar cells
+		let rows = "";
+		let currentDay = 1;
+
+		while (currentDay <= daysInMonth) {
+			rows += "<tr>";
+			for (let col = 0; col < numCols; col++) {
+				if (currentDay > daysInMonth) {
+					rows += `<td style="${styles.td} ${styles.empty}"></td>`;
+				} else {
+					const dayEpoch = dateToEpochDay(year, monthIndex, currentDay, worldId);
+					const holidays = getHolidaysForDay(dayEpoch, worldId);
+					const events = getEventsForDay(dayEpoch);
+					const isToday = isCurrentMonth && currentDate.day === currentDay;
+
+					// NOTE: Build cell content - day number is button to add event
+					let cellContent = `<a style="${isToday ? styles.dayNumToday : styles.dayNum}" href="!${moduleSettings.chatApiName} --add-event-menu ${dayEpoch}">${currentDay}</a>`;
+
+					// NOTE: Add moon phases (new and full moons for all moons - only on exact day)
+					for (const moon of config.moons) {
+						const phaseData = getMoonPhase(dayEpoch, moon);
+						const prevPhaseData = getMoonPhase(dayEpoch - 1, moon);
+
+						// NOTE: Show new moon only on first day of phase 0
+						if (phaseData.phaseIndex === 0 && prevPhaseData.phaseIndex !== 0) {
+							cellContent += `<span style="${styles.moonPhase}">🌑 ${moon.name} New</span>`;
+						}
+						// NOTE: Show full moon only on first day of phase 4
+						else if (phaseData.phaseIndex === 4 && prevPhaseData.phaseIndex !== 4) {
+							cellContent += `<span style="${styles.moonPhase}">🌕 ${moon.name} Full</span>`;
+						}
+					}
+
+					// Add holidays (not clickable)
+					for (const h of holidays) {
+						cellContent += `<span style="${styles.holiday}">🎉 ${h}</span>`;
+					}
+
+					// Add events (clickable to view details)
+					for (let i = 0; i < events.length; i++) {
+						const e = events[i];
+						cellContent += `<a style="${styles.event}" href="!${moduleSettings.chatApiName} --view-event ${dayEpoch}|${i}">📌 ${e.name}</a>`;
+					}
+
+					rows += `<td style="${styles.td}">${cellContent}</td>`;
+					currentDay++;
+				}
+			}
+			rows += "</tr>";
+		}
+
+		// NOTE: Return only the table content (no outer div wrapper)
+		return `<table style="${styles.table}">${headerRow}${rows}</table>`;
+	};
+
+	// ANCHOR Function: findOrCreateHandout
+	/**
+	 * @summary Finds or creates a handout with the given name.
+	 * @param {string} name - Handout name
+	 * @param {string} playerId - Player ID for permissions
+	 * @param {boolean} isPlayerJournal - If true, player owns it; if false, all can view
+	 * @returns {Object} Handout object
+	 */
+	const findOrCreateHandout = (name, playerId, isPlayerJournal) => {
+		let handout = findObjs({ type: "handout", name: name })[0];
+
+		if (!handout) {
+			if (isPlayerJournal) {
+				handout = createObj("handout", {
+					name: name,
+					inplayerjournals: playerId,
+					controlledby: playerId
+				});
+			} else {
+				handout = createObj("handout", {
+					name: name,
+					inplayerjournals: "all",
+					controlledby: ""
+				});
+			}
+		}
+
+		return handout;
+	};
+
 	// !SECTION End of Inner Methods: Image Resolution
 	// SECTION Inner Methods: Menu Rendering
 
@@ -641,36 +982,35 @@ const EASY_CALENDAR = (() => {
 		container: "background-color: #fff; border: 1px solid #8655b6; border-radius: 5px; overflow: hidden; margin: 5px 0;",
 		header: "background-color: #8655b6; color: #fff; padding: 8px 10px; font-size: 14px; font-weight: bold;",
 		subheader: "font-size: 11px; font-weight: normal; opacity: 0.9;",
-		body: "padding: 10px;",
-		dateSection: "font-size: 16px; font-weight: bold; margin-bottom: 5px;",
+		body: "padding: 10px; background-color: #fff;",
+		dateSection: "font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #333;",
 		timeSection: "font-size: 12px; color: #555; margin-bottom: 10px;",
-		celestialRow: "display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;",
-		celestialImage: "width: 50px; height: 50px; border-radius: 5px; margin-right: 10px;",
-		celestialText: "display: flex; flex-direction: column;",
-		celestialName: "font-weight: bold; font-size: 13px; color: #333;",
-		celestialLabel: "font-size: 11px; color: #666; margin-top: 2px;",
+		celestialContainer: "display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px;",
+		celestialBox: "flex: 1; text-align: center; padding: 8px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px;",
+		celestialImage: "width: 50px; height: 50px; border-radius: 5px; margin: 0 auto 5px auto; display: block;",
+		celestialName: "font-weight: bold; font-size: 11px; color: #333; margin-bottom: 2px;",
+		celestialLabel: "font-size: 10px; color: #666;",
 		buttonRow: "display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0;",
 		button: "background-color: #8655b6; color: #fff; padding: 5px 10px; border-radius: 3px; text-decoration: none; font-size: 11px; text-align: center;",
 		buttonSmall: "background-color: #34627b; color: #fff; padding: 3px 8px; border-radius: 3px; text-decoration: none; font-size: 10px;",
 		buttonGm: "background-color: #7E2D40; color: #fff; padding: 5px 10px; border-radius: 3px; text-decoration: none; font-size: 11px; text-align: center;",
-		divider: "border-top: 1px solid #ddd; margin: 10px 0;"
+		divider: "border-top: 1px solid #ddd; margin: 10px 0;",
+		sectionHeader: "background-color: #8655b6; color: #fff; padding: 4px 8px; font-size: 11px; font-weight: bold; margin: 10px -10px 10px -10px;"
 	};
 
-	// ANCHOR Function: buildCelestialRow
+	// ANCHOR Function: buildCelestialBox
 	/**
-	 * @summary Builds HTML for a celestial body row.
+	 * @summary Builds HTML for a celestial body box (vertical stack).
 	 * @param {string} name - Body name
 	 * @param {string} imageUrl - Image URL
 	 * @param {string} label - State/phase label
 	 * @returns {string} HTML string
 	 */
-	const buildCelestialRow = (name, imageUrl, label) => {
-		return `<div style="${MENU_STYLES.celestialRow}">`
+	const buildCelestialBox = (name, imageUrl, label) => {
+		return `<div style="${MENU_STYLES.celestialBox}">`
 			+ `<img src="${imageUrl}" style="${MENU_STYLES.celestialImage}" />`
-			+ `<div style="${MENU_STYLES.celestialText}">`
 			+ `<div style="${MENU_STYLES.celestialName}">${name}</div>`
 			+ `<div style="${MENU_STYLES.celestialLabel}">${label}</div>`
-			+ `</div>`
 			+ `</div>`;
 	};
 
@@ -695,31 +1035,54 @@ const EASY_CALENDAR = (() => {
 		const hourDesc = getHourDescription(hourOfDay, config.hoursInDay);
 		const timeStr = `Hour ${hourOfDay} of ${config.hoursInDay} (${hourDesc})`;
 
-		// NOTE: Build celestial rows
-		let celestialHtml = "";
+		// NOTE: Build celestial boxes (all suns, all moons, weather in horizontal row)
+		let celestialHtml = `<div style="${MENU_STYLES.celestialContainer}">`;
 
-		// Suns
+		// All Suns
 		for (const sun of config.suns) {
-			const state = getSunState(hourOfDay, sun);
-			const imageData = getSunImage(sun.name, state);
-			celestialHtml += buildCelestialRow(sun.name, imageData.url, imageData.label);
+			const sunState = getSunState(hourOfDay, sun);
+			const sunImageData = getSunImage(sun.name, sunState);
+			celestialHtml += buildCelestialBox(sun.name, sunImageData.url, sunImageData.label);
 		}
 
-		// Moons
+		// All Moons
 		for (const moon of config.moons) {
-			const phaseData = getMoonPhase(EasyCalendarVault.epochDay, moon);
-			const imageData = getMoonImage(moon.name, phaseData.phaseName);
-			celestialHtml += buildCelestialRow(moon.name, imageData.url, imageData.label);
+			const moonPhaseData = getMoonPhase(EasyCalendarVault.epochDay, moon);
+			const moonImageData = getMoonImage(moon.name, moonPhaseData.phaseName);
+			celestialHtml += buildCelestialBox(moon.name, moonImageData.url, moonImageData.label);
 		}
 
 		// Weather
 		const weatherData = getWeatherImage(weather);
-		celestialHtml += buildCelestialRow("Weather", weatherData.url, weatherData.label);
+		celestialHtml += buildCelestialBox("Weather", weatherData.url, weatherData.label);
+
+		celestialHtml += `</div>`;
+
+		// NOTE: Build events section for current day
+		let eventsHtml = "";
+		const holidays = getHolidaysForDay(EasyCalendarVault.epochDay, EasyCalendarVault.world);
+		const events = getEventsForDay(EasyCalendarVault.epochDay);
+
+		if (holidays.length > 0 || events.length > 0) {
+			eventsHtml = `<div style="${MENU_STYLES.sectionHeader}">Today's Events</div>`;
+
+			// Add holidays
+			for (const h of holidays) {
+				eventsHtml += `<div style="background-color: #ffe0b2; padding: 5px 8px; border-radius: 3px; margin-bottom: 4px; font-size: 11px; color: #e65100;">🎉 ${h}</div>`;
+			}
+
+			// Add events
+			for (let i = 0; i < events.length; i++) {
+				const e = events[i];
+				eventsHtml += `<a style="display: block; background-color: #e3f2fd; padding: 5px 8px; border-radius: 3px; margin-bottom: 4px; font-size: 11px; color: #1565c0; text-decoration: none;" href="!${moduleSettings.chatApiName} --view-event ${EasyCalendarVault.epochDay}|${i}">📌 <strong>${e.name}</strong> (${e.time})</a>`;
+			}
+		}
 
 		// NOTE: Build time control buttons (GM only)
 		let timeControlsHtml = "";
 		if (isGm) {
-			timeControlsHtml = `<div style="${MENU_STYLES.buttonRow}">`
+			timeControlsHtml = `<div style="${MENU_STYLES.sectionHeader}">Time Controls</div>`
+				+ `<div style="${MENU_STYLES.buttonRow}">`
 				+ `<a style="${MENU_STYLES.buttonSmall}" href="!${moduleSettings.chatApiName} --advance-day -1">−1 Day</a>`
 				+ `<a style="${MENU_STYLES.buttonSmall}" href="!${moduleSettings.chatApiName} --advance-day 1">+1 Day</a>`
 				+ `<a style="${MENU_STYLES.buttonSmall}" href="!${moduleSettings.chatApiName} --advance-hour -1">−1 Hour</a>`
@@ -742,16 +1105,17 @@ const EASY_CALENDAR = (() => {
 			const weatherKeys = getAllImageKeys("weather");
 			const weatherOptions = weatherKeys.join("|");
 
-			celestialControlsHtml = `<div style="${MENU_STYLES.buttonRow}">`;
+			celestialControlsHtml = `<div style="${MENU_STYLES.sectionHeader}">Celestial Controls</div>`
+				+ `<div style="${MENU_STYLES.buttonRow}">`;
 
 			// Sun controls (one per sun)
-			for (const sun of config.suns) {
-				celestialControlsHtml += `<a style="${MENU_STYLES.buttonSmall}" href="!${moduleSettings.chatApiName} --set-sun ${sun.name}|?{State|auto|${sunOptions}}">Set ${sun.name}</a>`;
+			for (const s of config.suns) {
+				celestialControlsHtml += `<a style="${MENU_STYLES.buttonSmall}" href="!${moduleSettings.chatApiName} --set-sun ${s.name}|?{State|auto|${sunOptions}}">Set ${s.name}</a>`;
 			}
 
 			// Moon controls (one per moon)
-			for (const moon of config.moons) {
-				celestialControlsHtml += `<a style="${MENU_STYLES.buttonSmall}" href="!${moduleSettings.chatApiName} --set-moon ${moon.name}|?{Phase|auto|${moonOptions}}">Set ${moon.name}</a>`;
+			for (const m of config.moons) {
+				celestialControlsHtml += `<a style="${MENU_STYLES.buttonSmall}" href="!${moduleSettings.chatApiName} --set-moon ${m.name}|?{Phase|auto|${moonOptions}}">Set ${m.name}</a>`;
 			}
 
 			// Weather control
@@ -763,7 +1127,7 @@ const EASY_CALENDAR = (() => {
 		// NOTE: Build action buttons
 		let actionsHtml = `<div style="${MENU_STYLES.divider}"></div>`
 			+ `<div style="${MENU_STYLES.buttonRow}">`
-			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --log">Log Day</a>`
+			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --log ?{Journal Entry}">Log Day</a>`
 			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --calendar">Open Calendar</a>`
 			+ `</div>`;
 
@@ -784,6 +1148,7 @@ const EASY_CALENDAR = (() => {
 			+ `<div style="${MENU_STYLES.dateSection}">${dateStr}</div>`
 			+ `<div style="${MENU_STYLES.timeSection}">${timeStr}</div>`
 			+ celestialHtml
+			+ eventsHtml
 			+ timeControlsHtml
 			+ celestialControlsHtml
 			+ actionsHtml
@@ -818,24 +1183,33 @@ const EASY_CALENDAR = (() => {
 			+ `<div style="${MENU_STYLES.header}">⚙ Calendar Settings</div>`
 			+ `<div style="${MENU_STYLES.body}">`
 			+ `<div style="${MENU_STYLES.buttonRow}">`
-			+ `<span style="min-width: 60px;">World:</span>`
+			+ `<span style="min-width: 80px;">World:</span>`
 			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --set-world ?{World|${worldOptions}}">${config.name}</a>`
 			+ `</div>`
 			+ `<div style="${MENU_STYLES.buttonRow}">`
-			+ `<span style="min-width: 60px;">Year:</span>`
+			+ `<span style="min-width: 80px;">Year:</span>`
 			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --set-year ?{Year|${date.year}}">${date.year}</a>`
 			+ `</div>`
 			+ `<div style="${MENU_STYLES.buttonRow}">`
-			+ `<span style="min-width: 60px;">Month:</span>`
+			+ `<span style="min-width: 80px;">Month:</span>`
 			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --set-month ?{Month|${monthOptions}}">${date.monthName}</a>`
 			+ `</div>`
 			+ `<div style="${MENU_STYLES.buttonRow}">`
-			+ `<span style="min-width: 60px;">Day:</span>`
+			+ `<span style="min-width: 80px;">Day:</span>`
 			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --set-day ?{Day|${date.day}}">${date.day}</a>`
 			+ `</div>`
 			+ `<div style="${MENU_STYLES.buttonRow}">`
-			+ `<span style="min-width: 60px;">Hour:</span>`
+			+ `<span style="min-width: 80px;">Hour:</span>`
 			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --set-hour ?{Hour|${hourOptions}}">${hourOfDay}</a>`
+			+ `</div>`
+			+ `<div style="${MENU_STYLES.divider}"></div>`
+			+ `<div style="${MENU_STYLES.buttonRow}">`
+			+ `<span style="min-width: 80px;">Auto Weather:</span>`
+			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --toggle-auto-weather">${EasyCalendarVault.autoWeather ? "On" : "Off"}</a>`
+			+ `</div>`
+			+ `<div style="${MENU_STYLES.buttonRow}">`
+			+ `<span style="min-width: 80px;">Weekday Names:</span>`
+			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --toggle-weekdays">${EasyCalendarVault.showWeekdays ? "On" : "Off"}</a>`
 			+ `</div>`
 			+ `<div style="${MENU_STYLES.divider}"></div>`
 			+ `<div style="${MENU_STYLES.buttonRow}">`
@@ -961,12 +1335,10 @@ const EASY_CALENDAR = (() => {
 		};
 
 		// NOTE: Build preview section
-		let previewHtml = `<div style="${MENU_STYLES.celestialRow}">`
+		let previewHtml = `<div style="text-align: center; padding: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px;">`
 			+ `<img src="${imgData.url}" style="${MENU_STYLES.celestialImage}" />`
-			+ `<div style="${MENU_STYLES.celestialText}">`
 			+ `<div style="${MENU_STYLES.celestialName}">${key}</div>`
 			+ `<div style="${MENU_STYLES.celestialLabel}">${imgData.label}</div>`
-			+ `</div>`
 			+ `</div>`;
 
 		// NOTE: Build edit table
@@ -1128,6 +1500,11 @@ const EASY_CALENDAR = (() => {
 		const days = parseInt(Object.keys(parsedArgs)[0], 10) || 0;
 		EasyCalendarVault.epochDay += days;
 
+		// NOTE: Randomize weather on day change
+		if (EasyCalendarVault.autoWeather && days !== 0) {
+			randomizeWeather();
+		}
+
 		// NOTE: Show updated menu
 		return processMenuAsync(msgDetails);
 	};
@@ -1153,18 +1530,26 @@ const EASY_CALENDAR = (() => {
 		const hours = parseInt(Object.keys(parsedArgs)[0], 10) || 0;
 
 		let newHour = (EasyCalendarVault.hourOfDay || 0) + hours;
+		let dayChanged = false;
 
 		// NOTE: Handle day rollover
 		while (newHour >= config.hoursInDay) {
 			newHour -= config.hoursInDay;
 			EasyCalendarVault.epochDay++;
+			dayChanged = true;
 		}
 		while (newHour < 0) {
 			newHour += config.hoursInDay;
 			EasyCalendarVault.epochDay--;
+			dayChanged = true;
 		}
 
 		EasyCalendarVault.hourOfDay = newHour;
+
+		// NOTE: Randomize weather on day change
+		if (EasyCalendarVault.autoWeather && dayChanged) {
+			randomizeWeather();
+		}
 
 		// NOTE: Show updated menu
 		return processMenuAsync(msgDetails);
@@ -1276,6 +1661,18 @@ const EASY_CALENDAR = (() => {
 
 		EasyCalendarVault.hourOfDay = hour;
 
+		return processSettingsAsync(msgDetails);
+	};
+
+	// ANCHOR Function: processToggleAutoWeather
+	/**
+	 * @summary Toggles automatic weather randomization.
+	 * @param {Object} msgDetails - Parsed message details
+	 * @returns {number} 0 on success, 1 on failure
+	 */
+	const processToggleAutoWeather = (msgDetails) => {
+		if (!msgDetails.isGm) return 1;
+		EasyCalendarVault.autoWeather = !EasyCalendarVault.autoWeather;
 		return processSettingsAsync(msgDetails);
 	};
 
@@ -1512,32 +1909,276 @@ const EASY_CALENDAR = (() => {
 
 	// ANCHOR Function: processLogDay
 	/**
-	 * @summary Placeholder for log day feature.
+	 * @summary Logs an entry to the player's Daily Journal handout.
 	 * @param {Object} msgDetails - Parsed message details
-	 * @returns {number} 0
+	 * @param {Object} parsedArgs - Parsed arguments
+	 * @returns {number} 0 on success
 	 */
-	const processLogDay = (msgDetails) => {
-		Utils.whisperPlayerMessage({
-			from: moduleSettings.readableName,
-			to: msgDetails.callerName,
-			message: "Log Day feature coming soon!"
+	const processLogDay = (msgDetails, parsedArgs) => {
+		// NOTE: Parse entry text from raw content
+		const content = msgDetails.raw.content;
+		const match = content.match(/--log\s+(.+)/i);
+
+		if (!match || !match[1].trim()) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: "No entry provided."
+			});
+			return 0;
+		}
+
+		const entryText = match[1].trim();
+
+		// NOTE: Get current date for timestamp
+		const date = epochDayToDate(EasyCalendarVault.epochDay, EasyCalendarVault.world);
+		const hourOfDay = EasyCalendarVault.hourOfDay || 0;
+		const dateStr = date.isFestival
+			? `${date.monthName}, ${date.year}`
+			: `${date.day}${getDaySuffix(date.day)} of ${date.monthName}, ${date.year}`;
+		const timeStr = `Hour ${hourOfDay}`;
+
+		// NOTE: Find or create the player's journal
+		const journalName = "Daily Journal";
+		const handout = findOrCreateHandout(journalName, msgDetails.callerId, true);
+
+		// NOTE: Append entry to bottom of handout
+		handout.get("notes", (notes) => {
+			const currentNotes = notes || "";
+			const newEntry = `<p><strong>${dateStr} (${timeStr})</strong><br>${entryText}</p><hr>`;
+			const updatedNotes = currentNotes + newEntry;
+			handout.set("notes", updatedNotes);
+
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: `Entry logged to your Daily Journal.`
+			});
 		});
+
 		return 0;
 	};
 
 	// ANCHOR Function: processOpenCalendar
 	/**
-	 * @summary Placeholder for open calendar feature.
+	 * @summary Opens/updates the Campaign Calendar handout, updating only the easyCalendarData div in notes.
 	 * @param {Object} msgDetails - Parsed message details
-	 * @returns {number} 0
+	 * @returns {number} 0 on success
 	 */
 	const processOpenCalendar = (msgDetails) => {
+		const config = getWorldConfig(EasyCalendarVault.world);
+		const date = epochDayToDate(EasyCalendarVault.epochDay, EasyCalendarVault.world);
+
+		// NOTE: Build handout name
+		const handoutName = `Campaign Calendar: ${date.monthName}`;
+
+		// NOTE: Find or create the calendar handout (viewable by all)
+		const handout = findOrCreateHandout(handoutName, msgDetails.callerId, false);
+		const handoutId = handout.get("id");
+
+		// NOTE: Build calendar grid (inner content only)
+		const calendarHtml = buildCalendarGridHtml(date.year, date.monthIndex, EasyCalendarVault.world);
+
+		// NOTE: Get current notes and update only the div content
+		handout.get("notes", (notes) => {
+			let currentNotes = notes || "";
+
+			// NOTE: Check if div exists in notes
+			const divRegex = /<div id="easyCalendarData"[^>]*>[\s\S]*?<\/div>/i;
+			const divOpenTag = '<div id="easyCalendarData">';
+			const divCloseTag = '</div>';
+
+			if (divRegex.test(currentNotes)) {
+				// NOTE: Replace existing div content
+				currentNotes = currentNotes.replace(divRegex, `${divOpenTag}${calendarHtml}${divCloseTag}`);
+			} else {
+				// NOTE: Append div to notes
+				currentNotes += `${divOpenTag}${calendarHtml}${divCloseTag}`;
+			}
+
+			handout.set("notes", currentNotes);
+
+			// NOTE: Send clickable link to open the handout
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: `<a href="http://journal.roll20.net/handout/${handoutId}">Open ${handoutName}</a>`
+			});
+		});
+
+		return 0;
+	};
+
+	// ANCHOR Function: processAddEventMenu
+	/**
+	 * @summary Shows a menu to add an event to a specific day.
+	 * @param {Object} msgDetails - Parsed message details
+	 * @param {Object} parsedArgs - Parsed arguments
+	 * @returns {number} 0 on success
+	 */
+	const processAddEventMenu = (msgDetails, parsedArgs) => {
+		// NOTE: Get epoch day from arguments
+		const epochDay = parseInt(Object.keys(parsedArgs)[0], 10);
+
+		if (isNaN(epochDay)) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: "Invalid day selected."
+			});
+			return 1;
+		}
+
+		// NOTE: Get date info for display
+		const date = epochDayToDate(epochDay, EasyCalendarVault.world);
+		const dateStr = date.isFestival
+			? date.monthName
+			: `${date.day}${getDaySuffix(date.day)} of ${date.monthName}, ${date.year}`;
+
+		// NOTE: Build menu with prompts for event details
+		const menuHtml = `<div style="${MENU_STYLES.container}">`
+			+ `<div style="${MENU_STYLES.header}">Add Event</div>`
+			+ `<div style="${MENU_STYLES.body}">`
+			+ `<div style="${MENU_STYLES.dateSection}">${dateStr}</div>`
+			+ `<div style="${MENU_STYLES.divider}"></div>`
+			+ `<div style="${MENU_STYLES.buttonRow}">`
+			+ `<a style="${MENU_STYLES.button}" href="!${moduleSettings.chatApiName} --add-event ${epochDay}|?{Event Name}|?{Time (e.g. Morning, Midday, Evening)}|?{Description}">Create Event</a>`
+			+ `</div>`
+			+ `<div style="${MENU_STYLES.divider}"></div>`
+			+ `<div style="${MENU_STYLES.buttonRow}">`
+			+ `<a style="${MENU_STYLES.buttonGm}" href="!${moduleSettings.chatApiName} --calendar">← Back to Calendar</a>`
+			+ `</div>`
+			+ `</div>`
+			+ `</div>`;
+
 		Utils.whisperPlayerMessage({
 			from: moduleSettings.readableName,
 			to: msgDetails.callerName,
-			message: "Open Calendar feature coming soon!"
+			message: menuHtml
 		});
+
 		return 0;
+	};
+
+	// ANCHOR Function: processAddEvent
+	/**
+	 * @summary Adds an event to a specific day.
+	 * @param {Object} msgDetails - Parsed message details
+	 * @param {Object} parsedArgs - Parsed arguments
+	 * @returns {number} 0 on success, 1 on failure
+	 */
+	const processAddEvent = (msgDetails, parsedArgs) => {
+		// NOTE: Parse "epochDay|name|time|description" from raw content
+		const content = msgDetails.raw.content;
+		const match = content.match(/--add-event\s+(\d+)\|([^|]+)\|([^|]*)\|(.+)/i);
+		if (!match) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: "Invalid event format."
+			});
+			return 1;
+		}
+
+		const epochDay = parseInt(match[1], 10);
+		const name = match[2].trim();
+		const time = match[3].trim() || "Unspecified";
+		const description = match[4].trim();
+
+		if (isNaN(epochDay) || !name || !description) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: "Invalid event format. Name and description are required."
+			});
+			return 1;
+		}
+
+		// NOTE: Add event to vault
+		addEventToDay(epochDay, name, time, description, msgDetails.callerId);
+
+		// NOTE: Get date info for confirmation
+		const date = epochDayToDate(epochDay, EasyCalendarVault.world);
+		const dateStr = date.isFestival
+			? date.monthName
+			: `${date.day}${getDaySuffix(date.day)} of ${date.monthName}`;
+
+		Utils.whisperPlayerMessage({
+			from: moduleSettings.readableName,
+			to: msgDetails.callerName,
+			message: `Event "${name}" added to ${dateStr}.`
+		});
+
+		// NOTE: Refresh the calendar handout
+		return processOpenCalendar(msgDetails);
+	};
+
+	// ANCHOR Function: processViewEvent
+	/**
+	 * @summary Posts event details to chat.
+	 * @param {Object} msgDetails - Parsed message details
+	 * @param {Object} parsedArgs - Parsed arguments
+	 * @returns {number} 0 on success, 1 on failure
+	 */
+	const processViewEvent = (msgDetails, parsedArgs) => {
+		// NOTE: Parse "epochDay|eventIndex" from raw content
+		const content = msgDetails.raw.content;
+		const match = content.match(/--view-event\s+(\d+)\|(\d+)/i);
+		if (!match) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: "Invalid event reference."
+			});
+			return 1;
+		}
+
+		const epochDay = parseInt(match[1], 10);
+		const eventIndex = parseInt(match[2], 10);
+
+		const events = getEventsForDay(epochDay);
+		if (!events[eventIndex]) {
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: "Event not found."
+			});
+			return 1;
+		}
+
+		const event = events[eventIndex];
+		const date = epochDayToDate(epochDay, EasyCalendarVault.world);
+		const dateStr = date.isFestival
+			? `${date.monthName}, ${date.year}`
+			: `${date.day}${getDaySuffix(date.day)} of ${date.monthName}, ${date.year}`;
+
+		// NOTE: Build event display
+		const eventHtml = `<div style="${MENU_STYLES.container}">`
+			+ `<div style="${MENU_STYLES.header}">📌 ${event.name}</div>`
+			+ `<div style="${MENU_STYLES.body}">`
+			+ `<div style="${MENU_STYLES.dateSection}">${dateStr}</div>`
+			+ `<div style="${MENU_STYLES.timeSection}">⏰ ${event.time}</div>`
+			+ `<div style="${MENU_STYLES.divider}"></div>`
+			+ `<p>${event.description}</p>`
+			+ `</div>`
+			+ `</div>`;
+
+		// NOTE: Post to chat (visible to all)
+		sendChat(moduleSettings.readableName, eventHtml);
+
+		return 0;
+	};
+
+	// ANCHOR Function: processToggleWeekdays
+	/**
+	 * @summary Toggles display of weekday names in calendar.
+	 * @param {Object} msgDetails - Parsed message details
+	 * @returns {number} 0 on success, 1 on failure
+	 */
+	const processToggleWeekdays = (msgDetails) => {
+		if (!msgDetails.isGm) return 1;
+		EasyCalendarVault.showWeekdays = !EasyCalendarVault.showWeekdays;
+		return processSettingsAsync(msgDetails);
 	};
 
 	// !SECTION End of Inner Methods: Action Processors
@@ -1545,27 +2186,32 @@ const EASY_CALENDAR = (() => {
 
 	// ANCHOR Member: actionMap
 	const actionMap = {
-		"--menu":            (msgDetails) => processMenuAsync(msgDetails),
-		"--show":            (msgDetails) => processShowAsync(msgDetails),
-		"--settings":        (msgDetails) => processSettingsAsync(msgDetails),
-		"--images":          (msgDetails) => processImagesAsync(msgDetails),
-		"--advance-day":     (msgDetails, parsedArgs) => processAdvanceDay(msgDetails, parsedArgs),
-		"--advance-hour":    (msgDetails, parsedArgs) => processAdvanceHour(msgDetails, parsedArgs),
-		"--set-world":       (msgDetails, parsedArgs) => processSetWorld(msgDetails, parsedArgs),
-		"--set-year":        (msgDetails, parsedArgs) => processSetYear(msgDetails, parsedArgs),
-		"--set-month":       (msgDetails, parsedArgs) => processSetMonth(msgDetails, parsedArgs),
-		"--set-day":         (msgDetails, parsedArgs) => processSetDay(msgDetails, parsedArgs),
-		"--set-hour":        (msgDetails, parsedArgs) => processSetHour(msgDetails, parsedArgs),
-		"--set-sun":         (msgDetails, parsedArgs) => processSetSun(msgDetails, parsedArgs),
-		"--set-moon":        (msgDetails, parsedArgs) => processSetMoon(msgDetails, parsedArgs),
-		"--set-weather":     (msgDetails, parsedArgs) => processSetWeather(msgDetails, parsedArgs),
-		"--edit-image-menu": (msgDetails, parsedArgs) => processEditImageMenu(msgDetails, parsedArgs),
-		"--add-image":       (msgDetails, parsedArgs) => processAddImage(msgDetails, parsedArgs),
-		"--edit-image":      (msgDetails, parsedArgs) => processEditImage(msgDetails, parsedArgs),
-		"--remove-image":    (msgDetails, parsedArgs) => processRemoveImage(msgDetails, parsedArgs),
-		"--reset-image":     (msgDetails, parsedArgs) => processResetImage(msgDetails, parsedArgs),
-		"--log":             (msgDetails) => processLogDay(msgDetails),
-		"--calendar":        (msgDetails) => processOpenCalendar(msgDetails)
+		"--menu":               (msgDetails) => processMenuAsync(msgDetails),
+		"--show":               (msgDetails) => processShowAsync(msgDetails),
+		"--settings":           (msgDetails) => processSettingsAsync(msgDetails),
+		"--images":             (msgDetails) => processImagesAsync(msgDetails),
+		"--advance-day":        (msgDetails, parsedArgs) => processAdvanceDay(msgDetails, parsedArgs),
+		"--advance-hour":       (msgDetails, parsedArgs) => processAdvanceHour(msgDetails, parsedArgs),
+		"--set-world":          (msgDetails, parsedArgs) => processSetWorld(msgDetails, parsedArgs),
+		"--set-year":           (msgDetails, parsedArgs) => processSetYear(msgDetails, parsedArgs),
+		"--set-month":          (msgDetails, parsedArgs) => processSetMonth(msgDetails, parsedArgs),
+		"--set-day":            (msgDetails, parsedArgs) => processSetDay(msgDetails, parsedArgs),
+		"--set-hour":           (msgDetails, parsedArgs) => processSetHour(msgDetails, parsedArgs),
+		"--toggle-auto-weather":(msgDetails) => processToggleAutoWeather(msgDetails),
+		"--toggle-weekdays":    (msgDetails) => processToggleWeekdays(msgDetails),
+		"--set-sun":            (msgDetails, parsedArgs) => processSetSun(msgDetails, parsedArgs),
+		"--set-moon":           (msgDetails, parsedArgs) => processSetMoon(msgDetails, parsedArgs),
+		"--set-weather":        (msgDetails, parsedArgs) => processSetWeather(msgDetails, parsedArgs),
+		"--edit-image-menu":    (msgDetails, parsedArgs) => processEditImageMenu(msgDetails, parsedArgs),
+		"--add-image":          (msgDetails, parsedArgs) => processAddImage(msgDetails, parsedArgs),
+		"--edit-image":         (msgDetails, parsedArgs) => processEditImage(msgDetails, parsedArgs),
+		"--remove-image":       (msgDetails, parsedArgs) => processRemoveImage(msgDetails, parsedArgs),
+		"--reset-image":        (msgDetails, parsedArgs) => processResetImage(msgDetails, parsedArgs),
+		"--log":                (msgDetails, parsedArgs) => processLogDay(msgDetails, parsedArgs),
+		"--calendar":           (msgDetails) => processOpenCalendar(msgDetails),
+		"--add-event-menu":     (msgDetails, parsedArgs) => processAddEventMenu(msgDetails, parsedArgs),
+		"--add-event":          (msgDetails, parsedArgs) => processAddEvent(msgDetails, parsedArgs),
+		"--view-event":         (msgDetails, parsedArgs) => processViewEvent(msgDetails, parsedArgs)
 	};
 
 	// Set default action
@@ -1595,6 +2241,9 @@ const EASY_CALENDAR = (() => {
 		if (EasyCalendarVault.epochDay === undefined) EasyCalendarVault.epochDay = epochDay;
 		if (EasyCalendarVault.hourOfDay === undefined) EasyCalendarVault.hourOfDay = today.getHours();
 		if (EasyCalendarVault.weather === undefined) EasyCalendarVault.weather = "clear";
+		if (EasyCalendarVault.autoWeather === undefined) EasyCalendarVault.autoWeather = true;
+		if (EasyCalendarVault.showWeekdays === undefined) EasyCalendarVault.showWeekdays = true;
+		if (EasyCalendarVault.events === undefined) EasyCalendarVault.events = {};
 		if (EasyCalendarVault.customImages === undefined) EasyCalendarVault.customImages = { moon: {}, sun: {}, weather: {} };
 		if (EasyCalendarVault.imageOverrides === undefined) EasyCalendarVault.imageOverrides = { moon: {}, sun: {}, weather: {} };
 		if (EasyCalendarVault.overrides === undefined) EasyCalendarVault.overrides = { moon: {}, sun: {} };
