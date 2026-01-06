@@ -1,6 +1,6 @@
 /**
  * @name easy-equip
- * @version 1.1.0
+ * @version 1.2.0
  * @description Component system for merging character sheet data
  * @author Clint & Claude
  */
@@ -17,7 +17,7 @@ const EASY_EQUIP = (() => {
 		readableName: "Easy-Equip",
 		chatApiName: "ezequip",
 		globalName: "EASY_EQUIP",
-		version: "1.1.0",
+		version: "1.2.0",
 		author: "Mhykiel",
 		sendWelcomeMsg: true,
 		verbose: false,
@@ -302,7 +302,6 @@ const EASY_EQUIP = (() => {
 			let shouldApply = true;
 
 			if (mod.mode === "set") {
-				// Only set if component value is higher than current
 				const modNum = parseFloat(mod.value) || 0;
 				if (modNum > originalNum) {
 					newValue = mod.value;
@@ -367,12 +366,9 @@ const EASY_EQUIP = (() => {
 		const originalSide = (rawCurrentSide !== undefined && rawCurrentSide !== null && rawCurrentSide !== "")
 			? parseInt(rawCurrentSide, 10)
 			: 0;
-		
-		log(`[EZEQUIP] addTokenImage: rawCurrentSide=${rawCurrentSide}, originalSide=${originalSide}`);
-		
+
 		let sides = parseSides(token.get("sides"));
 
-		// If no sides, initialize with current image as side 0
 		if (sides.length === 0) {
 			const currentImg = token.get("imgsrc");
 			if (currentImg) {
@@ -380,11 +376,8 @@ const EASY_EQUIP = (() => {
 			}
 		}
 
-		// Append new image
 		sides.push(imageUrl);
 		const newIndex = sides.length - 1;
-
-		log(`[EZEQUIP] addTokenImage: sides count=${sides.length}, switching to newIndex=${newIndex}`);
 
 		token.set({
 			sides: serializeSides(sides),
@@ -396,34 +389,24 @@ const EASY_EQUIP = (() => {
 	};
 
 	// ANCHOR Function: removeTokenImage
-	const removeTokenImage = (token, imageUrl, originalSide) => {
-		if (!token || !imageUrl) return null;
+	const removeTokenImage = (token, imageUrl) => {
+		if (!token) return null;
 
 		let sides = parseSides(token.get("sides"));
 
-		const imageIndex = sides.findIndex(s => s === imageUrl);
-		if (imageIndex === -1) return null;
-
-		sides.splice(imageIndex, 1);
-
-		// Calculate adjusted originalSide after removal
-		let newSide = originalSide;
-		if (sides.length === 0) {
-			newSide = 0;
-		} else if (originalSide > imageIndex) {
-			// Original side was after removed image, shift down
-			newSide = originalSide - 1;
-		} else if (originalSide >= sides.length) {
-			// Original side no longer exists
-			newSide = sides.length - 1;
+		// Try to remove the image if found
+		if (imageUrl) {
+			const imageIndex = sides.findIndex(s => s === imageUrl);
+			if (imageIndex !== -1) {
+				sides.splice(imageIndex, 1);
+			}
 		}
 
-		const newImg = sides[newSide] || "";
-		log(`[EZEQUIP] removeTokenImage: removed index ${imageIndex}, originalSide=${originalSide}, newSide=${newSide}`);
-		
+		const newImg = sides[0] || "";
+
 		token.set({
 			sides: serializeSides(sides),
-			currentside: newSide,
+			currentside: 0,
 			imgsrc: newImg
 		});
 
@@ -437,30 +420,13 @@ const EASY_EQUIP = (() => {
 			try {
 				const tokenData = JSON.parse(defaulttoken);
 				tokenData.sides = serializeSides(sides);
+				tokenData.currentside = 0;
+				tokenData.imgsrc = sides[0] || "";
 				character.set("defaulttoken", JSON.stringify(tokenData));
-				log(`[EZEQUIP] syncDefaultTokenSides: updated default token with ${sides.length} sides`);
 			} catch (e) {
 				log(`[EZEQUIP] syncDefaultTokenSides: failed - ${e}`);
 			}
 		});
-	};
-
-	// ANCHOR Function: switchToTokenImage
-	const switchToTokenImage = (token, imageUrl) => {
-		if (!token || !imageUrl) return null;
-
-		const originalSide = parseInt(token.get("currentside"), 10) || 0;
-		const sides = parseSides(token.get("sides"));
-
-		const imageIndex = sides.findIndex(s => s === imageUrl);
-		if (imageIndex === -1) return null;
-
-		token.set({
-			currentside: imageIndex,
-			imgsrc: imageUrl
-		});
-
-		return { originalSide, addedImageUrl: imageUrl };
 	};
 
 	// !SECTION End Token Management
@@ -473,19 +439,26 @@ const EASY_EQUIP = (() => {
 		try {
 			const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001001" });
 
-			const menuItemsArray = [
-				`<li><a role="button" href="\`!${moduleSettings.chatApiName} --list">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001002" })}</a></li>`,
-				`<li><a role="button" href="\`!${moduleSettings.chatApiName} --modify">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001003" })}</a></li>`
+			const mainButtons = [
+				`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --list">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001002" })}</a>`,
+				`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --modify">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001003" })}</a>`
 			];
 
-			// GM-only: Make Shifter
+			let body = `<div class="ez-content">${mainButtons.join("\n")}</div>`;
+
 			if (msgDetails.isGm) {
-				menuItemsArray.push(`<li><a role="button" href="\`!${moduleSettings.chatApiName} --shifter">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001022" })}</a></li>`);
+				const gmHeader = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001023" });
+				const gmButtons = [
+					`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --shifter">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001022" })}</a>`
+				];
+				body += `<div class="ez-header">${gmHeader}</div>`;
+				body += `<div class="ez-content">${gmButtons.join("\n")}</div>`;
 			}
 
 			const menuContent = {
 				title,
-				menuItems: menuItemsArray.join("\n"),
+				subtitle: "",
+				body,
 				footer: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001004" })
 			};
 
@@ -515,6 +488,30 @@ const EASY_EQUIP = (() => {
 		}
 	};
 
+	// ANCHOR Function: getComponentImage
+	const getComponentImage = (compChar) => {
+		return new Promise((resolve) => {
+			compChar.get("defaulttoken", (defaultToken) => {
+				let tokenImage = null;
+				if (defaultToken) {
+					try {
+						const tokenData = JSON.parse(defaultToken);
+						if (tokenData.imgsrc) {
+							tokenImage = tokenData.imgsrc;
+						}
+					} catch (e) {
+						// Silently skip if parse fails
+					}
+				}
+				// Fallback to avatar if no token image
+				if (!tokenImage) {
+					tokenImage = compChar.get("avatar") || null;
+				}
+				resolve(tokenImage);
+			});
+		});
+	};
+
 	// ANCHOR Function: processListAsync
 	const processListAsync = async (msgDetails) => {
 		const thisFuncDebugName = "processListAsync";
@@ -523,29 +520,36 @@ const EASY_EQUIP = (() => {
 			const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001005" });
 			const components = getAccessibleComponents(msgDetails.callerId, msgDetails.isGm);
 
-			let menuItemsArray = [];
+			let bodyContent = "";
 
 			if (components.length === 0) {
-				menuItemsArray.push(`<li data-category="info">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001006" })}</li>`);
+				bodyContent = `<p style="color: var(--ez-color-text-complement); font-style: italic; margin: 5px 0;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001006" })}</p>`;
 			} else {
-				// Close the ul, use a table, then reopen ul for footer compatibility
-				menuItemsArray.push("</ul>");
-				menuItemsArray.push('<table style="width:100%; border-collapse: collapse; margin: 5px 0;">');
-				components.forEach(comp => {
+				// Get images for all components
+				const componentData = await Promise.all(components.map(async (comp) => {
 					const name = comp.get("name").replace("Component: ", "");
-					const addBtn = `<a role="button" href="\`!${moduleSettings.chatApiName} --add prompt|${name}" style="display:inline-block; background-color:var(--ez-color-secondary); border:2px solid var(--ez-color-background-secondary); color:var(--ez-color-text-contrast); padding:3px 8px; border-radius:5px; text-decoration:none; font-weight:bold; margin-left:5px;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001007" })}</a>`;
-					const buildBtn = msgDetails.isGm
-						? `<a role="button" href="\`!${moduleSettings.chatApiName} --build prompt|${name}" style="display:inline-block; background-color:var(--ez-color-secondary); border:2px solid var(--ez-color-background-secondary); color:var(--ez-color-text-contrast); padding:3px 8px; border-radius:5px; text-decoration:none; font-weight:bold; margin-left:5px;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001008" })}</a>`
+					const image = await getComponentImage(comp);
+					return { name, image };
+				}));
+
+				let tableRows = "";
+				componentData.forEach(({ name, image }) => {
+					const imgCell = image 
+						? `<img src="${image}" style="width: 50px; height: 50px; border-radius: 5px; vertical-align: middle;">` 
 						: "";
-					menuItemsArray.push(`<tr><td style="color:var(--ez-color-primary); padding:5px 0; font-weight:bold;">${name}</td><td style="text-align:right;">${addBtn}${buildBtn}</td></tr>`);
+					const addBtn = `<a class="ez-btn" style="background: #008000;" href="\`!${moduleSettings.chatApiName} --add prompt|${name}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001007" })}</a>`;
+					const buildBtn = msgDetails.isGm
+						? `<a class="ez-btn" style="background: #0000ff;" href="\`!${moduleSettings.chatApiName} --build prompt|${name}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001008" })}</a>`
+						: "";
+					tableRows += `<tr><td style="width: 55px;">${imgCell}</td><td style="color: var(--ez-color-text-contrast); padding: 5px; font-weight: bold;">${name}</td><td>${addBtn}</td>${msgDetails.isGm ? `<td>${buildBtn}</td>` : ""}</tr>`;
 				});
-				menuItemsArray.push("</table>");
-				menuItemsArray.push("<ul>");
+				bodyContent = `<table style="width: 100%; border-collapse: collapse;">${tableRows}</table>`;
 			}
 
 			const menuContent = {
 				title,
-				menuItems: menuItemsArray.join("\n"),
+				subtitle: "",
+				body: `<div class="ez-content">${bodyContent}</div>`,
 				footer: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001009" })
 			};
 
@@ -600,42 +604,62 @@ const EASY_EQUIP = (() => {
 				const activeNames = Object.keys(tracking.active || {});
 				const inactiveNames = Object.keys(tracking.inactive || {});
 
-				const title = charName;
-				let menuItemsArray = [];
+				// Get images for all components
+				const allNames = [...activeNames, ...inactiveNames];
+				const imageMap = {};
+				await Promise.all(allNames.map(async (name) => {
+					const compChar = findObjs({ _type: "character", name: `Component: ${name}` })[0];
+					if (compChar) {
+						imageMap[name] = await getComponentImage(compChar);
+					}
+				}));
+
+				let body = "";
 
 				// Active section
-				menuItemsArray.push("</ul>");
-				menuItemsArray.push(`<h4>${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100B" })}</h4>`);
+				const activeHeader = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100B" });
+				body += `<div class="ez-header">${activeHeader}</div>`;
+
 				if (activeNames.length === 0) {
-					menuItemsArray.push(`<p style="color:var(--ez-color-text-complement); font-style:italic; margin:5px 0;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100C" })}</p>`);
+					body += `<div class="ez-content"><p style="color: var(--ez-color-text-complement); font-style: italic; margin: 5px 0;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100C" })}</p></div>`;
 				} else {
-					menuItemsArray.push('<table style="width:100%; border-collapse: collapse; margin: 5px 0;">');
+					let tableRows = "";
 					activeNames.forEach(name => {
-						const disableBtn = `<a role="button" href="\`!${moduleSettings.chatApiName} --disable prompt|${name}" style="display:inline-block; background-color:var(--ez-color-secondary); border:2px solid var(--ez-color-background-secondary); color:var(--ez-color-text-contrast); padding:3px 8px; border-radius:5px; text-decoration:none; font-weight:bold; margin-left:5px;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100D" })}</a>`;
-						const removeBtn = `<a role="button" href="\`!${moduleSettings.chatApiName} --remove prompt|${name}" style="display:inline-block; background-color:var(--ez-rainbow-red); border:2px solid var(--ez-color-background-secondary); color:var(--ez-color-text-contrast); padding:3px 8px; border-radius:5px; text-decoration:none; font-weight:bold; margin-left:5px;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100E" })}</a>`;
-						menuItemsArray.push(`<tr><td style="color:var(--ez-color-primary); padding:5px 0; font-weight:bold;">${name}</td><td style="text-align:right;">${disableBtn}${removeBtn}</td></tr>`);
+						const tokenImg = imageMap[name] || "";
+						const imgCell = tokenImg 
+							? `<img src="${tokenImg}" style="width: 50px; height: 50px; border-radius: 5px; vertical-align: middle;">` 
+							: "";
+						const disableBtn = `<a class="ez-btn" style="background: #ffff00; color: #000000;" href="\`!${moduleSettings.chatApiName} --disable prompt|${name}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100D" })}</a>`;
+						const removeBtn = `<a class="ez-btn" style="background: #ff0000;" href="\`!${moduleSettings.chatApiName} --remove prompt|${name}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100E" })}</a>`;
+						tableRows += `<tr><td style="width: 55px;">${imgCell}</td><td style="color: var(--ez-color-text-contrast); padding: 5px; font-weight: bold;">${name}</td><td>${disableBtn}</td><td>${removeBtn}</td></tr>`;
 					});
-					menuItemsArray.push("</table>");
+					body += `<div class="ez-content"><table style="width: 100%; border-collapse: collapse;">${tableRows}</table></div>`;
 				}
 
 				// Inactive section
-				menuItemsArray.push(`<h4>${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100F" })}</h4>`);
+				const inactiveHeader = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100F" });
+				body += `<div class="ez-header">${inactiveHeader}</div>`;
+
 				if (inactiveNames.length === 0) {
-					menuItemsArray.push(`<p style="color:var(--ez-color-text-complement); font-style:italic; margin:5px 0;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100C" })}</p>`);
+					body += `<div class="ez-content"><p style="color: var(--ez-color-text-complement); font-style: italic; margin: 5px 0;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100C" })}</p></div>`;
 				} else {
-					menuItemsArray.push('<table style="width:100%; border-collapse: collapse; margin: 5px 0;">');
+					let tableRows = "";
 					inactiveNames.forEach(name => {
-						const enableBtn = `<a role="button" href="\`!${moduleSettings.chatApiName} --enable prompt|${name}" style="display:inline-block; background-color:var(--ez-color-secondary); border:2px solid var(--ez-color-background-secondary); color:var(--ez-color-text-contrast); padding:3px 8px; border-radius:5px; text-decoration:none; font-weight:bold; margin-left:5px;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001010" })}</a>`;
-						const removeBtn = `<a role="button" href="\`!${moduleSettings.chatApiName} --remove prompt|${name}" style="display:inline-block; background-color:var(--ez-rainbow-red); border:2px solid var(--ez-color-background-secondary); color:var(--ez-color-text-contrast); padding:3px 8px; border-radius:5px; text-decoration:none; font-weight:bold; margin-left:5px;">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100E" })}</a>`;
-						menuItemsArray.push(`<tr><td style="color:var(--ez-color-primary); padding:5px 0; font-weight:bold;">${name}</td><td style="text-align:right;">${enableBtn}${removeBtn}</td></tr>`);
+						const tokenImg = imageMap[name] || "";
+						const imgCell = tokenImg 
+							? `<img src="${tokenImg}" style="width: 50px; height: 50px; border-radius: 5px; vertical-align: middle;">` 
+							: "";
+						const enableBtn = `<a class="ez-btn" style="background: #008000;" href="\`!${moduleSettings.chatApiName} --enable prompt|${name}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001010" })}</a>`;
+						const removeBtn = `<a class="ez-btn" style="background: #ff0000;" href="\`!${moduleSettings.chatApiName} --remove prompt|${name}">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E00100E" })}</a>`;
+						tableRows += `<tr><td style="width: 55px;">${imgCell}</td><td style="color: var(--ez-color-text-contrast); padding: 5px; font-weight: bold;">${name}</td><td>${enableBtn}</td><td>${removeBtn}</td></tr>`;
 					});
-					menuItemsArray.push("</table>");
+					body += `<div class="ez-content"><table style="width: 100%; border-collapse: collapse;">${tableRows}</table></div>`;
 				}
-				menuItemsArray.push("<ul>");
 
 				const menuContent = {
-					title,
-					menuItems: menuItemsArray.join("\n"),
+					title: charName,
+					subtitle: "",
+					body,
 					footer: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E001011" })
 				};
 
@@ -712,7 +736,6 @@ const EASY_EQUIP = (() => {
 		}
 
 		return new Promise((resolve) => {
-			// Extract token image from default token (async)
 			compChar.get("defaulttoken", async (defaultToken) => {
 				let tokenImage = null;
 				if (defaultToken) {
@@ -724,6 +747,11 @@ const EASY_EQUIP = (() => {
 					} catch (e) {
 						// Silently skip if parse fails
 					}
+				}
+
+				// Fallback to avatar if no token image
+				if (!tokenImage) {
+					tokenImage = compChar.get("avatar") || null;
 				}
 
 				const componentData = {
@@ -869,7 +897,6 @@ const EASY_EQUIP = (() => {
 						entry.originals = applyAttributeMods(targetChar.id, componentData.attributes);
 					}
 
-					// Handle token image
 					if (componentData.tokenImage && targetToken) {
 						const tokenResult = addTokenImage(targetToken, componentData.tokenImage);
 						if (tokenResult) {
@@ -890,6 +917,8 @@ const EASY_EQUIP = (() => {
 
 	// ANCHOR Function: processRemove
 	const processRemove = async (msgDetails, parsedArgs) => {
+		const thisFuncDebugName = "processRemove";
+
 		const componentName = parsedArgs.prompt;
 		if (!componentName) {
 			await Utils.whisperAlertMessageAsync({
@@ -946,19 +975,12 @@ const EASY_EQUIP = (() => {
 						if (sectionDef) removeRepeatingRows(targetChar.id, sectionDef.prefix, rowIds);
 					}
 					if (entry.originals) restoreOriginalAttrs(targetChar.id, entry.originals);
-
-					// Remove token image (full purge)
-					if (entry.tokenData && targetToken) {
-						const updatedSides = removeTokenImage(targetToken, entry.tokenData.addedImageUrl, entry.tokenData.originalSide);
-						if (updatedSides) {
-							syncDefaultTokenSides(targetChar, updatedSides);
-						}
-					}
 				}
 
-				// Also purge from inactive (image may still be in sides)
-				if (!wasActive && entry.tokenData && targetToken) {
-					const updatedSides = removeTokenImage(targetToken, entry.tokenData.addedImageUrl, entry.tokenData.originalSide);
+				// Always reset token to index 0 and remove component image
+				if (targetToken) {
+					const imageToRemove = entry.tokenData?.addedImageUrl || null;
+					const updatedSides = removeTokenImage(targetToken, imageToRemove);
 					if (updatedSides) {
 						syncDefaultTokenSides(targetChar, updatedSides);
 					}
@@ -976,6 +998,8 @@ const EASY_EQUIP = (() => {
 
 	// ANCHOR Function: processDisable
 	const processDisable = async (msgDetails, parsedArgs) => {
+		const thisFuncDebugName = "processDisable";
+
 		const componentName = parsedArgs.prompt;
 		if (!componentName) {
 			await Utils.whisperAlertMessageAsync({
@@ -1025,12 +1049,10 @@ const EASY_EQUIP = (() => {
 				}
 				if (entry.originals) restoreOriginalAttrs(targetChar.id, entry.originals);
 
-				// Switch back to original side (leave image in sides)
 				if (entry.tokenData && targetToken) {
 					const sides = parseSides(targetToken.get("sides"));
 					const originalSide = entry.tokenData.originalSide;
 					const originalImg = sides[originalSide] || sides[0];
-					log(`[EZEQUIP] processDisable: stored originalSide=${originalSide}, sides count=${sides.length}, originalImg exists=${!!originalImg}`);
 					targetToken.set({
 						currentside: originalSide,
 						imgsrc: originalImg
@@ -1050,6 +1072,8 @@ const EASY_EQUIP = (() => {
 
 	// ANCHOR Function: processEnable
 	const processEnable = async (msgDetails, parsedArgs) => {
+		const thisFuncDebugName = "processEnable";
+
 		const componentName = parsedArgs.prompt;
 		if (!componentName) {
 			await Utils.whisperAlertMessageAsync({
@@ -1127,30 +1151,25 @@ const EASY_EQUIP = (() => {
 					entry.originals = applyAttributeMods(targetChar.id, componentData.attributes);
 				}
 
-				// Handle token image - switch to existing, or add if missing
 				if (entry.tokenData && targetToken) {
 					let sides = parseSides(targetToken.get("sides"));
 					const imageUrl = entry.tokenData.addedImageUrl;
 					let imageIndex = sides.findIndex(s => s === imageUrl);
-					
-					// Add if missing (safety check - token may have been recreated)
+
 					if (imageIndex === -1) {
 						sides.push(imageUrl);
 						imageIndex = sides.length - 1;
 						targetToken.set({ sides: serializeSides(sides) });
 						syncDefaultTokenSides(targetChar, sides);
-						log(`[EZEQUIP] processEnable: image was missing, re-added at index=${imageIndex}`);
 					}
-					
-					// Store current side as new original before switching
+
 					const currentSide = parseInt(targetToken.get("currentside"), 10) || 0;
 					entry.tokenData.originalSide = currentSide;
-					
+
 					targetToken.set({
 						currentside: imageIndex,
 						imgsrc: imageUrl
 					});
-					log(`[EZEQUIP] processEnable: switching to imageIndex=${imageIndex}`);
 				}
 
 				tracking.active[componentName] = entry;
@@ -1194,7 +1213,6 @@ const EASY_EQUIP = (() => {
 			return 1;
 		}
 
-		// Verify NPC
 		const npcFlag = findObjs({ _type: "attribute", _characterid: npcChar.id, name: "npc" })[0];
 		if (!npcFlag || npcFlag.get("current") !== "1") {
 			await Utils.whisperAlertMessageAsync({
@@ -1210,7 +1228,6 @@ const EASY_EQUIP = (() => {
 
 		const npcName = npcChar.get("name");
 
-		// Generate unique component name
 		let baseName = `Shift ${npcName}`;
 		let componentName = baseName;
 		let counter = 1;
@@ -1219,24 +1236,20 @@ const EASY_EQUIP = (() => {
 			componentName = `${baseName} ${counter}`;
 		}
 
-		// Create component character
 		const compChar = createObj("character", {
 			name: `Component: ${componentName}`,
 			inplayerjournals: "",
 			controlledby: ""
 		});
 
-		// Disable Charactermancer popup
 		createObj("attribute", { characterid: compChar.id, name: "l1mancer_status", current: "complete" });
 		createObj("attribute", { characterid: compChar.id, name: "mancer_cancel", current: "on" });
 
-		// Helper to get NPC attribute value
 		const getNpcAttr = (attrName) => {
 			const attr = findObjs({ _type: "attribute", _characterid: npcChar.id, name: attrName })[0];
 			return attr ? attr.get("current") : "";
 		};
 
-		// Create SET traits for stats
 		const statAttrs = [
 			{ npc: "strength", label: "STR" },
 			{ npc: "dexterity", label: "DEX" },
@@ -1263,7 +1276,6 @@ const EASY_EQUIP = (() => {
 			}
 		});
 
-		// Create SET traits for speed, ac, hp
 		const otherAttrs = [
 			{ npc: "npc_speed", label: "speed" },
 			{ npc: "npc_ac", label: "ac" },
@@ -1287,7 +1299,6 @@ const EASY_EQUIP = (() => {
 			}
 		});
 
-		// Copy NPC traits to PC traits
 		const npcTraits = extractSectionData(npcChar.id, NPC_SECTION_DEFS.npctrait);
 		npcTraits.forEach(trait => {
 			const rowId = generateRowID();
@@ -1312,7 +1323,6 @@ const EASY_EQUIP = (() => {
 			});
 		});
 
-		// Copy NPC actions to PC attacks
 		const npcActions = extractSectionData(npcChar.id, NPC_SECTION_DEFS.npcaction);
 		npcActions.forEach(action => {
 			const rowId = generateRowID();
@@ -1325,7 +1335,6 @@ const EASY_EQUIP = (() => {
 					});
 				}
 			}
-			// Set attack options flag
 			createObj("attribute", {
 				characterid: compChar.id,
 				name: `repeating_attack_${rowId}_options-flag`,
@@ -1333,22 +1342,17 @@ const EASY_EQUIP = (() => {
 			});
 		});
 
-		// Get token image from selected token and copy default token
 		return new Promise((resolve) => {
-			// Get image directly from the selected token on the map
 			let tokenImage = null;
 			if (npcToken) {
 				tokenImage = npcToken.get("imgsrc");
-				log(`[EZEQUIP] processShifter: got imgsrc from selected token: ${tokenImage ? 'yes' : 'no'}`);
 			}
 
-			// Set avatar on component character
 			if (tokenImage) {
 				compChar.set("avatar", tokenImage);
 			}
 
 			npcChar.get("defaulttoken", async (defaultToken) => {
-				// Set component's default token with the captured image
 				if (tokenImage) {
 					let tokenData = {};
 					if (defaultToken) {
@@ -1358,28 +1362,22 @@ const EASY_EQUIP = (() => {
 							// Start fresh if parse fails
 						}
 					}
-					// Set the image and basic properties
 					tokenData.imgsrc = tokenImage;
 					tokenData.represents = compChar.id;
 					compChar.set("defaulttoken", JSON.stringify(tokenData));
-					log(`[EZEQUIP] processShifter: set component defaulttoken with imgsrc`);
 				} else if (defaultToken) {
-					// Fallback: use NPC's default token as-is
 					compChar.set("defaulttoken", defaultToken);
 				}
 
-				// Auto-build the component
 				const buildArgs = { prompt: componentName };
 				await processBuild(msgDetails, buildArgs);
 
-				// Ensure token image is in component data
 				if (tokenImage) {
 					await new Promise((resolveUpdate) => {
 						getEquipJSON(compChar, (componentData) => {
 							if (componentData) {
 								componentData.tokenImage = tokenImage;
 								setEquipJSON(compChar, componentData);
-								log(`[EZEQUIP] processShifter: set tokenImage in component data`);
 							}
 							resolveUpdate();
 						});
@@ -1452,16 +1450,6 @@ const EASY_EQUIP = (() => {
 			const easySharedForge = Utils.getSharedForge();
 			PhraseFactory = easySharedForge.getFactory({ name: "PhraseFactory" });
 
-			// Check for TokenMod dependency
-			if (typeof TokenMod === "undefined") {
-				Utils.logSyslogMessage({
-					severity: "WARN",
-					tag: moduleSettings.readableName,
-					transUnitId: "50001",
-					message: "TokenMod not detected. Token image features may have limited functionality."
-				});
-			}
-
 			// Add localization phrases
 			PhraseFactory.add({
 				newMap: {
@@ -1499,7 +1487,8 @@ const EASY_EQUIP = (() => {
 						"0x0E00101F": "Enabled '{{ component }}' on {{ character }}.",
 						"0x0E001020": "Selected character is not an NPC.",
 						"0x0E001021": "Created '{{ name }}' from '{{ npc }}'.",
-						"0x0E001022": "Make Shifter"
+						"0x0E001022": "Make Shifter",
+						"0x0E001023": "GM Tools"
 					}
 				}
 			});
