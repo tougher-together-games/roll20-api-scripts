@@ -354,9 +354,9 @@ const EASY_UTILS = (() => {
 					return ruleA.index - ruleB.index;
 				};
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ css }) => {
 					try {
 						const cleanedCss = css
@@ -585,9 +585,9 @@ const EASY_UTILS = (() => {
 					return [rootNode];
 				}
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ html }) => {
 					try {
 						const cleanedHtml = html
@@ -714,9 +714,9 @@ const EASY_UTILS = (() => {
 				// Cache Dependencies
 				const encodeCodeBlock = EASY_UTILS.getFunction({ functionName: "encodeCodeBlock", moduleSettings });
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ content }) => {
 
 					const htmlArray = [];
@@ -1138,7 +1138,7 @@ const EASY_UTILS = (() => {
 									});
 
 									// If we popped nextLine off earlier but haven't used it as a footer,
-									// we may consider unshifting it back hereâ€”depending on your desired logic
+									// we may consider unshifting it back here—depending on your desired logic
 									if (footerLine) {
 										lines.unshift(footerLine);
 									}
@@ -1369,9 +1369,9 @@ const EASY_UTILS = (() => {
 					return `<${node.element}${attributesString}>${childrenHtml}</${node.element}>`;
 				}
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ htmlJson }) => {
 					try {
 						const parsedJson = JSON.parse(htmlJson);
@@ -1435,9 +1435,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "convertToSingleLine";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ multiline }) => {
 					const regex = /("[^"]*"|'[^']*')|\s+/g;
 
@@ -1524,7 +1524,7 @@ const EASY_UTILS = (() => {
 					const contributedLanguagePhrases = {};
 
 					// The Vault for storing each player's chosen language (e.g., playerLanguages["player123"] = "frFR")
-					// sync to ensure itâ€™s stored in vault
+					// sync to ensure it's stored in vault
 					const playerLanguagesMap = sharedVault.playerLanguages || {};
 					sharedVault.playerLanguages = playerLanguagesMap;
 
@@ -1560,26 +1560,26 @@ const EASY_UTILS = (() => {
 							};
 						} else if (languageCode === "frFR") {
 							return {
-								"0": "SuccÃ¨s",
-								"1": "Ã‰chec",
+								"0": "Succès",
+								"1": "Échec",
 								"10000": ".=> Initialisation <=.",
-								"20000": ".=> PrÃªt <=.",
-								"20100": "TerminÃ© : {{ remark }} a Ã©tÃ© crÃ©Ã©.",
+								"20000": ".=> Prêt <=.",
+								"20100": "Terminé : {{ remark }} a été créé.",
 								"40000": "Arguments invalides : {{ remark }}",
-								"40400": "Non trouvÃ© : {{ remark }}",
+								"40400": "Non trouvé : {{ remark }}",
 								"50000": "Erreur : {{ remark }}",
 								"30000": "Avertissement : {{ remark }}",
 								"60000": "Information : {{ remark }}",
-								"70000": "DÃ©bogage : {{ remark }}",
-								"0x0D9A441E": "Des jetons doivent Ãªtre sÃ©lectionnÃ©s ou passÃ©s avec --ids.",
+								"70000": "Débogage : {{ remark }}",
+								"0x0D9A441E": "Des jetons doivent être sélectionnés ou passés avec --ids.",
 								"0x004A7742": "erreur",
 								"0x0B672E77": "avertissement",
 								"0x0004E2AF": "information",
 								"0x000058E0": "conseil",
-								"0x02B2451A": "Vous avez entrÃ© la commande suivante :",
-								"0x0834C8EE": "Si le problÃ¨me persiste, contactez l'auteur du module ({{ author }}).",
-								"0x03B6FF6E": "Arguments invalides : une ou plusieurs commandes ne sont pas reconnues. VÃ©rifiez l'orthographe et l'utilisation des commandes.",
-								"0x09B11313": "Options du MaÃ®tre du Jeu"
+								"0x02B2451A": "Vous avez entré la commande suivante :",
+								"0x0834C8EE": "Si le problème persiste, contactez l'auteur du module ({{ author }}).",
+								"0x03B6FF6E": "Arguments invalides : une ou plusieurs commandes ne sont pas reconnues. Vérifiez l'orthographe et l'utilisation des commandes.",
+								"0x09B11313": "Options du Maître du Jeu"
 
 							};
 						}
@@ -1636,7 +1636,7 @@ const EASY_UTILS = (() => {
 						 * @returns {string} The final string with placeholders replaced, or the `transUnitId` itself if no matching phrase is found.
 						 */
 						get({ playerId = "default", transUnitId, expressions = {} }) {
-							// 1) Determine playerâ€™s language or default
+							// 1) Determine player's language or default
 							const lang = playerLanguagesMap[playerId] || defaultLanguageCode;
 
 							// 2) Ensure that language is loaded
@@ -1661,7 +1661,7 @@ const EASY_UTILS = (() => {
 						/**
 						 * Merges new phrases into the in-memory dictionaries for one or multiple languages.
 						 * The caller provides a single `newMap` object with language codes as keys,
-						 * and each languageâ€™s value is a dictionary of transUnitId â†’ phrase string.
+       * and each language's value is a dictionary of transUnitId -> phrase string.
 						 *
 						 * @param {Object} config - A configuration object.
 						 * @param {Object} config.newMap - A map where each key is a language code (e.g. "enUS", "frFR") 
@@ -1676,8 +1676,8 @@ const EASY_UTILS = (() => {
 						 *       "0x08161075": "Set Preferred Language"
 						 *     },
 						 *     frFR: {
-						 *       "0x03BDB2A5": "Menu personnalisÃ©",
-						 *       "0x08161075": "DÃ©finir la langue prÃ©fÃ©rÃ©e"
+						 *       "0x03BDB2A5": "Menu personnalisé",
+						 *       "0x08161075": "Définir la langue préférée"
 						 *     }
 						 *   }
 						 * });
@@ -1748,7 +1748,7 @@ const EASY_UTILS = (() => {
 						},
 
 						/**
-						 * Removes a specific phrase entry from a languageâ€™s dictionary,
+						 * Removes a specific phrase entry from a language's dictionary,
 						 * including both contributed phrases and loaded phrases if present.
 						 *
 						 * @param {Object} config - An object containing the parameters.
@@ -1912,26 +1912,45 @@ const EASY_UTILS = (() => {
 					 **************************************************************************************************/
 					function loadTemplateByName(templateName) {
 						switch (templateName) {
+
+						// ANCHOR Template: chatAlert
 						case "chatAlert":
 							return `
-								<div class="alert-box {{ alert-class }}">
-									<h3>{{ title }}</h3>
-									<p>{{ description }}</p>
-									<p class="alert-code">{{ code }}</p>
-									<p>{{ remark }}</p>
-									<p class="alert-footer">{{ footer }}</p>
-								</div>`;
+<div id="rootContainer" class="ez-box ez-alert {{ alertClass }}">
+	<div class="ez-cap ez-cap-top"></div>
+	<div class="ez-title">{{ title }}</div>
+	<div class="ez-body">
+		<p class="ez-description">{{ description }}</p>
+		<pre class="ez-code">{{ code }}</pre>
+		<p class="ez-remark">{{ remark }}</p>
+	</div>
+	<div class="ez-footer">{{ footer }}</div>
+	<div class="ez-cap ez-cap-bottom"></div>
+</div>`;
 
+						// ANCHOR Template: chatMenu
+						// Body is built dynamically with .ez-header and .ez-content divs
 						case "chatMenu":
 							return `
-								<div class="menu-box {{ menu-class }}">
-									<h3>{{ title }}</h3>
-									<ul>
-										<!-- <li><a href="!api --menu">Option 1</a></li> -->
-										{{ menuItems }}
-									</ul>
-									<p class="menu-footer">{{ footer }}</p>
-								</div>`;
+<div id="rootContainer" class="ez-box ez-menu {{ menuClass }}">
+	<div class="ez-cap ez-cap-top"></div>
+	<div class="ez-title">{{ title }}</div>
+	<div class="ez-subtitle">{{ subtitle }}</div>
+	{{ body }}
+	<div class="ez-footer">{{ footer }}</div>
+	<div class="ez-cap ez-cap-bottom"></div>
+</div>`;
+
+						// ANCHOR Template: chatAnnouncement
+						case "chatAnnouncement":
+							return `
+<div id="rootContainer" class="ez-box ez-announcement {{ announcementClass }}">
+	<div class="ez-cap ez-cap-top"></div>
+	<div class="ez-title">{{ title }}</div>
+	<div class="ez-body">{{ body }}</div>
+	<div class="ez-footer">{{ footer }}</div>
+	<div class="ez-cap ez-cap-bottom"></div>
+</div>`;
 
 						default:
 							return null;
@@ -2100,127 +2119,326 @@ const EASY_UTILS = (() => {
 					 **************************************************************************************************/
 					function loadThemeByName(themeName) {
 						switch (themeName) {
+
+						// ANCHOR Theme: chatAlert
 						case "chatAlert":
 							return `
-								/* Design Colors */
-								:root {${globalSettings.defaultStyle}}
+:root {${globalSettings.defaultStyle}}
 
-								.alert-box {
-									padding: var(--ez-block-padding);
-									border: 1px solid var(--ez-color-border-primary);
-									border-radius: var(--ez-block-radius);
-									color: var(--ez-color-text-primary);
-									background-color: var(--ez-color-background-primary);
-								}
+/* **************************************************
+ * Base Box Styles
+ ************************************************** */
+#rootContainer.ez-box {
+	font-family: var(--ez-font-family-sans-serif);
+	font-size: var(--ez-font-size);
+	line-height: var(--ez-line-height);
+	color: var(--ez-color-text-primary);
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+}
 
-								h3 {
-									margin: var(--ez-block-margin);
-									color: var(--ez-color-text-contrast);
-									font-size: calc(2 * var(--ez-font-size));
-									text-transform: uppercase;
-								}
+/* **************************************************
+ * Cap Styles (Top/Bottom decorative bars)
+ ************************************************** */
+.ez-cap {
+	min-height: var(--ez-cap-height, 12px);
+	background-size: var(--ez-cap-bg-size, 100% 100%);
+	background-repeat: no-repeat;
+}
 
-								.alert-code {
-									display: block;
-									margin: var(--ez-block-margin);
-									padding: var(--ez-block-padding);
-									border: var(--ez-color-border-shadow);
-									border-radius: var(--ez-block-radius);
-									font-family: var(--ez-font-family-monospace);
-									background-color: var(--ez-color-background-contrast);
-								}
+.ez-cap-top {
+	background: var(--ez-cap-top-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+	border-radius: var(--ez-cap-radius, 8px 8px 0 0);
+}
 
-								p:empty {
-									display: none;
-								}
+.ez-cap-bottom {
+	background: var(--ez-cap-bottom-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+	border-radius: var(--ez-cap-radius-bottom, 0 0 8px 8px);
+}
 
-								.alert-footer {
-									margin: var(--ez-block-margin);
-									color: var(--ez-color-text-secondary);
-									font-size: calc(1.5 * var(--ez-font-size));
-								}`;
+/* **************************************************
+ * Alert Title
+ ************************************************** */
+.ez-alert .ez-title {
+	background: var(--ez-title-bg, var(--ez-color-primary));
+	background-size: var(--ez-title-bg-size, cover);
+	color: var(--ez-color-text-contrast);
+	font-weight: bold;
+	text-transform: uppercase;
+	text-align: var(--ez-title-align, center);
+	padding: var(--ez-block-padding);
+	margin: 0;
+}
 
+/* **************************************************
+ * Alert Body
+ ************************************************** */
+.ez-alert .ez-body {
+	background: var(--ez-body-bg, var(--ez-color-background-primary));
+	background-size: var(--ez-body-bg-size, cover);
+	padding: var(--ez-block-padding);
+}
+
+.ez-alert .ez-description {
+	margin: 0 0 0.5em 0;
+}
+
+.ez-alert .ez-code {
+	display: block;
+	background: var(--ez-code-bg, var(--ez-color-background-contrast));
+	color: var(--ez-color-text-primary);
+	font-family: var(--ez-font-family-monospace);
+	font-size: 12px;
+	padding: var(--ez-block-padding);
+	border-radius: var(--ez-block-radius);
+	margin: 0.5em 0;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+}
+
+.ez-alert .ez-code:empty { display: none; }
+
+.ez-alert .ez-remark {
+	margin: 0.5em 0 0 0;
+	font-style: italic;
+}
+
+.ez-alert .ez-remark:empty { display: none; }
+
+/* **************************************************
+ * Alert Footer
+ ************************************************** */
+.ez-alert .ez-footer {
+	background: var(--ez-footer-bg, var(--ez-color-background-secondary));
+	background-size: var(--ez-footer-bg-size, cover);
+	color: var(--ez-color-text-complement);
+	font-size: 12px;
+	text-align: var(--ez-footer-align, center);
+	padding: 5px;
+}
+
+.ez-alert .ez-footer:empty { display: none; }
+
+/* **************************************************
+ * Alert Severity Variants
+ ************************************************** */
+.ez-alert.ez-error .ez-title { background: var(--ez-error-bg, var(--ez-rainbow-red)); }
+.ez-alert.ez-error .ez-cap { background: var(--ez-error-bg, var(--ez-rainbow-red)); }
+.ez-alert.ez-warn .ez-title { background: var(--ez-warn-bg, var(--ez-rainbow-orange)); }
+.ez-alert.ez-warn .ez-cap { background: var(--ez-warn-bg, var(--ez-rainbow-orange)); }
+.ez-alert.ez-info .ez-title { background: var(--ez-info-bg, var(--ez-color-tertiary)); }
+.ez-alert.ez-info .ez-cap { background: var(--ez-info-bg, var(--ez-color-tertiary)); }
+.ez-alert.ez-tip .ez-title { background: var(--ez-tip-bg, var(--ez-rainbow-green)); }
+.ez-alert.ez-tip .ez-cap { background: var(--ez-tip-bg, var(--ez-rainbow-green)); }
+`;
+
+						// ANCHOR Theme: chatMenu
 						case "chatMenu":
 							return `
-								/* Design Colors */
-								:root {${globalSettings.defaultStyle}}
+:root {${globalSettings.defaultStyle}}
 
-								/* Chat Menu CSS Rules */
-								h3, h4 {
-								margin: 0;
-								font-size: 1em;
-								text-transform: uppercase;
-								font-weight: bold;
-								text-align: center;
-								margin-bottom: 10px;
-								color: var(--ez-color-text-contrast);
-								background-color: var(--ez-color-primary);
-								border: 2px solid var(--ez-color-background-secondary);
-								border-radius: 5px;
-								padding: 5px;
-								}
+/* **************************************************
+ * Base Box Styles
+ ************************************************** */
+#rootContainer.ez-box {
+	font-family: var(--ez-font-family-sans-serif);
+	font-size: var(--ez-font-size);
+	line-height: var(--ez-line-height);
+	color: var(--ez-color-text-primary);
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+}
 
-								h4 {
-									background-color: var(--ez-color-tertiary);
-								}
+/* **************************************************
+ * Cap Styles (Top/Bottom decorative bars)
+ ************************************************** */
+.ez-cap {
+	min-height: var(--ez-cap-height, 12px);
+	background-size: var(--ez-cap-bg-size, 100% 100%);
+	background-repeat: no-repeat;
+}
 
-								ul {
-								list-style-type: none;
-								padding: 0;
-								margin: 0;
-								}
+.ez-cap-top {
+	background: var(--ez-cap-top-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+	border-radius: var(--ez-cap-radius, 8px 8px 0 0);
+}
 
-								li {
-								margin: 5px 0;
-								width: 90%;
-								background-color: var(--ez-color-secondary);
-								border: 2px solid var(--ez-color-background-secondary);
-								color: var(--ez-color-text-contrast);
-								padding: 5px 10px;
-								border-radius: 5px;
-								cursor: pointer;
-								box-sizing: border-box;
-								}
+.ez-cap-bottom {
+	background: var(--ez-cap-bottom-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+	border-radius: var(--ez-cap-radius-bottom, 0 0 8px 8px);
+}
 
-								li[data-category="caution"] {
-								background-color: var(--ez-rainbow-red);
-								}
+/* **************************************************
+ * Menu Title
+ ************************************************** */
+.ez-menu .ez-title {
+	background: var(--ez-title-bg, var(--ez-color-primary));
+	background-size: var(--ez-title-bg-size, cover);
+	color: var(--ez-color-text-contrast);
+	font-weight: bold;
+	text-transform: uppercase;
+	text-align: var(--ez-title-align, center);
+	padding: var(--ez-block-padding);
+	margin: 0;
+}
 
-								li[data-category="alterative"] {
-								background-color: var(--ez-rainbow-red);
-								}
+/* **************************************************
+ * Menu Subtitle
+ ************************************************** */
+.ez-menu .ez-subtitle {
+	background: var(--ez-subtitle-bg, var(--ez-color-secondary));
+	background-size: var(--ez-subtitle-bg-size, cover);
+	color: var(--ez-color-text-contrast);
+	font-size: 12px;
+	text-align: var(--ez-subtitle-align, center);
+	padding: 5px;
+}
 
-								/* Strip styles from Anchor tags (<a>) */
-								li > a[role="button"] {
-									text-decoration: none;
-									color: var(--ez-color-text-contrast);
-									font-weight: bold;
-									font-size: inherit;
-									font-family: inherit;
-									cursor: pointer;
-								}
+.ez-menu .ez-subtitle:empty { display: none; }
 
-								.menu-box {
-								font-size: 1em;
-								background-color: var(--ez-color-background-primary);
-								border: 2px solid var(--ez-color-background-secondary);
-								border-radius: 8px;
-								padding: 10px;
-								max-width: 100%;
-								font-family: var(--ez-font-family);
-								color: var(--ez-color-text-contrast);
-								margin: 5px;
-								}
+/* **************************************************
+ * Menu Header (Section Dividers)
+ ************************************************** */
+.ez-menu .ez-header {
+	background: var(--ez-header-bg, var(--ez-color-tertiary));
+	background-size: var(--ez-header-bg-size, cover);
+	color: var(--ez-color-text-contrast);
+	font-weight: bold;
+	text-align: var(--ez-header-align, center);
+	padding: 5px var(--ez-block-padding);
+}
 
-								.menu-footer {
-								color: var(--ez-color-text-complement);
-								}
+/* **************************************************
+ * Menu Content Areas
+ ************************************************** */
+.ez-menu .ez-content {
+	background: var(--ez-content-bg, var(--ez-color-background-primary));
+	background-size: var(--ez-content-bg-size, cover);
+	padding: var(--ez-block-padding);
+	text-align: var(--ez-content-align, center);
+}
 
-								.inline-rolls {
-								color: black;
-								}
-							`;
-						default:
+/* **************************************************
+ * Menu Buttons
+ ************************************************** */
+.ez-menu .ez-btn {
+	display: block;
+	background: var(--ez-btn-bg, var(--ez-color-secondary));
+	background-size: var(--ez-btn-bg-size, cover);
+	color: var(--ez-color-text-contrast);
+	text-decoration: none;
+	font-weight: bold;
+	text-align: var(--ez-btn-align, center);
+	padding: 5px 10px;
+	margin: 3px 0;
+	border: 2px solid var(--ez-color-background-secondary);
+	border-radius: var(--ez-block-radius);
+	cursor: pointer;
+}
+
+.ez-menu .ez-btn:hover {
+	background: var(--ez-btn-hover-bg, var(--ez-color-primary));
+}
+
+.ez-menu .ez-btn.ez-caution {
+	background: var(--ez-btn-caution-bg, var(--ez-rainbow-red));
+}
+
+/* **************************************************
+ * Menu Footer
+ ************************************************** */
+.ez-menu .ez-footer {
+	background: var(--ez-footer-bg, var(--ez-color-background-secondary));
+	background-size: var(--ez-footer-bg-size, cover);
+	color: var(--ez-color-text-complement);
+	font-size: 12px;
+	text-align: var(--ez-footer-align, center);
+	padding: 5px;
+}
+
+.ez-menu .ez-footer:empty { display: none; }
+`;
+
+						// ANCHOR Theme: chatAnnouncement
+						case "chatAnnouncement":
+							return `
+:root {${globalSettings.defaultStyle}}
+
+/* **************************************************
+ * Base Box Styles
+ ************************************************** */
+#rootContainer.ez-box {
+	font-family: var(--ez-font-family-sans-serif);
+	font-size: var(--ez-font-size);
+	line-height: var(--ez-line-height);
+	color: var(--ez-color-text-primary);
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+/* **************************************************
+ * Cap Styles (Top/Bottom decorative bars)
+ ************************************************** */
+.ez-cap {
+	min-height: var(--ez-cap-height, 12px);
+	background-size: var(--ez-cap-bg-size, 100% 100%);
+	background-repeat: no-repeat;
+}
+
+.ez-cap-top {
+	background: var(--ez-cap-top-bg, var(--ez-cap-bg, var(--ez-color-accent)));
+	border-radius: var(--ez-cap-radius, 8px 8px 0 0);
+}
+
+.ez-cap-bottom {
+	background: var(--ez-cap-bottom-bg, var(--ez-cap-bg, var(--ez-color-accent)));
+	border-radius: var(--ez-cap-radius-bottom, 0 0 8px 8px);
+}
+
+/* **************************************************
+ * Announcement Title
+ ************************************************** */
+.ez-announcement .ez-title {
+	background: var(--ez-title-bg, var(--ez-color-accent));
+	background-size: var(--ez-title-bg-size, cover);
+	color: var(--ez-color-text-contrast);
+	font-weight: bold;
+	text-transform: uppercase;
+	text-align: var(--ez-title-align, center);
+	padding: var(--ez-block-padding);
+	margin: 0;
+}
+
+/* **************************************************
+ * Announcement Body
+ ************************************************** */
+.ez-announcement .ez-body {
+	background: var(--ez-body-bg, var(--ez-color-background-accent));
+	background-size: var(--ez-body-bg-size, cover);
+	color: var(--ez-color-text-primary);
+	padding: var(--ez-block-padding);
+	text-align: var(--ez-body-align, left);
+}
+
+/* **************************************************
+ * Announcement Footer
+ ************************************************** */
+.ez-announcement .ez-footer {
+	background: var(--ez-footer-bg, var(--ez-color-background-secondary));
+	background-size: var(--ez-footer-bg-size, cover);
+	color: var(--ez-color-text-complement);
+	font-size: 12px;
+	text-align: var(--ez-footer-align, center);
+	padding: 5px;
+}
+
+.ez-announcement .ez-footer:empty { display: none; }
+`;
+
+												default:
 							return null;
 						}
 					}
@@ -2338,9 +2556,9 @@ const EASY_UTILS = (() => {
 
 				// Cache Dependencies
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ text }) => {
 					// Quick type check
 					if (typeof text !== "string") {
@@ -2430,9 +2648,9 @@ const EASY_UTILS = (() => {
 
 				// Cache Dependencies
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ text }) => {
 					// Quick type check
 					if (typeof text !== "string") {
@@ -2526,9 +2744,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "decodeCodeBlock";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ text }) => {
 
 					// Debug logging if desired
@@ -2620,9 +2838,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "encodeCodeBlock";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ text }) => {
 
 					// Debug logging if desired
@@ -2714,9 +2932,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "decodeNoteContent";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ text }) => {
 
 					// Debug logging if desired
@@ -2796,9 +3014,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "encodeNoteContent";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ text }) => {
 
 					// Debug logging if desired
@@ -2875,9 +3093,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "getGlobalSettings";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return () => {
 
 					// Debug logging if desired
@@ -2919,9 +3137,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "getSharedForge";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return () => {
 
 					// Debug logging if desired
@@ -2966,9 +3184,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "getSharedVault";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return () => {
 
 					// Debug logging if desired
@@ -3028,9 +3246,9 @@ const EASY_UTILS = (() => {
 				// Cache Dependencies
 				const getSyslogTimestamp = () => { return new Date().toISOString(); };
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ severity, tag, transUnitId, message }) => {
 					const severityMap = {
 						3: "ERROR",
@@ -3098,9 +3316,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "parseChatCommands";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ apiCallContent }) => {
 					const commandMap = new Map();
 					const normalizedContent = apiCallContent.trim();
@@ -3172,9 +3390,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "parseChatSubcommands";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ subcommands }) => {
 					const subcommandMap = {};
 
@@ -3255,75 +3473,48 @@ const EASY_UTILS = (() => {
 
 				const thisFuncDebugName = "replacePlaceholders";
 
-				// Cache Dependencies
-
-				/**
-				 * @function resolveCssVar
-				 * @description Recursively resolves CSS variables in a value string, replacing `var(--xyz)` references with their corresponding values from a `cssVars` map.
-				 *              - Prevents infinite recursion by tracking visited variables.
-				 *              - Leaves unresolved variables as `var(--xyz)` if their value is not found.
-				 * 
-				 * @param {string} value - The CSS property value containing potential `var(--xyz)` references.
-				 * @param {Object} cssVars - An object mapping CSS variable names (e.g., `--xyz`) to their values.
-				 * @param {Set<string>} [visited=new Set()] - A set of already visited variables to prevent circular references.
-				 * 
-				 * @returns {string} The resolved CSS value with variables replaced, or the original value if unchanged.
-				 */
-				function resolveCssVar(value, cssVars, visited = new Set()) {
-
-					// Prevent infinite recursion by keeping track of visited variables
-					if (!value || typeof value !== "string") return value;
-
-					return value.replace(/var\((--[\w-]+)\)/g, (_, cssVar) => {
-						if (visited.has(cssVar)) {
-
-							// Stop recursion if the variable is already being processed
-							return `var(${cssVar})`;
-						}
-
-						const resolvedValue = cssVars[cssVar];
-						if (resolvedValue !== undefined) {
-							visited.add(cssVar);
-							const result = resolveCssVar(resolvedValue, cssVars, visited);
-							visited.delete(cssVar);
-
-							return result;
-						} else {
-
-							// If the variable is unknown, return as-is
-							return `var(${cssVar})`;
-						}
-					});
+				// Resolves CSS var() including fallbacks: var(--name) or var(--name, fallback)
+				function resolveVar(text, cssVars) {
+					// Match var(--name) or var(--name, fallback)
+					// Fallback can contain nested parens like var() or url()
+					const varRegex = /var\((--[\w-]+)(?:\s*,\s*((?:[^()]+|\([^()]*\))*))?\)/g;
+					
+					let result = text;
+					let safety = 0;
+					
+					// Keep resolving until no more var() or safety limit
+					while (result.includes("var(") && safety < 10) {
+						result = result.replace(varRegex, (match, varName, fallback) => {
+							const value = cssVars[varName];
+							if (value !== undefined) {
+								return value;
+							}
+							// Use fallback if provided, otherwise keep original
+							return fallback !== undefined ? fallback.trim() : match;
+						});
+						safety++;
+					}
+					
+					return result;
 				}
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ text, expressions = {}, cssVars = {} }) => {
 
-					let output = "";
-
-					/* Resolve CSS variables in the `cssVars` first as some CSS variable values are other CSS variables
-					================================================================================================= */
-					const resolvedCssVars = {};
-					for (const [key, value] of Object.entries(cssVars)) {
-						resolvedCssVars[key] = resolveCssVar(value, cssVars);
-					}
-
-					/* Replace placeholders in text
-					================================================================================================= */
-					output = text
+					// Replace placeholders in text
+					const output = text
 						.replace(/{{(.*?)}}/g, (_, key) => {
 							return expressions[key.trim()] || "";
 						})
 						.replace(/\[\[(.*?)\]\]/g, (_, anExpression) => {
-
 							// Wrap Roll20 roll expressions in a span for styling
 							return `<span class="inline-rolls">[[${anExpression.trim()}]]</span>`;
-						})
-						.replace(/var\((--[\w-]+)\)/g, (_, cssVar) => {
-							return resolvedCssVars[cssVar.trim()] || `var(${cssVar.trim()})`;
 						});
+
+					// Resolve CSS variables with fallback support
+					const finalOutput = resolveVar(output, cssVars);
 
 					// Debug logging if desired
 					if (moduleSettings?.debug?.[thisFuncDebugName] ?? false) {
@@ -3332,11 +3523,11 @@ const EASY_UTILS = (() => {
 							severity: "DEBUG",
 							tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
 							transUnitId: "70000",
-							message: output,
+							message: finalOutput,
 						});
 					}
 
-					return output;
+					return finalOutput;
 				};
 			};
 		},
@@ -3891,10 +4082,10 @@ const EASY_UTILS = (() => {
 					}
 				}
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-				return ({ cssJson, htmlJson }) => {
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
+				return ({ cssJson, htmlJson, cssVars = {} }) => {
 					try {
 						// Convert inputs if needed
 						let cssRules = typeof cssJson === "string" ? JSON.parse(cssJson) : cssJson;
@@ -3910,6 +4101,16 @@ const EASY_UTILS = (() => {
 						// Preprocess :root => rootVariables + #rootContainer
 						const { rootVariables, updatedRules } = preprocessRootRules(cssRules, htmlTree);
 						cssRules = updatedRules;
+
+						// Merge custom cssVars (overrides rootVariables)
+						Object.assign(rootVariables, cssVars);
+
+						// One-pass resolution of var() in rootVariables
+						for (const [key, value] of Object.entries(rootVariables)) {
+							rootVariables[key] = value.replace(/var\((--[\w-]+)\)/g, (_, varName) => {
+								return rootVariables[varName] || `var(${varName})`;
+							});
+						}
 
 						// For each rule => find matched => merge style
 						for (const rule of cssRules) {
@@ -3970,9 +4171,9 @@ const EASY_UTILS = (() => {
 				const parseChatSubcommands = EASY_UTILS.getFunction({ functionName: "parseChatSubcommands", moduleSettings });
 				const whisperAlertMessageAsync = EASY_UTILS.getFunction({ functionName: "whisperAlertMessageAsync", moduleSettings });
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ actionMap, apiCall }) => {
 
 					// Debug logging if desired
@@ -4109,21 +4310,28 @@ const EASY_UTILS = (() => {
 				const convertHtmlToJson = EASY_UTILS.getFunction({ functionName: "convertHtmlToJson", moduleSettings });
 				const convertCssToJson = EASY_UTILS.getFunction({ functionName: "convertCssToJson", moduleSettings });
 				const decodeCodeBlock = EASY_UTILS.getFunction({ functionName: "decodeCodeBlock", moduleSettings });
+				const getSharedVault = EASY_UTILS.getFunction({ functionName: "getSharedVault", moduleSettings });
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return async ({ template, expressions = {}, theme, cssVars = {} }) => {
 
 					try {
+						// Merge custom styles from vault with passed cssVars
+						const vault = getSharedVault();
+						const customStyle = vault.customStyle || {};
+						const mergedCssVars = { ...customStyle, ...cssVars };
+
 						const [fetchedTemplate, fetchedTheme] = await Promise.all([
-							templateFactory.get({ template, expressions, cssVars }),
-							themeFactory.get({ theme, expressions, cssVars })
+							templateFactory.get({ template, expressions, cssVars: mergedCssVars }),
+							themeFactory.get({ theme, expressions, cssVars: mergedCssVars })
 						]);
 
 						const styledJson = applyCssToHtmlJson({
 							cssJson: convertCssToJson({ css: fetchedTheme }),
-							htmlJson: convertHtmlToJson({ html: fetchedTemplate })
+							htmlJson: convertHtmlToJson({ html: fetchedTemplate }),
+							cssVars: mergedCssVars
 						});
 
 						const output = convertJsonToHtml({ htmlJson: decodeCodeBlock({ text: styledJson }) });
@@ -4200,16 +4408,15 @@ const EASY_UTILS = (() => {
 				const whisperPlayerMessage = EASY_UTILS.getFunction({ functionName: "whisperPlayerMessage", moduleSettings });
 				const PhraseFactory = EASY_UTILS.getFunction({ functionName: "createPhraseFactory", moduleSettings });
 
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return async ({ from, to, toId, severity = 6, apiCallContent, remark }) => {
 
 					const typeEnum = {
 						error: {
 							type: 3, // "ERROR"
-							bgColor: "#ffdddd",
-							titleColor: "#FF0000",
+							cssClass: "ez-error",
 							// Content
 							// "0x004A7742": "error",
 							title: PhraseFactory.get({ playerId: toId, transUnitId: "0x004A7742" }),
@@ -4223,8 +4430,7 @@ const EASY_UTILS = (() => {
 						},
 						warn: {
 							type: 4, // "WARN"
-							bgColor: "#FBE7A1",
-							titleColor: "#CA762B",
+							cssClass: "ez-warn",
 							// Content
 							// "0x0B672E77": "warning",
 							title: PhraseFactory.get({ playerId: toId, transUnitId: "0x0B672E77" }),
@@ -4239,8 +4445,7 @@ const EASY_UTILS = (() => {
 						},
 						info: {
 							type: 6, // "INFO"
-							bgColor: "#b8defd",
-							titleColor: "#2516f5",
+							cssClass: "ez-info",
 							// Content
 							// "0x0004E2AF": "information"
 							title: PhraseFactory.get({ playerId: toId, transUnitId: "0x0004E2AF" }),
@@ -4255,8 +4460,7 @@ const EASY_UTILS = (() => {
 						},
 						debug: {
 							type: 7, // "DEBUG"
-							bgColor: "#C3FDB8",
-							titleColor: "#16F529",
+							cssClass: "ez-tip",
 							// Content
 							// "0x000058E0": "tip"
 							title: PhraseFactory.get({ playerId: toId, transUnitId: "0x000058E0" }),
@@ -4281,7 +4485,7 @@ const EASY_UTILS = (() => {
 					const alertConfig = typeEnum[resolvedSeverity] || typeEnum.info;
 
 					const alertContent = {
-						"alert-class": alertConfig.type,
+						alertClass: alertConfig.cssClass,
 						title: alertConfig.title,
 						description: alertConfig.description,
 						code: alertConfig.code,
@@ -4289,17 +4493,12 @@ const EASY_UTILS = (() => {
 						footer: alertConfig.footer
 					};
 
-					const alertPalette = {
-						"--ez-color-background-primary": alertConfig.bgColor,
-						"--ez-color-text-contrast": alertConfig.titleColor,
-					};
-
 					try {
 						const styledMessage = await renderTemplateAsync({
 							template: "chatAlert",
 							expressions: alertContent,
 							theme: "chatAlert",
-							cssVars: alertPalette,
+							cssVars: {},
 						});
 
 						whisperPlayerMessage({ from, to, message: styledMessage });
@@ -4362,9 +4561,9 @@ const EASY_UTILS = (() => {
 				const thisFuncDebugName = "whisperPlayerMessage";
 
 				// Cache Dependencies
-				// â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-				// â”‚                                      Main Closure                                                 â”‚
-				// â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+				// **************************************************
+				// *                 Main Closure                   *
+				// **************************************************
 				return ({ from, to, message }) => {
 					const sender = from || moduleSettings.readableName;
 					const recipient = to || "gm";

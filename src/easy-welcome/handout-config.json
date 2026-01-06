@@ -1,0 +1,44 @@
+{
+    "newPlayer": {
+        "enabled": true,
+        "steps": [
+            {
+                "type": "createCharacter",
+                "config": {
+                    "label": "pc",
+                    "charType": "pc",
+                    "name": "{{playerName}}'s Character",
+                    "inPlayerJournals": "all",
+                    "controlledBy": "{{playerId}}"
+                }
+            },
+            {
+                "type": "sendToChat",
+                "config": {
+                    "message": "/w {{playerName}} Welcome! Your character sheet: [{{character:pc:name}}](http://journal.roll20.net/character/{{character:pc}})"
+                }
+            }
+        ]
+    },
+    "newCharacter": {
+        "enabled": true,
+        "steps": [
+            {
+                "type": "createCharacter",
+                "config": {
+                    "label": "pc",
+                    "charType": "pc",
+                    "name": "{{playerName}}'s Character",
+                    "inPlayerJournals": "all",
+                    "controlledBy": "{{playerId}}"
+                }
+            },
+            {
+                "type": "sendToChat",
+                "config": {
+                    "message": "/w {{playerName}} Character created: [{{character:pc:name}}](http://journal.roll20.net/character/{{character:pc}})"
+                }
+            }
+        ]
+    }
+}

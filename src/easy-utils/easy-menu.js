@@ -81,8 +81,12 @@ const EASY_MENU = (() => {
 		"--menu": (msgDetails) => { return processMenuAsync(msgDetails); },
 		"--set-lang": (msgDetails, parsedArgs) => { return processSetLanguageAsync(msgDetails, parsedArgs); },
 		"--alerts": (msgDetails) => { return processExampleAlerts(msgDetails); },
+		"--announcement": (msgDetails, parsedArgs) => { return processAnnouncementAsync(msgDetails, parsedArgs); },
 		"--flip": (msgDetails) => { return processFlipTokensAsync(msgDetails); },
 		"--purge-state": (msgDetails, parsedArgs) => { return processPurgeState(msgDetails, parsedArgs); },
+		"--export-config": (msgDetails) => { return processExportConfig(msgDetails); },
+		"--reload-config": (msgDetails) => { return processReloadConfig(msgDetails); },
+		"--reset-style": (msgDetails) => { return processResetStyle(msgDetails); },
 		"--echo-inline-roll": (msgDetails) => { Utils.whisperPlayerMessage({ from: moduleSettings.readableName, to: msgDetails.callerName, message: JSON.stringify(msgDetails.raw) }); },
 	};
 
@@ -97,32 +101,36 @@ const EASY_MENU = (() => {
 		const thisFuncDebugName = "processMenuAsync";
 		const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x03BDB2A5" });
 
-		// NOTE use the '\' to escape, make literal, the special characters like the backtick (`) and exclamation (!)
-		const menuItemsArray = [
-			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --set-lang">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x08161075" })}</a></li>`,
-			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --alerts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D842F34" })}</a></li>`,
-			`<li><a role="button" href="\`!${moduleSettings.chatApiName} --flip">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0382B96E" })}</a></li>`
+		// Build buttons for main content
+		const mainButtons = [
+			`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --set-lang">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x08161075" })}</a>`,
+			`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --alerts">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0D842F34" })}</a>`,
+			`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --announcement">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C3D" })}</a>`,
+			`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --flip">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0382B96E" })}</a>`
 		];
 
-		const gmMenuItemsArray = [
-			"</ul>",
-			`<h4>${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x09B11313" })}</h4>`,
-			"<ul>",
-			`<li data-category="caution"><a role="button" href="\`!${moduleSettings.chatApiName} --purge-state all">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0DD74385" })}</a></li>`,
-			`<li data-category="caution"><a role="button" href="\`!${moduleSettings.chatApiName} --purge-state EASY_VAULT">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0009ADA5" })}</a></li>`,
-		];
+		// Build body with content section
+		let body = `<div class="ez-content">${mainButtons.join("\n")}</div>`;
 
-		// Conditionally combine arrays if isGm is true
-		const combinedMenuItemsArray = msgDetails.isGm
-			? [...menuItemsArray, ...gmMenuItemsArray]
-			: menuItemsArray;
-
-		const menuItemsHTML = combinedMenuItemsArray.join("\n");
+		// Add GM-only section if GM
+		if (msgDetails.isGm) {
+			const gmHeader = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x09B11313" });
+			const gmButtons = [
+				`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --export-config">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0E1F2A3B" })}</a>`,
+				`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --reload-config">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0F2E3D4C" })}</a>`,
+				`<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --reset-style">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0K8L9M0N" })}</a>`,
+				`<a class="ez-btn ez-caution" href="\`!${moduleSettings.chatApiName} --purge-state all">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0DD74385" })}</a>`,
+				`<a class="ez-btn ez-caution" href="\`!${moduleSettings.chatApiName} --purge-state EASY_VAULT">${PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0009ADA5" })}</a>`
+			];
+			body += `<div class="ez-header">${gmHeader}</div>`;
+			body += `<div class="ez-content">${gmButtons.join("\n")}</div>`;
+		}
 
 		const menuContent = {
 			title,
-			menuItems: menuItemsHTML,
-			footer: "",
+			subtitle: "",
+			body,
+			footer: `v${moduleSettings.version}`,
 		};
 
 		try {
@@ -167,19 +175,19 @@ const EASY_MENU = (() => {
 
 			if (_isEmptyObject(parsedArgs)) {
 
-				const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x03BDB2A5" });
+				const title = PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x08161075" });
 				const availableLanguagesArray = PhraseFactory.getLanguages();
 
-				const menuItemsArray = availableLanguagesArray.map(aLang => {
-					return `<li><a role="button" href="\`!${moduleSettings.chatApiName} --set-lang ${aLang}">${aLang}</a></li>`;
+				const buttonsArray = availableLanguagesArray.map(aLang => {
+					return `<a class="ez-btn" href="\`!${moduleSettings.chatApiName} --set-lang ${aLang}">${aLang}</a>`;
 				});
 
-				const menuItemsHTML = menuItemsArray
-					.join("\n");
+				const body = `<div class="ez-content">${buttonsArray.join("\n")}</div>`;
 
 				const menuContent = {
 					title,
-					menuItems: menuItemsHTML,
+					subtitle: "",
+					body,
 					footer: "",
 				};
 
@@ -351,6 +359,368 @@ const EASY_MENU = (() => {
 		}
 	};
 
+	// ANCHOR Function: processAnnouncementAsync
+	const processAnnouncementAsync = async (msgDetails, parsedArgs) => {
+
+		const thisFuncDebugName = "processAnnouncementAsync";
+
+		try {
+			// Get message from args or use default
+			const message = parsedArgs.message || parsedArgs.msg || 
+				PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0B3C4D5E" });
+
+			const announcementContent = {
+				title: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0A1B2C3D" }),
+				body: message,
+				footer: moduleSettings.readableName,
+			};
+
+			const styledMessage = await Utils.renderTemplateAsync({
+				template: "chatAnnouncement",
+				expressions: announcementContent,
+				theme: "chatAnnouncement",
+				cssVars: {},
+			});
+
+			Utils.whisperPlayerMessage({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				message: styledMessage
+			});
+
+			return 0;
+
+		} catch (err) {
+
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+
+			return 1;
+		}
+	};
+
+	// ANCHOR Function: processExportConfig
+	const processExportConfig = (msgDetails) => {
+
+		const thisFuncDebugName = "processExportConfig";
+		const configHandoutName = "Easy-Utils:Config";
+
+		try {
+			// Comprehensive config template with all CSS variables
+			const cssContent = `:root {
+    /* ======================================================
+     * EASY-UTILS CONFIGURATION
+     * ======================================================
+     * Modify variables as needed.
+     * Run !ezmenu --reload-config to apply changes.
+     * Run !ezmenu --reset-style to revert to defaults.
+     * ====================================================== */
+
+    /* ==================================================
+     * PRIMARY PALETTE
+     * ================================================== */
+    --ez-color-primary: #8655b6;
+    --ez-color-secondary: #34627b;
+    --ez-color-tertiary: #17aee8;
+    --ez-color-accent: #cc6699;
+    --ez-color-complement: #fcec52;
+    --ez-color-contrast: #c3b9c8;
+
+    /* ==================================================
+     * BACKGROUNDS
+     * ================================================== */
+    --ez-color-background-primary: #252b2c;
+    --ez-color-background-secondary: #2d3e43;
+    --ez-color-background-tertiary: #8c888e;
+    --ez-color-background-accent: #fbe2c4;
+    --ez-color-background-complement: #3f3f3f;
+    --ez-color-background-contrast: #f2f2f2;
+
+    /* ==================================================
+     * BORDERS
+     * ================================================== */
+    --ez-color-border-primary: #000000;
+    --ez-color-border-shadow: #3f3f3f;
+    --ez-color-border-contrast: #f2f2f2;
+
+    /* ==================================================
+     * TEXT COLORS
+     * ================================================== */
+    --ez-color-text-primary: #000000;
+    --ez-color-text-secondary: #2d3e43;
+    --ez-color-text-tertiary: #660000;
+    --ez-color-text-accent: #cc6699;
+    --ez-color-text-complement: #c9ad6a;
+    --ez-color-text-contrast: #ffffff;
+
+    /* ==================================================
+     * RAINBOW COLORS (for alerts and accents)
+     * ================================================== */
+    --ez-rainbow-red: #ff0000;
+    --ez-rainbow-orange: #ffa500;
+    --ez-rainbow-yellow: #ffff00;
+    --ez-rainbow-olive: #808000;
+    --ez-rainbow-green: #008000;
+    --ez-rainbow-teal: #008080;
+    --ez-rainbow-blue: #0000ff;
+    --ez-rainbow-violet: #ee82ee;
+    --ez-rainbow-purple: #800080;
+    --ez-rainbow-pink: #ffc0cb;
+    --ez-rainbow-brown: #a52a2a;
+    --ez-rainbow-grey: #808080;
+    --ez-rainbow-black: #000000;
+
+    /* ==================================================
+     * TYPOGRAPHY
+     * ================================================== */
+    --ez-line-height: 1.6;
+    --ez-font-weight: 400;
+    --ez-font-size: 62.5%;
+    --ez-font-family-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --ez-font-family-serif: 'Times New Roman', Times, Garamond, serif;
+    --ez-font-family-sans-serif: Ubuntu, Cantarell, Helvetica, Arial, 'Helvetica Neue', sans-serif;
+    --ez-font-family-monospace: Consolas, monospace;
+
+    /* ==================================================
+     * LAYOUT
+     * ================================================== */
+    --ez-block-padding: 5px 10px;
+    --ez-block-margin: .5em 0em;
+    --ez-block-radius: 5px;
+
+    /* ==================================================
+     * CAP (Top/Bottom decorative bars)
+     * ================================================== */
+    --ez-cap-height: 12px;
+    /* --ez-cap-bg: url(https://example.com/cap.png); */
+    /* --ez-cap-top-bg: url(https://example.com/cap-top.png); */
+    /* --ez-cap-bottom-bg: url(https://example.com/cap-bottom.png); */
+    /* --ez-cap-bg-size: 100% 100%; */
+    /* --ez-cap-radius: 8px 8px 0 0; */
+    /* --ez-cap-radius-bottom: 0 0 8px 8px; */
+
+    /* ==================================================
+     * TITLE BAR
+     * ================================================== */
+    --ez-title-align: center;
+    /* --ez-title-bg: url(https://example.com/title.png); */
+    /* --ez-title-bg-size: cover; */
+
+    /* ==================================================
+     * SUBTITLE (Menu only)
+     * ================================================== */
+    --ez-subtitle-align: center;
+    /* --ez-subtitle-bg: url(https://example.com/subtitle.png); */
+    /* --ez-subtitle-bg-size: cover; */
+
+    /* ==================================================
+     * HEADER (Menu section dividers)
+     * ================================================== */
+    --ez-header-align: center;
+    /* --ez-header-bg: url(https://example.com/header.png); */
+    /* --ez-header-bg-size: cover; */
+
+    /* ==================================================
+     * CONTENT AREAS (Menu)
+     * ================================================== */
+    --ez-content-align: center;
+    /* --ez-content-bg: url(https://example.com/content.png); */
+    /* --ez-content-bg-size: cover; */
+
+    /* ==================================================
+     * BODY (Alert/Announcement)
+     * ================================================== */
+    --ez-body-align: left;
+    /* --ez-body-bg: url(https://example.com/body.png); */
+    /* --ez-body-bg-size: cover; */
+
+    /* ==================================================
+     * FOOTER
+     * ================================================== */
+    --ez-footer-align: center;
+    /* --ez-footer-bg: url(https://example.com/footer.png); */
+    /* --ez-footer-bg-size: cover; */
+
+    /* ==================================================
+     * BUTTONS (Menu)
+     * ================================================== */
+    --ez-btn-align: center;
+    /* --ez-btn-bg: url(https://example.com/button.png); */
+    /* --ez-btn-bg-size: cover; */
+    /* --ez-btn-hover-bg: url(https://example.com/button-hover.png); */
+    /* --ez-btn-caution-bg: url(https://example.com/button-caution.png); */
+
+    /* ==================================================
+     * CODE BLOCKS (Alert)
+     * ================================================== */
+    /* --ez-code-bg: #f2f2f2; */
+
+    /* ==================================================
+     * ALERT SEVERITY COLORS
+     * ================================================== */
+    /* --ez-error-bg: #ff0000; */
+    /* --ez-warn-bg: #ffa500; */
+    /* --ez-info-bg: #17aee8; */
+    /* --ez-tip-bg: #008000; */
+}`;
+
+			// Check if handout exists
+			let handout = findObjs({ type: "handout", name: configHandoutName })[0];
+
+			if (!handout) {
+				handout = createObj("handout", {
+					name: configHandoutName,
+					inplayerjournals: "",
+					archived: false
+				});
+			}
+
+			// Set the GM notes with the CSS content
+			handout.set("notes", cssContent);
+
+			Utils.whisperAlertMessageAsync({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				toId: msgDetails.callerId,
+				severity: "INFO",
+				apiCallContent: msgDetails.raw.content,
+				remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0G4H5I6J", expressions: { remark: configHandoutName } })
+			});
+
+			return 0;
+
+		} catch (err) {
+
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+
+			return 1;
+		}
+	};
+
+	// ANCHOR Function: processReloadConfig
+	const processReloadConfig = (msgDetails) => {
+
+		const thisFuncDebugName = "processReloadConfig";
+		const configHandoutName = "Easy-Utils:Config";
+
+		try {
+			// Find the config handout
+			const handout = findObjs({ type: "handout", name: configHandoutName })[0];
+
+			if (!handout) {
+				Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "WARN",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "40400", expressions: { remark: configHandoutName } })
+				});
+				return 1;
+			}
+
+			// Read the notes content
+			handout.get("notes", (notes) => {
+				if (!notes || notes === "null") {
+					Utils.whisperAlertMessageAsync({
+						from: moduleSettings.readableName,
+						to: msgDetails.callerName,
+						toId: msgDetails.callerId,
+						severity: "WARN",
+						apiCallContent: msgDetails.raw.content,
+						remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0H5I6J7K" })
+					});
+					return;
+				}
+
+				// Parse CSS variables from the notes
+				// Expected format: :root { --ez-var: value; }
+				const cssVarRegex = /(--[\w-]+)\s*:\s*([^;]+);/g;
+				let match;
+				const customVars = {};
+
+				while ((match = cssVarRegex.exec(notes)) !== null) {
+					customVars[match[1].trim()] = match[2].trim();
+				}
+
+				// Store in vault for persistence
+				const vault = Utils.getSharedVault();
+				vault.customStyle = customVars;
+
+				// Update ThemeFactory with custom vars (if needed)
+				// For now, just confirm reload
+				Utils.whisperAlertMessageAsync({
+					from: moduleSettings.readableName,
+					to: msgDetails.callerName,
+					toId: msgDetails.callerId,
+					severity: "INFO",
+					apiCallContent: msgDetails.raw.content,
+					remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0I6J7K8L", expressions: { remark: Object.keys(customVars).length } })
+				});
+			});
+
+			return 0;
+
+		} catch (err) {
+
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+
+			return 1;
+		}
+	};
+
+	// ANCHOR Function: processResetStyle
+	const processResetStyle = (msgDetails) => {
+
+		const thisFuncDebugName = "processResetStyle";
+
+		try {
+			// Clear custom styles from vault
+			const vault = Utils.getSharedVault();
+			delete vault.customStyle;
+
+			Utils.whisperAlertMessageAsync({
+				from: moduleSettings.readableName,
+				to: msgDetails.callerName,
+				toId: msgDetails.callerId,
+				severity: "INFO",
+				apiCallContent: msgDetails.raw.content,
+				remark: PhraseFactory.get({ playerId: msgDetails.callerId, transUnitId: "0x0J7K8L9M" })
+			});
+
+			return 0;
+
+		} catch (err) {
+
+			const msgId = "50000";
+			Utils.logSyslogMessage({
+				severity: "ERROR",
+				tag: `${moduleSettings.readableName}.${thisFuncDebugName}`,
+				transUnitId: msgId,
+				message: PhraseFactory.get({ transUnitId: msgId, expressions: { remark: err } })
+			});
+
+			return 1;
+		}
+	};
+
 	// ANCHOR Function: processFlipTokensAsync
 	const processFlipTokensAsync = async (msgDetails) => {
 
@@ -478,6 +848,7 @@ const EASY_MENU = (() => {
 				*/
 				"getGlobalSettings",
 				"getSharedForge",
+				"getSharedVault",
 				"handleApiCall",
 				"logSyslogMessage",
 				"parseChatCommands",
@@ -531,7 +902,16 @@ const EASY_MENU = (() => {
 						"0x07845DCE": "This is an example error alert whispered to players.",
 						"0x06F2AA1E": "Example warning, suggesting a possibly dangerous thing happened.",
 						"0x0512C293": "This is an example information notification whispered to players",
-						"0x061115DE": "An example tip or confirmation styled Notification."
+						"0x061115DE": "An example tip or confirmation styled Notification.",
+						"0x0A1B2C3D": "Announcement",
+						"0x0B3C4D5E": "This is an example announcement message. Announcements can be used for important game updates or story narration.",
+						"0x0E1F2A3B": "Export Config",
+						"0x0F2E3D4C": "Reload Config",
+						"0x0G4H5I6J": "Config exported to handout: {{ remark }}",
+						"0x0H5I6J7K": "Config handout is empty. Export config first.",
+						"0x0I6J7K8L": "Config reloaded. {{ remark }} custom variables loaded.",
+						"0x0J7K8L9M": "Custom styles cleared. Using default theme.",
+						"0x0K8L9M0N": "Reset Style"
 					},
 					frFR: {
 						"0x03BDB2A5": "Menu personnalisé",
@@ -546,7 +926,16 @@ const EASY_MENU = (() => {
 						"0x07845DCE": "Ceci est un exemple d'alerte d'erreur chuchotée aux joueurs.",
 						"0x06F2AA1E": "Exemple d'avertissement, suggérant un événement potentiellement dangereux.",
 						"0x0512C293": "Ceci est un exemple de notification d'information chuchotée aux joueurs.",
-						"0x061115DE": "Un exemple de notification de type conseil ou confirmation."
+						"0x061115DE": "Un exemple de notification de type conseil ou confirmation.",
+						"0x0A1B2C3D": "Annonce",
+						"0x0B3C4D5E": "Ceci est un exemple de message d'annonce. Les annonces peuvent être utilisées pour des mises à jour importantes ou une narration.",
+						"0x0E1F2A3B": "Exporter la config",
+						"0x0F2E3D4C": "Recharger la config",
+						"0x0G4H5I6J": "Config exportée vers le document: {{ remark }}",
+						"0x0H5I6J7K": "Le document de config est vide. Exportez d'abord la config.",
+						"0x0I6J7K8L": "Config rechargée. {{ remark }} variables personnalisées chargées.",
+						"0x0J7K8L9M": "Styles personnalisés effacés. Utilisation du thème par défaut.",
+						"0x0K8L9M0N": "Réinitialiser le style"
 					}
 				}
 			});
