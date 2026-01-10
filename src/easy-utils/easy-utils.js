@@ -1138,7 +1138,7 @@ const EASY_UTILS = (() => {
 									});
 
 									// If we popped nextLine off earlier but haven't used it as a footer,
-									// we may consider unshifting it back here—depending on your desired logic
+									// we may consider unshifting it back hereâ€”Âdepending on your desired logic
 									if (footerLine) {
 										lines.unshift(footerLine);
 									}
@@ -1560,26 +1560,26 @@ const EASY_UTILS = (() => {
 							};
 						} else if (languageCode === "frFR") {
 							return {
-								"0": "Succès",
-								"1": "Échec",
+								"0": "SuccÃ¨s",
+								"1": "Ã‰chec",
 								"10000": ".=> Initialisation <=.",
-								"20000": ".=> Prêt <=.",
-								"20100": "Terminé : {{ remark }} a été créé.",
+								"20000": ".=> PrÃªt <=.",
+								"20100": "TerminÃ© : {{ remark }} a Ã©tÃ© crÃ©Ã©.",
 								"40000": "Arguments invalides : {{ remark }}",
-								"40400": "Non trouvé : {{ remark }}",
+								"40400": "Non trouvÃ© : {{ remark }}",
 								"50000": "Erreur : {{ remark }}",
 								"30000": "Avertissement : {{ remark }}",
 								"60000": "Information : {{ remark }}",
-								"70000": "Débogage : {{ remark }}",
-								"0x0D9A441E": "Des jetons doivent être sélectionnés ou passés avec --ids.",
+								"70000": "DÃ©bogage : {{ remark }}",
+								"0x0D9A441E": "Des jetons doivent Ãªtre sÃ©lectionnÃ©s ou passÃ©s avec --ids.",
 								"0x004A7742": "erreur",
 								"0x0B672E77": "avertissement",
 								"0x0004E2AF": "information",
 								"0x000058E0": "conseil",
-								"0x02B2451A": "Vous avez entré la commande suivante :",
-								"0x0834C8EE": "Si le problème persiste, contactez l'auteur du module ({{ author }}).",
-								"0x03B6FF6E": "Arguments invalides : une ou plusieurs commandes ne sont pas reconnues. Vérifiez l'orthographe et l'utilisation des commandes.",
-								"0x09B11313": "Options du Maître du Jeu"
+								"0x02B2451A": "Vous avez entrÃ© la commande suivante :",
+								"0x0834C8EE": "Si le problÃ¨me persiste, contactez l'auteur du module ({{ author }}).",
+								"0x03B6FF6E": "Arguments invalides : une ou plusieurs commandes ne sont pas reconnues. VÃ©rifiez l'orthographe et l'utilisation des commandes.",
+								"0x09B11313": "Options du MaÃ®tre du Jeu"
 
 							};
 						}
@@ -1676,8 +1676,8 @@ const EASY_UTILS = (() => {
 						 *       "0x08161075": "Set Preferred Language"
 						 *     },
 						 *     frFR: {
-						 *       "0x03BDB2A5": "Menu personnalisé",
-						 *       "0x08161075": "Définir la langue préférée"
+						 *       "0x03BDB2A5": "Menu personnalisÃ©",
+						 *       "0x08161075": "DÃ©finir la langue prÃ©fÃ©rÃ©e"
 						 *     }
 						 *   }
 						 * });
@@ -2039,13 +2039,59 @@ const EASY_UTILS = (() => {
 						 */
 						init: () => {
 
-							// Clear everything
+							// Clear everything except default function
 							Object.keys(templateMemoryMap).forEach((key) => {
-								delete templateMemoryMap[key];
+								if (key !== "default") {
+									delete templateMemoryMap[key];
+								}
+							});
+						},
+
+						/**
+						 * Returns the raw template string without placeholder replacement.
+						 *
+						 * @param {Object} config - Configuration object.
+						 * @param {string} config.template - The template name.
+						 * @returns {string|null} The raw template string or null if not found/is function.
+						 */
+						getRaw: ({ template }) => {
+							// Load on demand if needed
+							if (!templateMemoryMap[template]) {
+								const loadedTemplate = loadTemplateByName(template);
+								if (loadedTemplate) {
+									templateMemoryMap[template] = loadedTemplate;
+								}
+							}
+
+							const tmpl = templateMemoryMap[template];
+							// Don't return function templates
+							if (typeof tmpl === "function") return null;
+							return tmpl || null;
+						},
+
+						/**
+						 * Returns all templates as a map, excluding function templates.
+						 *
+						 * @returns {Object} Map of template names to template strings.
+						 */
+						getAll: () => {
+							// Ensure all built-in templates are loaded
+							const builtIns = ["chatAlert", "chatMenu", "chatAnnouncement"];
+							builtIns.forEach((name) => {
+								if (!templateMemoryMap[name]) {
+									const loaded = loadTemplateByName(name);
+									if (loaded) templateMemoryMap[name] = loaded;
+								}
 							});
 
-							// Load a minimal default
-							templateMemoryMap["default"] = convertHtmlToJson({ html: htmlDefault });
+							// Return all non-function templates
+							const result = {};
+							Object.entries(templateMemoryMap).forEach(([key, value]) => {
+								if (typeof value !== "function") {
+									result[key] = value;
+								}
+							});
+							return result;
 						}
 					};
 
@@ -2099,6 +2145,7 @@ const EASY_UTILS = (() => {
 				const convertToSingleLine = EASY_UTILS.getFunction({ functionName: "convertToSingleLine", moduleSettings });
 				const replacePlaceholders = EASY_UTILS.getFunction({ functionName: "replacePlaceholders", moduleSettings });
 				const getSharedForge = EASY_UTILS.getFunction({ functionName: "getSharedForge", moduleSettings });
+				const getSharedVault = EASY_UTILS.getFunction({ functionName: "getSharedVault", moduleSettings });
 
 				// Key used to store and retrieve the ThemeFactory in the Forge
 				const themeFactoryKey = "ThemeFactory";
@@ -2519,16 +2566,87 @@ const EASY_UTILS = (() => {
 
 						/**
 						 * Initializes the theme map to a default state, clearing all existing themes.
+						 * Also clears vault.customStyle.
 						 *
 						 * @returns {void}
 						 */
 						init: () => {
-							// Clear all themes
+							// Clear all themes except default
 							Object.keys(themeMemoryMap).forEach((key) => {
-								delete themeMemoryMap[key];
+								if (key !== "default") {
+									delete themeMemoryMap[key];
+								}
 							});
-							// Reset to default theme
-							themeMemoryMap["default"] = "{\"universal\": {},\"elements\": {},\"classes\": {},\"attributes\": {},\"functions\": {},\"ids\": {}}";
+
+							// Clear custom CSS variables from vault
+							const vault = getSharedVault();
+							if (vault.customStyle) {
+								delete vault.customStyle;
+							}
+						},
+
+						/**
+						 * Returns the raw theme string without placeholder replacement.
+						 *
+						 * @param {Object} config - Configuration object.
+						 * @param {string} config.theme - The theme name.
+						 * @returns {string|null} The raw theme string or null if not found.
+						 */
+						getRaw: ({ theme }) => {
+							// Load on demand if needed
+							if (!themeMemoryMap[theme]) {
+								const loadedTheme = loadThemeByName(theme);
+								if (loadedTheme) {
+									themeMemoryMap[theme] = loadedTheme;
+								}
+							}
+							return themeMemoryMap[theme] || null;
+						},
+
+						/**
+						 * Returns all themes as a map.
+						 *
+						 * @returns {Object} Map of theme names to theme strings.
+						 */
+						getAll: () => {
+							// Ensure all built-in themes are loaded
+							const builtIns = ["chatAlert", "chatMenu", "chatAnnouncement"];
+							builtIns.forEach((name) => {
+								if (!themeMemoryMap[name]) {
+									const loaded = loadThemeByName(name);
+									if (loaded) themeMemoryMap[name] = loaded;
+								}
+							});
+
+							// Return all themes except default
+							const result = {};
+							Object.entries(themeMemoryMap).forEach(([key, value]) => {
+								if (key !== "default") {
+									result[key] = value;
+								}
+							});
+							return result;
+						},
+
+						/**
+						 * Stores CSS root variables in vault.customStyle for persistence.
+						 *
+						 * @param {Object} config - Configuration object.
+						 * @param {Object} config.variables - CSS variables to store.
+						 */
+						setRootVariables: ({ variables }) => {
+							const vault = getSharedVault();
+							vault.customStyle = { ...variables };
+						},
+
+						/**
+						 * Retrieves CSS root variables from vault.customStyle.
+						 *
+						 * @returns {Object} Stored CSS variables or empty object.
+						 */
+						getRootVariables: () => {
+							const vault = getSharedVault();
+							return vault.customStyle || {};
 						}
 					};
 
@@ -4588,7 +4706,136 @@ const EASY_UTILS = (() => {
 				};
 			};
 		},
-	};
+
+	// ANCHOR Util: parseConfigHandout
+	/**
+	 * @summary Parses the Easy-Utils:Config handout content to extract CSS variables, themes, and templates.
+	 * Parses style tags and section markers from GM Notes.
+	 * 
+	 * @function parseConfigHandout
+	 * @memberof EASY_UTILS
+	 * @returns {Function} A higher-order function that takes `moduleSettings` and returns a parser function.
+	 */
+	parseConfigHandout: function () {
+		return (moduleSettings) => {
+
+			return ({ content }) => {
+				const result = {
+					rootVariables: {},
+					themes: {},
+					templates: {}
+				};
+
+				if (!content) return result;
+
+				// Extract CSS variables from <style id="ez-config-variables">
+				const varsMatch = content.match(/<style\s+id="ez-config-variables"[^>]*>([\s\S]*?)<\/style>/i);
+				if (varsMatch) {
+					const styleContent = varsMatch[1];
+					// Parse :root { ... } block
+					const rootMatch = styleContent.match(/:root\s*{([\s\S]*?)}/i);
+					if (rootMatch) {
+						const rootContent = rootMatch[1];
+						const varRegex = /(--[\w-]+)\s*:\s*([^;]+);/g;
+						let match;
+						while ((match = varRegex.exec(rootContent)) !== null) {
+							result.rootVariables[match[1].trim()] = match[2].trim();
+						}
+					}
+				}
+
+				// Extract themes from <style id="ez-config-theme-NAME">
+				const themeRegex = /<style\s+id="ez-config-theme-([^"]+)"[^>]*>([\s\S]*?)<\/style>/gi;
+				let themeMatch;
+				while ((themeMatch = themeRegex.exec(content)) !== null) {
+					result.themes[themeMatch[1]] = themeMatch[2].trim();
+				}
+
+				// Extract templates from <template id="ez-config-template-NAME">
+				const templateRegex = /<template\s+id="ez-config-template-([^"]+)"[^>]*>([\s\S]*?)<\/template>/gi;
+				let templateMatch;
+				while ((templateMatch = templateRegex.exec(content)) !== null) {
+					result.templates[templateMatch[1]] = templateMatch[2].trim();
+				}
+
+				return result;
+			};
+		};
+	},
+
+	// ANCHOR Util: generateConfigHandout
+	/**
+	 * @summary Generates the Easy-Utils:Config handout content for GM Notes.
+	 * Uses style tags and div markers that Roll20 preserves in gmnotes.
+	 * 
+	 * @function generateConfigHandout
+	 * @memberof EASY_UTILS
+	 * @returns {Function} A higher-order function that takes `moduleSettings` and returns a generator function.
+	 */
+	generateConfigHandout: function () {
+		return (moduleSettings) => {
+
+			// Helper to parse CSS variable string into object
+			const parseDefaultStyle = (styleString) => {
+				const vars = {};
+				const lines = styleString.split("\n");
+				for (const line of lines) {
+					const trimmed = line.trim();
+					// Skip comments and empty lines
+					if (!trimmed || trimmed.startsWith("/*") || trimmed.startsWith("*")) continue;
+					// Parse variable declarations
+					const match = trimmed.match(/^(--[\w-]+)\s*:\s*(.+?);?\s*$/);
+					if (match) {
+						vars[match[1]] = match[2];
+					}
+				}
+				return vars;
+			};
+
+			return ({ rootVariables, themes, templates }) => {
+				let output = [];
+
+				// CSS Variables in a style tag with :root
+				output.push("<style id=\"ez-config-variables\">");
+				output.push(":root {");
+
+				// Use provided rootVariables object, or parse defaultStyle string
+				let vars;
+				if (rootVariables && typeof rootVariables === "object" && Object.keys(rootVariables).length > 0) {
+					vars = rootVariables;
+				} else {
+					vars = parseDefaultStyle(globalSettings.defaultStyle);
+				}
+
+				for (const [key, value] of Object.entries(vars)) {
+					output.push(`${key}: ${value};`);
+				}
+				output.push("}");
+				output.push("</style>");
+
+				// Themes - each in its own style tag with id
+				if (themes && Object.keys(themes).length > 0) {
+					for (const [name, css] of Object.entries(themes)) {
+						output.push(`<style id="ez-config-theme-${name}">`);
+						output.push(css);
+						output.push("</style>");
+					}
+				}
+
+				// Templates - each in a template tag with id
+				if (templates && Object.keys(templates).length > 0) {
+					for (const [name, html] of Object.entries(templates)) {
+						output.push(`<template id="ez-config-template-${name}">`);
+						output.push(html);
+						output.push("</template>");
+					}
+				}
+
+				return output.join("\n");
+			};
+		};
+	},
+};
 
 	// !SECTION End of Inner Methods: High Level Utilities
 	// !SECTION End of Outer Method: functionLoaders

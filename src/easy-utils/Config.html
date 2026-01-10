@@ -1,0 +1,389 @@
+<style id="ez-config-variables">
+    :root {
+        --ez-color-primary: #8655b6;
+        --ez-color-secondary: #34627b;
+        --ez-color-tertiary: #17aee8;
+        --ez-color-accent: #cc6699;
+        --ez-color-complement: #fcec52;
+        --ez-color-contrast: #c3b9c8;
+        --ez-color-background-primary: #252b2c;
+        --ez-color-background-secondary: #2d3e43;
+        --ez-color-background-tertiary: #8c888e;
+        --ez-color-background-accent: #fbe2c4;
+        --ez-color-background-complement: #3f3f3f;
+        --ez-color-background-contrast: #f2f2f2;
+        --ez-color-border-primary: #000000;
+        --ez-color-border-shadow: #3f3f3f;
+        --ez-color-border-contrast: #f2f2f2;
+        --ez-color-text-primary: #000000;
+        --ez-color-text-secondary: #2d3e43;
+        --ez-color-text-tertiary: #660000;
+        --ez-color-text-accent: #cc6699;
+        --ez-color-text-complement: #c9ad6a;
+        --ez-color-text-contrast: #ffffff;
+        --ez-rainbow-red: #ff0000;
+        --ez-rainbow-orange: #ffa500;
+        --ez-rainbow-yellow: #ffff00;
+        --ez-rainbow-olive: #808000;
+        --ez-rainbow-green: #008000;
+        --ez-rainbow-teal: #008080;
+        --ez-rainbow-blue: #0000ff;
+        --ez-rainbow-violet: #ee82ee;
+        --ez-rainbow-purple: #800080;
+        --ez-rainbow-pink: #ffc0cb;
+        --ez-rainbow-brown: #a52a2a;
+        --ez-rainbow-grey: #808080;
+        --ez-rainbow-black: #000000;
+        --ez-line-height: 1.6;
+        --ez-font-weight: 400;
+        --ez-font-size: 62.5%;
+        --ez-font-family-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --ez-font-family-serif: 'Times New Roman', Times, Garamond, serif, var(--ez-font-family-emoji);
+        --ez-font-family-sans-serif: Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--ez-font-family-emoji);
+        --ez-font-family-monospace: Consolas, monospace;
+        --ez-block-padding: 5px 10px;
+        --ez-block-margin: .5em 0em;
+        --ez-block-radius: 5px;
+    }
+</style>
+<style id="ez-config-theme-chatMenu">
+    :root {}
+
+    /* ************************************************** * Base Box Styles ************************************************** */
+    #rootContainer.ez-box {
+        font-family: var(--ez-font-family-sans-serif);
+        font-size: var(--ez-font-size);
+        line-height: var(--ez-line-height);
+        color: var(--ez-color-text-primary);
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ************************************************** * Cap Styles (Top/Bottom decorative bars) ************************************************** */
+    .ez-cap {
+        min-height: var(--ez-cap-height, 12px);
+        background-size: var(--ez-cap-bg-size, 100% 100%);
+        background-repeat: no-repeat;
+    }
+
+    .ez-cap-top {
+        background: var(--ez-cap-top-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+        border-radius: var(--ez-cap-radius, 8px 8px 0 0);
+    }
+
+    .ez-cap-bottom {
+        background: var(--ez-cap-bottom-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+        border-radius: var(--ez-cap-radius-bottom, 0 0 8px 8px);
+    }
+
+    /* ************************************************** * Menu Title ************************************************** */
+    .ez-menu .ez-title {
+        background: var(--ez-title-bg, var(--ez-color-primary));
+        background-size: var(--ez-title-bg-size, cover);
+        color: var(--ez-color-text-contrast);
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: var(--ez-title-align, center);
+        padding: var(--ez-block-padding);
+        margin: 0;
+    }
+
+    /* ************************************************** * Menu Subtitle ************************************************** */
+    .ez-menu .ez-subtitle {
+        background: var(--ez-subtitle-bg, var(--ez-color-secondary));
+        background-size: var(--ez-subtitle-bg-size, cover);
+        color: var(--ez-color-text-contrast);
+        font-size: 12px;
+        text-align: var(--ez-subtitle-align, center);
+        padding: 5px;
+    }
+
+    .ez-menu .ez-subtitle:empty {
+        display: none;
+    }
+
+    /* ************************************************** * Menu Header (Section Dividers) ************************************************** */
+    .ez-menu .ez-header {
+        background: var(--ez-header-bg, var(--ez-color-tertiary));
+        background-size: var(--ez-header-bg-size, cover);
+        color: var(--ez-color-text-contrast);
+        font-weight: bold;
+        text-align: var(--ez-header-align, center);
+        padding: 5px var(--ez-block-padding);
+    }
+
+    /* ************************************************** * Menu Content Areas ************************************************** */
+    .ez-menu .ez-content {
+        background: var(--ez-content-bg, var(--ez-color-background-primary));
+        background-size: var(--ez-content-bg-size, cover);
+        padding: var(--ez-block-padding);
+        text-align: var(--ez-content-align, center);
+    }
+
+    /* ************************************************** * Menu Buttons ************************************************** */
+    .ez-menu .ez-btn {
+        display: block;
+        background: var(--ez-btn-bg, var(--ez-color-secondary));
+        background-size: var(--ez-btn-bg-size, cover);
+        color: var(--ez-color-text-contrast);
+        text-decoration: none;
+        font-weight: bold;
+        text-align: var(--ez-btn-align, center);
+        padding: 5px 10px;
+        margin: 3px 0;
+        border: 2px solid var(--ez-color-background-secondary);
+        border-radius: var(--ez-block-radius);
+        cursor: pointer;
+    }
+
+    .ez-menu .ez-btn:hover {
+        background: var(--ez-btn-hover-bg, var(--ez-color-primary));
+    }
+
+    .ez-menu .ez-btn.ez-caution {
+        background: var(--ez-btn-caution-bg, var(--ez-rainbow-red));
+    }
+
+    /* ************************************************** * Menu Footer ************************************************** */
+    .ez-menu .ez-footer {
+        background: var(--ez-footer-bg, var(--ez-color-background-secondary));
+        background-size: var(--ez-footer-bg-size, cover);
+        color: var(--ez-color-text-complement);
+        font-size: 12px;
+        text-align: var(--ez-footer-align, center);
+        padding: 5px;
+    }
+
+    .ez-menu .ez-footer:empty {
+        display: none;
+    }
+</style>
+<style id="ez-config-theme-chatAlert">
+    :root {}
+
+    /* ************************************************** * Base Box Styles ************************************************** */
+    #rootContainer.ez-box {
+        font-family: var(--ez-font-family-sans-serif);
+        font-size: var(--ez-font-size);
+        line-height: var(--ez-line-height);
+        color: var(--ez-color-text-primary);
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ************************************************** * Cap Styles (Top/Bottom decorative bars) ************************************************** */
+    .ez-cap {
+        min-height: var(--ez-cap-height, 12px);
+        background-size: var(--ez-cap-bg-size, 100% 100%);
+        background-repeat: no-repeat;
+    }
+
+    .ez-cap-top {
+        background: var(--ez-cap-top-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+        border-radius: var(--ez-cap-radius, 8px 8px 0 0);
+    }
+
+    .ez-cap-bottom {
+        background: var(--ez-cap-bottom-bg, var(--ez-cap-bg, var(--ez-color-primary)));
+        border-radius: var(--ez-cap-radius-bottom, 0 0 8px 8px);
+    }
+
+    /* ************************************************** * Alert Title ************************************************** */
+    .ez-alert .ez-title {
+        background: var(--ez-title-bg, var(--ez-color-primary));
+        background-size: var(--ez-title-bg-size, cover);
+        color: var(--ez-color-text-contrast);
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: var(--ez-title-align, center);
+        padding: var(--ez-block-padding);
+        margin: 0;
+    }
+
+    /* ************************************************** * Alert Body ************************************************** */
+    .ez-alert .ez-body {
+        background: var(--ez-body-bg, var(--ez-color-background-primary));
+        background-size: var(--ez-body-bg-size, cover);
+        padding: var(--ez-block-padding);
+    }
+
+    .ez-alert .ez-description {
+        margin: 0 0 0.5em 0;
+    }
+
+    .ez-alert .ez-code {
+        display: block;
+        background: var(--ez-code-bg, var(--ez-color-background-contrast));
+        color: var(--ez-color-text-primary);
+        font-family: var(--ez-font-family-monospace);
+        font-size: 12px;
+        padding: var(--ez-block-padding);
+        border-radius: var(--ez-block-radius);
+        margin: 0.5em 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .ez-alert .ez-code:empty {
+        display: none;
+    }
+
+    .ez-alert .ez-remark {
+        margin: 0.5em 0 0 0;
+        font-style: italic;
+    }
+
+    .ez-alert .ez-remark:empty {
+        display: none;
+    }
+
+    /* ************************************************** * Alert Footer ************************************************** */
+    .ez-alert .ez-footer {
+        background: var(--ez-footer-bg, var(--ez-color-background-secondary));
+        background-size: var(--ez-footer-bg-size, cover);
+        color: var(--ez-color-text-complement);
+        font-size: 12px;
+        text-align: var(--ez-footer-align, center);
+        padding: 5px;
+    }
+
+    .ez-alert .ez-footer:empty {
+        display: none;
+    }
+
+    /* ************************************************** * Alert Severity Variants ************************************************** */
+    .ez-alert.ez-error .ez-title {
+        background: var(--ez-error-bg, var(--ez-rainbow-red));
+    }
+
+    .ez-alert.ez-error .ez-cap {
+        background: var(--ez-error-bg, var(--ez-rainbow-red));
+    }
+
+    .ez-alert.ez-warn .ez-title {
+        background: var(--ez-warn-bg, var(--ez-rainbow-orange));
+    }
+
+    .ez-alert.ez-warn .ez-cap {
+        background: var(--ez-warn-bg, var(--ez-rainbow-orange));
+    }
+
+    .ez-alert.ez-info .ez-title {
+        background: var(--ez-info-bg, var(--ez-color-tertiary));
+    }
+
+    .ez-alert.ez-info .ez-cap {
+        background: var(--ez-info-bg, var(--ez-color-tertiary));
+    }
+
+    .ez-alert.ez-tip .ez-title {
+        background: var(--ez-tip-bg, var(--ez-rainbow-green));
+    }
+
+    .ez-alert.ez-tip .ez-cap {
+        background: var(--ez-tip-bg, var(--ez-rainbow-green));
+    }
+</style>
+<style id="ez-config-theme-chatAnnouncement">
+    :root {}
+
+    /* ************************************************** * Base Box Styles ************************************************** */
+    #rootContainer.ez-box {
+        font-family: var(--ez-font-family-sans-serif);
+        font-size: var(--ez-font-size);
+        line-height: var(--ez-line-height);
+        color: var(--ez-color-text-primary);
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ************************************************** * Cap Styles (Top/Bottom decorative bars) ************************************************** */
+    .ez-cap {
+        min-height: var(--ez-cap-height, 12px);
+        background-size: var(--ez-cap-bg-size, 100% 100%);
+        background-repeat: no-repeat;
+    }
+
+    .ez-cap-top {
+        background: var(--ez-cap-top-bg, var(--ez-cap-bg, var(--ez-rainbow-teal)));
+        border-radius: var(--ez-cap-radius, 8px 8px 0 0);
+    }
+
+    .ez-cap-bottom {
+        background: var(--ez-cap-bottom-bg, var(--ez-cap-bg, var(--ez-color-accent)));
+        border-radius: var(--ez-cap-radius-bottom, 0 0 8px 8px);
+    }
+
+    /* ************************************************** * Announcement Title ************************************************** */
+    .ez-announcement .ez-title {
+        background: var(--ez-title-bg, var(--ez-color-accent));
+        background-size: var(--ez-title-bg-size, cover);
+        color: var(--ez-color-text-contrast);
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: var(--ez-title-align, center);
+        padding: var(--ez-block-padding);
+        margin: 0;
+    }
+
+    /* ************************************************** * Announcement Body ************************************************** */
+    .ez-announcement .ez-body {
+        /* Add to the .ez-announcement .ez-body section or create new rule */
+        border-style: solid;
+        border-image-source: url("https://raw.githubusercontent.com/tougher-together-games/default-game-assets/refs/heads/main/handouts/themes/black-n-gold/example-avatar.jpg");
+        border-image-slice: 12 12 12 12;
+        border-image-width: 12px;
+        border-image-outset: 0;
+        border-image-repeat: repeat;
+    }
+
+    /* ************************************************** * Announcement Footer ************************************************** */
+.ez-announcement .ez-footer {
+    background: 
+        url(left-cap.png) left center / 20px 20px no-repeat,
+        url(right-cap.png) right center / 20px 20px no-repeat,
+        url(center-tile.png) center center / auto 20px repeat-x;
+    height: 20px;
+    padding: 0 25px;
+}
+
+    .ez-announcement .ez-footer:empty {
+        display: none;
+    }
+</style>
+
+<div id="ez-config-template-chatMenu">
+    <div id="rootContainer" class="ez-box ez-menu {{ menuClass }}">
+        <div class="ez-cap ez-cap-top"></div>
+        <div class="ez-title">{{ title }}</div>
+        <div class="ez-subtitle">{{ subtitle }}</div> {{ body }} <div class="ez-footer">{{ footer }}</div>
+        <div class="ez-cap ez-cap-bottom"></div>
+    </div>
+</div>
+
+<div id="ez-config-template-chatAlert">
+    <div id="rootContainer" class="ez-box ez-alert {{ alertClass }}">
+        <div class="ez-cap ez-cap-top"></div>
+        <div class="ez-title">{{ title }}</div>
+        <div class="ez-body">
+            <p class="ez-description">{{ description }}</p>
+            <pre class="ez-code">{{ code }}</pre>
+            <p class="ez-remark">{{ remark }}</p>
+        </div>
+        <div class="ez-footer">{{ footer }}</div>
+        <div class="ez-cap ez-cap-bottom"></div>
+    </div>
+</div>
+
+<div id="ez-config-template-chatAnnouncement">
+    <div id="rootContainer" class="ez-box ez-announcement {{ announcementClass }}">
+        <div class="ez-cap ez-cap-top"></div>
+        <div class="ez-title">{{ title }}</div>
+        <div class="ez-body">{{ body }}</div>
+        <div class="ez-footer">{{ footer }}</div>
+        <div class="ez-cap ez-cap-bottom"></div>
+    </div>
+</div>
